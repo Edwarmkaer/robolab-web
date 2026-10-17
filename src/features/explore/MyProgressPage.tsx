@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { TOPICS } from "../../domain/explore/challenges";
-import { topicProgress } from "../../domain/explore/progress";
+import { TOPICS } from "@robolab/backend/domain/explore/challenges";
+import { topicProgress } from "@robolab/backend/domain/explore/progress";
 import { Guide } from "../../shared/ui/Guide";
 import { ExploreLayout, TOPIC_COLOR } from "./ExploreLayout";
 import { useExploreProgress } from "./storage";

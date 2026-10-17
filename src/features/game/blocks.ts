@@ -1,4 +1,4 @@
-import type { Command } from "../../domain/game/program";
+import type { Command } from "@robolab/backend/domain/game/program";
 
 /** Cómo se ve y se nombra cada bloque. El nombre se lee en voz alta. */
 export const BLOCK_LOOK: Record<Command, { label: string; icon: string }> = {

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { GameMap } from "../../domain/game/map";
-import { type BlockPath, type Program, compileWithSource } from "../../domain/game/program";
-import { type Outcome, type RobotState, simulate } from "../../domain/game/simulator";
+import type { GameMap } from "@robolab/backend/domain/game/map";
+import { type BlockPath, type Program, compileWithSource } from "@robolab/backend/domain/game/program";
+import { type Outcome, type RobotState, simulate } from "@robolab/backend/domain/game/simulator";
 
 export const STEP_MS = 450;
 

@@ -1,7 +1,7 @@
 import { useQuery } from "convex/react";
 import { Link } from "react-router-dom";
-import { api } from "../../../../convex/_generated/api";
-import { localCalendarDate, shortLabel } from "../../../domain/evaluation/calendar";
+import { api } from "@robolab/backend/convex/_generated/api";
+import { localCalendarDate, shortLabel } from "@robolab/backend/domain/evaluation/calendar";
 import { Icon } from "../../../shared/ui/Icon";
 
 export function EvaluationsPage() {

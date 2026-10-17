@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Link, NavLink } from "react-router-dom";
-import type { Topic } from "../../domain/explore/challenges";
-import type { EducationLevel } from "../../domain/game/levels";
+import type { Topic } from "@robolab/backend/domain/explore/challenges";
+import type { EducationLevel } from "@robolab/backend/domain/game/levels";
 import { APP_NAME } from "../../shared/brand";
 
 /** Color de cada tópico (la línea bajo la tarjeta y su barra de avance). */

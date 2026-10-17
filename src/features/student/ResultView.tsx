@@ -1,9 +1,9 @@
 import { useMutation, useQuery } from "convex/react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { api } from "../../../convex/_generated/api";
-import type { Id } from "../../../convex/_generated/dataModel";
-import { formatDuration } from "../../domain/evaluation/scoring";
+import { api } from "@robolab/backend/convex/_generated/api";
+import type { Id } from "@robolab/backend/convex/_generated/dataModel";
+import { formatDuration } from "@robolab/backend/domain/evaluation/scoring";
 import { userMessage } from "../../shared/errors";
 import { Icon } from "../../shared/ui/Icon";
 import { speak } from "./speech";

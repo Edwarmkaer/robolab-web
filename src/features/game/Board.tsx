@@ -1,5 +1,5 @@
-import { type Cell, type GameMap, cellKey } from "../../domain/game/map";
-import type { RobotState } from "../../domain/game/simulator";
+import { type Cell, type GameMap, cellKey } from "@robolab/backend/domain/game/map";
+import type { RobotState } from "@robolab/backend/domain/game/simulator";
 
 type Props = {
   readonly map: GameMap;

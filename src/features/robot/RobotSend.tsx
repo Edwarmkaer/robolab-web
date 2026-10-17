@@ -1,8 +1,8 @@
 import { useMutation, useQuery } from "convex/react";
 import { type FormEvent, useEffect, useState } from "react";
-import { api } from "../../../convex/_generated/api";
-import type { Program } from "../../domain/game/program";
-import { ROBOT_CODE_LENGTH, isValidRobotCode, normalizeRobotCode } from "../../domain/robot/protocol";
+import { api } from "@robolab/backend/convex/_generated/api";
+import type { Program } from "@robolab/backend/domain/game/program";
+import { ROBOT_CODE_LENGTH, isValidRobotCode, normalizeRobotCode } from "@robolab/backend/domain/robot/protocol";
 import { userMessage } from "../../shared/errors";
 import { useToast } from "../../shared/ui/Toast";
 

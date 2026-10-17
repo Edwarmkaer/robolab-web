@@ -1,8 +1,8 @@
 import { useMutation, useQuery } from "convex/react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { api } from "../../../convex/_generated/api";
-import { localCalendarDate } from "../../domain/evaluation/calendar";
+import { api } from "@robolab/backend/convex/_generated/api";
+import { localCalendarDate } from "@robolab/backend/domain/evaluation/calendar";
 import { APP_NAME } from "../../shared/brand";
 import { userMessage } from "../../shared/errors";
 import { Icon } from "../../shared/ui/Icon";

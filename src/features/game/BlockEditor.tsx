@@ -1,7 +1,7 @@
 import type { Dispatch } from "react";
-import type { EditorAction, EditorState } from "../../domain/game/editor";
-import { COMMANDS, type BlockPath, MAX_REPEAT, MIN_REPEAT } from "../../domain/game/program";
-import type { LevelPolicy } from "../../domain/game/levels";
+import type { EditorAction, EditorState } from "@robolab/backend/domain/game/editor";
+import { COMMANDS, type BlockPath, MAX_REPEAT, MIN_REPEAT } from "@robolab/backend/domain/game/program";
+import type { LevelPolicy } from "@robolab/backend/domain/game/levels";
 import { Icon } from "../../shared/ui/Icon";
 import { speak } from "../student/speech";
 import { BLOCK_LOOK, REPEAT_LOOK } from "./blocks";

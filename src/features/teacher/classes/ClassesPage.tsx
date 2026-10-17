@@ -1,11 +1,11 @@
 import { useMutation, useQuery } from "convex/react";
 import { type FormEvent, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { api } from "../../../../convex/_generated/api";
-import type { Id } from "../../../../convex/_generated/dataModel";
-import { parseStudentList } from "../../../domain/classroom/studentName";
-import { LIMITS } from "../../../domain/evaluation/rules";
-import { EDUCATION_LEVELS, type EducationLevel, LEVEL_LABEL } from "../../../domain/game/levels";
+import { api } from "@robolab/backend/convex/_generated/api";
+import type { Id } from "@robolab/backend/convex/_generated/dataModel";
+import { parseStudentList } from "@robolab/backend/domain/classroom/studentName";
+import { LIMITS } from "@robolab/backend/domain/evaluation/rules";
+import { EDUCATION_LEVELS, type EducationLevel, LEVEL_LABEL } from "@robolab/backend/domain/game/levels";
 import { userMessage } from "../../../shared/errors";
 import { Icon } from "../../../shared/ui/Icon";
 import { IconButton } from "../../../shared/ui/IconButton";

@@ -1,7 +1,7 @@
 import { useQuery } from "convex/react";
 import { Link } from "react-router-dom";
-import { api } from "../../../../convex/_generated/api";
-import { localCalendarDate } from "../../../domain/evaluation/calendar";
+import { api } from "@robolab/backend/convex/_generated/api";
+import { localCalendarDate } from "@robolab/backend/domain/evaluation/calendar";
 import { Icon } from "../../../shared/ui/Icon";
 
 const longDate = new Intl.DateTimeFormat("es-PE", { weekday: "long", day: "numeric", month: "long" });

@@ -1,5 +1,5 @@
 import { useCallback, useSyncExternalStore } from "react";
-import { type ExploreProgress, type PlayResult, emptyProgress, parseProgress, recordPlay } from "../../domain/explore/progress";
+import { type ExploreProgress, type PlayResult, emptyProgress, parseProgress, recordPlay } from "@robolab/backend/domain/explore/progress";
 
 const PROGRESS_KEY = "robolab.avance";
 const DEVICE_KEY = "robolab.dispositivo";

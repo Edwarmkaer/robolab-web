@@ -1,62 +1,63 @@
 # Guía para agentes y colaboradores
 
-RoboLab: retos de programación con un robot (modo abierto, sin cuenta) y
+Web de RoboLab: retos de programación con un robot (modo abierto, sin cuenta) y
 evaluaciones que se juegan (docente + alumnos con código). Vite + React 19 +
-TypeScript, backend en Convex. El README explica el producto; aquí van las
-reglas para trabajar en el código.
+TypeScript. El backend (Convex) y el dominio compartido están en otro repo,
+[robolab-backend](https://github.com/orinqq/robolab-backend), y llegan como el
+paquete `@robolab/backend`. El README explica el producto; aquí van las reglas
+para trabajar en el código.
 
 ## Comandos
 
 ```bash
-npm ci                 # instalar (usa el lockfile)
-npx convex dev         # backend local; déjalo corriendo (regenera convex/_generated)
-npm run setup          # una vez por backend: claves de sesión, SITE_URL y correo en consola
-npm run dev            # web en http://localhost:5173
+npm ci                 # instalar (usa el lockfile; trae el backend desde GitHub por https)
+npm run dev            # web en http://localhost:5173 (necesita VITE_CONVEX_URL en .env.local)
 npm run verify         # tipos + lint + pruebas + build: debe pasar antes de cada commit
+npm install git+https://github.com/orinqq/robolab-backend.git#main   # traer el backend nuevo
 ```
 
-Un agente sin cuenta de Convex puede levantar el backend local sin preguntas con
-`CONVEX_AGENT_MODE=anonymous npx convex dev --once` (o sin `--once` para dejarlo vivo).
-
-Útiles: `npx convex run demo:seed '{"email":"…","today":"AAAA-MM-DD"}'` (datos de
-ejemplo), `npx convex run robot:register '{"name":"Kusi"}'` (robot por wifi),
-`npx convex run explore:stats` (uso anónimo), `npx convex logs` (correos en modo consola).
-Robot: `npm run robot:simulador -- --clave <clave>` hace de robot sin placa; el
-protocolo está en `docs/robot-wifi.md` (D gira a la izquierda, Z a la derecha).
+Para que la web funcione hace falta un backend corriendo: seguir el README de
+robolab-backend (`npx convex dev`, `npm run setup`) y copiar su `CONVEX_URL` en
+el `.env.local` de aquí como `VITE_CONVEX_URL`.
 
 ## Arquitectura (respétala)
 
-- `src/domain/` es TypeScript puro: sin React, sin Convex, sin red. Lo usan el
-  navegador y el servidor. Toda regla de negocio nueva va aquí, con su prueba.
-- `convex/` son las funciones del backend. Toda consulta del docente pasa por
-  `convex/lib/access.ts`; las del alumno, por su token de sesión.
-- El servidor es la autoridad: vuelve a simular los programas, cuenta las
-  ejecuciones y califica con su reloj. Nunca confíes en lo que manda el navegador.
-- Al alumno nunca se le envía la respuesta correcta (`correctOption`).
-- Las validaciones (nombres, contraseña, preguntas) están en el dominio y se usan
-  igual en el formulario y en el servidor: no las dupliques.
+- Las reglas de negocio (juego, calificación, códigos, validaciones) **no van
+  aquí**: se importan de `@robolab/backend/domain/<ruta>`. Si falta una regla,
+  se agrega en el repo del backend con su prueba y luego se actualiza el paquete.
+- Las funciones del backend se llaman con `api` de
+  `@robolab/backend/convex/_generated/api`; los tipos `Id<"tabla">` vienen de
+  `@robolab/backend/convex/_generated/dataModel` (solo `import type`).
+- Solo esas tres rutas del paquete existen (campo `exports`): no importes otros
+  archivos del backend por ruta.
+- El servidor es la autoridad: la web muestra, el backend simula, cuenta y
+  califica. Nunca asumas en pantalla algo que el servidor no confirmó.
+- Al alumno nunca se le muestra la respuesta correcta antes de responder.
 - Pantallas en `src/features/<área>/`; componentes y estilos comunes en
   `src/shared/ui/` (tokens de color en `styles.css`, íconos en `Icon.tsx`).
+- `src/features/robot/wifiLink.ts` es un solo archivo sin imports, pensado para
+  que otra web lo copie tal cual: mantenlo así.
 
 ## Cómo trabajar
 
 - Prueba primero: un error se reproduce con una prueba que falla, y esa prueba
-  se queda. Las pruebas del backend usan `convex-test` (no necesitan backend).
+  se queda. Las pruebas de aquí son de lógica de pantalla (Vitest en Node); las
+  del dominio y del backend viven en robolab-backend.
 - Corre `npm run verify` antes de cada commit; GitHub Actions lo vuelve a correr.
 - Textos de la interfaz en español neutro, cortos y pensados para niños o
   docentes. Botones con ícono siempre llevan etiqueta accesible.
 - Commits pequeños, en español, que expliquen el porqué. Trabaja en una rama y
   abre un pull request; no hagas `push --force` sobre `main`.
+- Cuando el backend cambie, actualiza el paquete (`npm install git+https://...#main`)
+  y commitea `package-lock.json`: ahí queda fijado el commit del backend con el
+  que compila esta web. Si TypeScript marca algo del paquete, cambió el contrato.
 
 ## Cuidado con
 
-- `convex/_generated/` se sube al repo pero no se edita a mano: lo regenera
-  `npx convex dev`. Si cambias funciones de `convex/`, corre `convex dev` antes
-  del chequeo de tipos.
-- Con `convex dev` corriendo, no reescribas historia (rebase): regenera archivos
-  a mitad del proceso. Detenlo primero.
-- Secretos (claves de API, contraseñas, la clave del robot) nunca van al repo ni
-  al código del navegador: van con `npx convex env set`. No subas `.env.local`
-  ni `.env.test.local`.
+- `@robolab/backend` se instala desde git con `git+https://`, nunca `github:` ni
+  ssh: en Vercel no hay llaves ssh. Comprueba en el lockfile que `resolved`
+  empiece con `git+https`.
+- Secretos nunca van al repo ni al código del navegador. `VITE_CONVEX_URL` es la
+  única variable de la web y no es secreta; no subas `.env.local`.
 - En Windows PowerShell 5.1, `Get-Content`/`Set-Content` dañan las tildes al
   editar archivos; usa un editor o herramientas que respeten UTF-8.

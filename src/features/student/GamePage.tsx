@@ -1,12 +1,12 @@
 import { useMutation, useQuery } from "convex/react";
 import { useReducer, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { api } from "../../../convex/_generated/api";
-import type { Id } from "../../../convex/_generated/dataModel";
-import { editorReducer, emptyEditor } from "../../domain/game/editor";
-import { type Feedback, feedbackFor } from "../../domain/game/feedback";
-import { type EducationLevel, policyFor } from "../../domain/game/levels";
-import type { Outcome } from "../../domain/game/simulator";
+import { api } from "@robolab/backend/convex/_generated/api";
+import type { Id } from "@robolab/backend/convex/_generated/dataModel";
+import { editorReducer, emptyEditor } from "@robolab/backend/domain/game/editor";
+import { type Feedback, feedbackFor } from "@robolab/backend/domain/game/feedback";
+import { type EducationLevel, policyFor } from "@robolab/backend/domain/game/levels";
+import type { Outcome } from "@robolab/backend/domain/game/simulator";
 import { userMessage } from "../../shared/errors";
 import { Guide } from "../../shared/ui/Guide";
 import { Icon } from "../../shared/ui/Icon";

@@ -1,5 +1,5 @@
 import { useId, useState } from "react";
-import { checkPassword } from "../../../domain/auth/password";
+import { checkPassword } from "@robolab/backend/domain/auth/password";
 import { Icon } from "../../../shared/ui/Icon";
 
 type Props = {

@@ -1,7 +1,7 @@
 import { useAuthActions } from "@convex-dev/auth/react";
 import { Authenticated, AuthLoading, Unauthenticated, useQuery } from "convex/react";
 import { Link, NavLink, Navigate, Route, Routes, useNavigate } from "react-router-dom";
-import { api } from "../../../convex/_generated/api";
+import { api } from "@robolab/backend/convex/_generated/api";
 import { APP_NAME } from "../../shared/brand";
 import { type IconName, Icon } from "../../shared/ui/Icon";
 import { IconButton } from "../../shared/ui/IconButton";

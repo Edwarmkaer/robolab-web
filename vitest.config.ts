@@ -5,17 +5,11 @@ export default defineConfig({
     projects: [
       {
         test: {
-          name: "dominio",
+          name: "web",
           include: ["src/**/*.test.ts"],
           environment: "node",
-        },
-      },
-      {
-        test: {
-          name: "backend",
-          include: ["convex/**/*.test.ts"],
-          environment: "edge-runtime",
-          server: { deps: { inline: ["convex-test"] } },
+          // El paquete del backend trae TypeScript sin compilar: Vite lo transforma al vuelo.
+          server: { deps: { inline: ["@robolab/backend"] } },
         },
       },
     ],

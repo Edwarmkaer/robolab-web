@@ -1,8 +1,8 @@
 import { useMutation } from "convex/react";
 import { type FormEvent, useState } from "react";
 import { Link } from "react-router-dom";
-import { api } from "../../../convex/_generated/api";
-import { ACCESS_CODE_LENGTH, normalizeAccessCode } from "../../domain/evaluation/accessCode";
+import { api } from "@robolab/backend/convex/_generated/api";
+import { ACCESS_CODE_LENGTH, normalizeAccessCode } from "@robolab/backend/domain/evaluation/accessCode";
 import { userMessage } from "../../shared/errors";
 import { Icon } from "../../shared/ui/Icon";
 

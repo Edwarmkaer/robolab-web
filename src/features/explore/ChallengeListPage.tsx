@@ -1,6 +1,6 @@
 import { Link, Navigate, useParams } from "react-router-dom";
-import { KIND_LABEL, challengesFor, topicInfo } from "../../domain/explore/challenges";
-import { EDUCATION_LEVELS, type EducationLevel } from "../../domain/game/levels";
+import { KIND_LABEL, challengesFor, topicInfo } from "@robolab/backend/domain/explore/challenges";
+import { EDUCATION_LEVELS, type EducationLevel } from "@robolab/backend/domain/game/levels";
 import { Icon } from "../../shared/ui/Icon";
 import { Breadcrumbs, ExploreLayout, LEVEL_INFO } from "./ExploreLayout";
 import { useExploreProgress } from "./storage";

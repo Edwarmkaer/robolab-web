@@ -5,6 +5,4 @@ dist/
 .env.*.local
 *.log
 coverage/
-.convex/
 .claude/
-firmware/**/secretos.h

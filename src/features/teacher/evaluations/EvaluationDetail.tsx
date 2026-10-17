@@ -1,9 +1,9 @@
 import { useQuery } from "convex/react";
 import { Link, useParams } from "react-router-dom";
-import { api } from "../../../../convex/_generated/api";
-import type { Id } from "../../../../convex/_generated/dataModel";
-import { localCalendarDate, shortLabel } from "../../../domain/evaluation/calendar";
-import { formatDuration } from "../../../domain/evaluation/scoring";
+import { api } from "@robolab/backend/convex/_generated/api";
+import type { Id } from "@robolab/backend/convex/_generated/dataModel";
+import { localCalendarDate, shortLabel } from "@robolab/backend/domain/evaluation/calendar";
+import { formatDuration } from "@robolab/backend/domain/evaluation/scoring";
 import { Icon } from "../../../shared/ui/Icon";
 
 const STATUS = {

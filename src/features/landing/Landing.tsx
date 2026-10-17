@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { TOPICS } from "../../domain/explore/challenges";
+import { TOPICS } from "@robolab/backend/domain/explore/challenges";
 import { Icon } from "../../shared/ui/Icon";
 import { ExploreLayout, TOPIC_COLOR } from "../explore/ExploreLayout";
 

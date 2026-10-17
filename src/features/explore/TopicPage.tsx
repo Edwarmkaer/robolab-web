@@ -1,6 +1,6 @@
 import { Link, Navigate, useParams } from "react-router-dom";
-import { challengesFor, topicInfo } from "../../domain/explore/challenges";
-import { EDUCATION_LEVELS } from "../../domain/game/levels";
+import { challengesFor, topicInfo } from "@robolab/backend/domain/explore/challenges";
+import { EDUCATION_LEVELS } from "@robolab/backend/domain/game/levels";
 import { Breadcrumbs, ExploreLayout, LEVEL_INFO, TOPIC_COLOR } from "./ExploreLayout";
 
 /** Un tópico: elige tu nivel. */

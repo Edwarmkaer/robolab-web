@@ -1,10 +1,10 @@
 import { useMutation, useQuery } from "convex/react";
 import { type FormEvent, useEffect, useReducer, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { api } from "../../../../convex/_generated/api";
-import type { Id } from "../../../../convex/_generated/dataModel";
-import { localCalendarDate } from "../../../domain/evaluation/calendar";
-import { LIMITS, type QuestionIssue, questionIssues } from "../../../domain/evaluation/rules";
+import { api } from "@robolab/backend/convex/_generated/api";
+import type { Id } from "@robolab/backend/convex/_generated/dataModel";
+import { localCalendarDate } from "@robolab/backend/domain/evaluation/calendar";
+import { LIMITS, type QuestionIssue, questionIssues } from "@robolab/backend/domain/evaluation/rules";
 import { userMessage } from "../../../shared/errors";
 import { Icon } from "../../../shared/ui/Icon";
 import { IconButton } from "../../../shared/ui/IconButton";
