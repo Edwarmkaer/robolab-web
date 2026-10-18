@@ -1,9 +1,10 @@
 import { useAuthActions } from "@convex-dev/auth/react";
 import { Authenticated, AuthLoading, Unauthenticated, useQuery } from "convex/react";
-import { Link, NavLink, Navigate, Route, Routes, useNavigate } from "react-router-dom";
+import { Link, NavLink, Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { api } from "@robolab/backend/convex/_generated/api";
 import { APP_NAME } from "../../shared/brand";
 import { type IconName, Icon } from "../../shared/ui/Icon";
+import { ErrorBoundary } from "../../shared/ui/ErrorBoundary";
 import { IconButton } from "../../shared/ui/IconButton";
 import { useToast } from "../../shared/ui/Toast";
 import { LabCreatePage } from "../lab/LabCreatePage";
@@ -29,6 +30,7 @@ const TABS: readonly { to: string; label: string; icon: IconName; end: boolean }
 function TeacherShell() {
   const { signOut } = useAuthActions();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const toast = useToast();
   const me = useQuery(api.users.me);
   const initial = me?.name.trim().charAt(0).toUpperCase() ?? "";
@@ -74,22 +76,44 @@ function TeacherShell() {
           ))}
         </nav>
         <main>
-          <Routes>
-            <Route index element={<HomePage />} />
-            <Route path="clases" element={<ClassesPage />} />
-            <Route path="clases/nueva" element={<ClassesPage creating />} />
-            <Route path="clases/:classroomId" element={<ClassDetailPage tab="students" />} />
-            <Route path="clases/:classroomId/retos" element={<ClassDetailPage tab="challenges" />} />
-            <Route path="clases/:classroomId/retos/:assignmentId" element={<LegacyResultsRedirect />} />
-            <Route path="retos" element={<RetosPage />} />
-            <Route path="retos/nuevo" element={<NewChallengePage />} />
-            <Route path="retos/:assignmentId" element={<RetoDetailPage />} />
-            <Route path="evaluaciones/*" element={<Navigate to="/docente/retos" replace />} />
-            <Route path="progreso" element={<ProgressPage />} />
-            <Route path="laboratorio/nueva" element={<LabCreatePage />} />
-            <Route path="laboratorio/:missionId/resultados" element={<LabResultsPage />} />
-            <Route path="*" element={<Navigate to="/docente" replace />} />
-          </Routes>
+          {/* Si una pantalla no carga, la barra y las pestañas siguen; cambiar de pestaña lo reinicia. */}
+          <ErrorBoundary
+            key={pathname}
+            fallback={(message, reset) => (
+              <div className="empty">
+                <Icon name="alert" size={32} />
+                <p>No pudimos cargar esta pantalla.</p>
+                <p className="small" role="alert">
+                  {message}
+                </p>
+                <div className="row">
+                  <button type="button" className="btn btn-primary" onClick={reset}>
+                    Reintentar
+                  </button>
+                  <Link className="btn" to="/docente">
+                    Ir al inicio
+                  </Link>
+                </div>
+              </div>
+            )}
+          >
+            <Routes>
+              <Route index element={<HomePage />} />
+              <Route path="clases" element={<ClassesPage />} />
+              <Route path="clases/nueva" element={<ClassesPage creating />} />
+              <Route path="clases/:classroomId" element={<ClassDetailPage tab="students" />} />
+              <Route path="clases/:classroomId/retos" element={<ClassDetailPage tab="challenges" />} />
+              <Route path="clases/:classroomId/retos/:assignmentId" element={<LegacyResultsRedirect />} />
+              <Route path="retos" element={<RetosPage />} />
+              <Route path="retos/nuevo" element={<NewChallengePage />} />
+              <Route path="retos/:assignmentId" element={<RetoDetailPage />} />
+              <Route path="evaluaciones/*" element={<Navigate to="/docente/retos" replace />} />
+              <Route path="progreso" element={<ProgressPage />} />
+              <Route path="laboratorio/nueva" element={<LabCreatePage />} />
+              <Route path="laboratorio/:missionId/resultados" element={<LabResultsPage />} />
+              <Route path="*" element={<Navigate to="/docente" replace />} />
+            </Routes>
+          </ErrorBoundary>
         </main>
       </div>
     </div>
