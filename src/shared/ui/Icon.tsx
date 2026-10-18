@@ -112,6 +112,7 @@ const PATHS = {
     </>
   ),
   chevronRight: <path d="M9 6l6 6-6 6" />,
+  menu: <path d="M4 7h16M4 12h16M4 17h16" />,
   lock: (
     <>
       <rect x="5" y="11" width="14" height="9.5" rx="2" />

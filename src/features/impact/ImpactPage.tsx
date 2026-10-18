@@ -14,7 +14,7 @@ export function ImpactPage() {
   const url = window.location.origin;
 
   return (
-    <ExploreLayout>
+    <ExploreLayout title="Impacto en vivo" backTo="/">
       <div>
         <h1 style={{ margin: 0 }}>Impacto en vivo</h1>
         <p className="muted">Lo que pasa en {APP_NAME} ahora mismo. Solo cifras: nunca nombres.</p>

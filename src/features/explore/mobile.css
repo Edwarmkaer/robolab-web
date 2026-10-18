@@ -1,0 +1,76 @@
+/* Modo abierto en el celular (≤ 640 px): cabecera "RoboLab ≡", flecha de volver y menú desplegable. */
+
+.explore {
+  min-height: 100dvh;
+}
+
+.explore-back {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-left: -10px;
+  border-radius: 12px;
+  color: var(--c-brand-strong);
+  flex: none;
+}
+
+.explore-title {
+  flex: 1;
+  min-width: 0;
+  font-weight: 800;
+  font-size: 1.1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.explore-menu-btn {
+  margin-left: auto;
+  color: var(--c-ink);
+}
+
+@media (max-width: 640px) {
+  .explore-header-inner {
+    gap: 8px;
+    min-height: 60px;
+  }
+
+  .explore-header-inner .brand {
+    flex: 1;
+    color: var(--c-brand-strong);
+  }
+
+  /* Menú desplegable: una sección por fila, al alcance del pulgar. */
+  .explore-header .explore-nav {
+    display: grid;
+    gap: 4px;
+    padding: 4px 12px 12px;
+    border-top: 1px solid var(--c-line);
+    overflow: visible;
+  }
+
+  .explore-header .explore-nav a {
+    display: block;
+    min-height: 48px;
+    padding: 12px 14px;
+    border-radius: var(--radius);
+    font-size: 1rem;
+    color: var(--c-ink);
+    white-space: normal;
+  }
+
+  .explore-header .explore-nav a[aria-current="page"] {
+    color: var(--c-brand-strong);
+    background: var(--c-brand-soft);
+  }
+
+  /* Con la flecha de volver en la cabecera, las migas repiten lo mismo. */
+  .explore-main > .breadcrumbs {
+    display: none;
+  }
+
+  .explore-main {
+    padding-top: 20px;
+  }
+}

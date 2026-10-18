@@ -305,7 +305,7 @@ function ChallengePage({ challenge }: { challenge: Challenge }) {
   }
 
   return (
-    <ExploreLayout>
+    <ExploreLayout title={challenge.title} backTo={listPath(challenge)}>
       <Breadcrumbs
         items={[
           { label: "Explorar", to: "/" },

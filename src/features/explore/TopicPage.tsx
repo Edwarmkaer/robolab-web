@@ -10,7 +10,7 @@ export function TopicPage() {
   if (!topic || !topic.available) return <Navigate to="/" replace />;
 
   return (
-    <ExploreLayout>
+    <ExploreLayout title={topic.name} backTo="/">
       <Breadcrumbs items={[{ label: "Explorar", to: "/" }, { label: topic.name }]} />
       <div className="topic-head" style={{ ["--topic" as string]: TOPIC_COLOR[topic.id] }}>
         <span className="topic-emoji" aria-hidden="true">

@@ -16,7 +16,7 @@ export function MyProgressPage() {
   const competencies = coverage(CHALLENGES, solvedIds);
 
   return (
-    <ExploreLayout>
+    <ExploreLayout title="Mi avance" backTo="/">
       <h1 style={{ margin: 0 }}>Mi avance</h1>
       <p className="small muted">Se guarda solo en este dispositivo. Si borras los datos del navegador, se pierde.</p>
       <Guide
