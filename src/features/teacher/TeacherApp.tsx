@@ -5,6 +5,8 @@ import { api } from "@robolab/backend/convex/_generated/api";
 import { APP_NAME } from "../../shared/brand";
 import { type IconName, Icon } from "../../shared/ui/Icon";
 import { IconButton } from "../../shared/ui/IconButton";
+import { LabCreatePage } from "../lab/LabCreatePage";
+import { LabResultsPage } from "../lab/LabResultsPage";
 import { TeacherAuth } from "./auth/TeacherAuth";
 import { ClassesPage } from "./classes/ClassesPage";
 import { EvaluationDetail } from "./evaluations/EvaluationDetail";
@@ -68,6 +70,8 @@ function TeacherShell() {
         <Route path="evaluaciones/nueva" element={<EvaluationForm />} />
         <Route path="evaluaciones/:evaluationId" element={<EvaluationDetail />} />
         <Route path="progreso" element={<ProgressPage />} />
+        <Route path="laboratorio/nueva" element={<LabCreatePage />} />
+        <Route path="laboratorio/:missionId/resultados" element={<LabResultsPage />} />
         <Route path="*" element={<Navigate to="/docente" replace />} />
       </Routes>
     </div>

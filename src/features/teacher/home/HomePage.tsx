@@ -21,9 +21,14 @@ export function HomePage() {
           <h2>{firstName ? `Hola, ${firstName}` : "Hola"}</h2>
           <p className="muted">{capitalize(longDate.format(new Date()))}</p>
         </div>
-        <Link className="btn btn-primary" to="/docente/evaluaciones/nueva">
-          <Icon name="plus" /> Nueva evaluación
-        </Link>
+        <div className="row">
+          <Link className="btn" to="/docente/laboratorio/nueva">
+            <Icon name="plus" /> Crear misión multigrado
+          </Link>
+          <Link className="btn btn-primary" to="/docente/evaluaciones/nueva">
+            <Icon name="plus" /> Nueva evaluación
+          </Link>
+        </div>
       </div>
 
       <section className="stack" aria-labelledby="today-title">
