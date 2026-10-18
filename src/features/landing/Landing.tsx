@@ -71,6 +71,21 @@ export function Landing() {
         </Link>
       </section>
 
+      <section aria-label="Laboratorio multigrado">
+        <Link className="role-card" to="/laboratorio">
+          <span className="topic-emoji" aria-hidden="true" style={{ width: 96, height: 96, fontSize: "2.6rem", margin: 0, flex: "none" }}>
+            🧪
+          </span>
+          <span className="stack-sm">
+            <strong>Laboratorio multigrado</strong>
+            <span className="small muted">Misiones de Primaria creadas por docentes: un tablero de 6 × 6, tres niveles y un solo robot para toda el aula.</span>
+            <span className="btn btn-sm">
+              Ver misiones <Icon name="chevronRight" size={18} />
+            </span>
+          </span>
+        </Link>
+      </section>
+
       <p className="small muted" style={{ textAlign: "center" }}>
         <Link to="/impacto">Ver el impacto en vivo: retos resueltos, personas que juegan y cómo les va</Link>
       </p>
