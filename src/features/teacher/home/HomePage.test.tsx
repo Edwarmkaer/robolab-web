@@ -14,7 +14,10 @@ const HOME = {
     { _id: "c1", label: "5.º A", joinCode: "TEC-482", studentCount: 24, level: "primaria" },
     { _id: "c2", label: "3.º B", joinCode: "MAT-915", studentCount: 14, level: "inicial" },
   ],
-  todays: [],
+  activeRetos: [
+    { assignmentId: "a1", challengeId: "inicial-gira", title: "Gira a la estrella", classroomId: "c2", classroomLabel: "3.º B", studentCount: 20, studentsSolved: 12, solvedPercent: 60 },
+    { assignmentId: "a2", challengeId: "inicial-paseo", title: "Primer paseo", classroomId: "c1", classroomLabel: "5.º A", studentCount: 24, studentsSolved: 24, solvedPercent: 100 },
+  ],
 };
 const AVAILABLE = [
   { challengeId: "inicial-paseo", title: "Primer paseo", topic: "tecnologia", level: "inicial", kind: "sequence" },
@@ -81,5 +84,40 @@ describe("inicio del docente (T2)", () => {
     renderHome();
     expect(screen.getByText(/todavía no tienes clases/i)).toBeTruthy();
     expect(screen.getByRole("link", { name: /crear clase/i })).toBeTruthy();
+  });
+});
+
+describe("inicio del docente: retos activos", () => {
+  const section = () => within(screen.getByRole("heading", { name: "Retos activos" }).closest("section")!);
+
+  it("reemplaza «Evaluaciones de hoy»: cada reto abierto con su clase y cuántos lo lograron", () => {
+    renderHome();
+    expect(screen.queryByText(/evaluaciones de hoy/i)).toBeNull();
+    const activos = section();
+    expect((activos.getByRole("link", { name: /Gira a la estrella/ }) as HTMLAnchorElement).getAttribute("href")).toBe("/docente/retos/a1");
+    expect(activos.getByText("3.º B")).toBeTruthy();
+    const solved = (text: string) => activos.getByText((_, el) => el?.tagName === "SPAN" && el.textContent === text);
+    expect(solved("12 de 20 lo lograron")).toBeTruthy();
+    expect(activos.getByRole("img", { name: "60 % de la clase lo logró" })).toBeTruthy();
+    expect(solved("24 de 24 lo lograron")).toBeTruthy();
+  });
+
+  it("ofrece crear un reto nuevo y ver todos", () => {
+    renderHome();
+    expect((section().getByRole("link", { name: /nuevo reto/i }) as HTMLAnchorElement).getAttribute("href")).toBe("/docente/retos/nuevo");
+    expect((section().getByRole("link", { name: /ver todos/i }) as HTMLAnchorElement).getAttribute("href")).toBe("/docente/retos");
+  });
+
+  it("sin retos abiertos lo dice y no inventa tarjetas", () => {
+    home = { ...HOME, activeRetos: [] };
+    renderHome();
+    expect(section().getByText("Todavía no tienes retos activos.")).toBeTruthy();
+    expect(section().queryByRole("img")).toBeNull();
+  });
+
+  it("mientras el servidor no trae los retos activos muestra «Cargando…»", () => {
+    home = { ...HOME, activeRetos: undefined };
+    renderHome();
+    expect(section().getByText("Cargando…")).toBeTruthy();
   });
 });
