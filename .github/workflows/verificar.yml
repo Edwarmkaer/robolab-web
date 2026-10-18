@@ -15,5 +15,7 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      # Tipos, lint, pruebas (dominio y backend con convex-test) y build. No necesita secretos.
+      # URL local de prueba: permite incluir toda la app en el build, sin secretos.
       - run: npm run verify
+        env:
+          VITE_CONVEX_URL: http://127.0.0.1:3210

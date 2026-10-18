@@ -66,6 +66,44 @@ aquí como el paquete npm `@robolab/backend`.
 
 ## Arquitectura
 
+### Programar con gestos en Inicial
+
+En los retos abiertos de Inicial que permiten editar el programa aparece el modo
+**Gestos**. Elige **Activar cámara**, permite el acceso y muestra una sola mano:
+
+| Gesto | Acción |
+| --- | --- |
+| ☝️ Índice levantado | Avanzar |
+| ✌️ Índice y medio | Girar a la derecha |
+| 🤟 Pulgar, índice y meñique | Girar a la izquierda |
+| 👍 Pulgar arriba | Confirmar y ejecutar el programa visible |
+
+Mantén el gesto hasta llenar la barra (0,8 segundos para bloques; 1,2 para
+confirmar). Retira la mano durante al menos 0,4 segundos entre gestos, también
+para repetir el mismo bloque. Puedes quitar un bloque tocándolo, borrar el
+programa o cambiar a **Botones** sin perder la secuencia. Un programa vacío no
+se ejecuta y la entrada queda en pausa mientras Kusi se mueve.
+
+La cámara se activa solo al pedirla; se apaga al salir del reto, cambiar a
+Botones, ocultar la pestaña o fallar la captura. No se pide micrófono, no se
+graba vídeo y las imágenes se procesan en el equipo con MediaPipe en un worker.
+El modelo y WebAssembly se descargan de Google y jsDelivr al activar la cámara;
+se necesita internet para esa carga. Las versiones están fijadas. HTTPS (o
+localhost) es obligatorio. Si se deniega el permiso o falla el modelo, sigue
+disponible el modo Botones.
+
+**Para probar:** abre `/reto/inicial-paseo`, empieza el reto y arma una secuencia
+con la cámara. Revisa los bloques y confirma con 👍 o con el botón de confirmación.
+Prueba también `/reto/inicial-gira` para los giros. Los retos de predicción,
+Primaria y las evaluaciones de clase mantienen su entrada habitual.
+
+El enlace publicado `/r/cie-inicial/` pertenece a otra versión de la web:
+su reto «El tubo de ensayo» no está en el catálogo `@robolab/backend` de este
+repositorio. Esta implementación usa los retos actuales de Inicial; no crea
+mapas ni reglas de juego en la web.
+
+### Flujo compartido
+
 ```mermaid
 flowchart LR
   subgraph Web["Este repo: navegador (React + Vite)"]

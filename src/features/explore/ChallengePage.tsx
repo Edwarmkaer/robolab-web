@@ -1,5 +1,5 @@
 import { useMutation } from "convex/react";
-import { useReducer, useRef, useState } from "react";
+import { lazy, Suspense, useReducer, useRef, useState } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { api } from "@robolab/backend/convex/_generated/api";
 import { capacityText, evidenceFor } from "@robolab/backend/domain/curriculum/competencias";
@@ -22,6 +22,7 @@ import { deviceId, useExploreProgress } from "./storage";
 
 type Stats = { readonly runs: number; readonly hints: number; readonly ms: number };
 type Submission = { readonly program?: Program; readonly pick?: Cell };
+const InitialProgramEditor = lazy(() => import("../vision/InitialProgramEditor").then((module) => ({ default: module.InitialProgramEditor })));
 
 const INSTRUCTION: Record<Challenge["kind"], string> = {
   sequence: "Arma el programa para que Kusi llegue a la estrella.",
@@ -141,6 +142,7 @@ function Play({ challenge, onSolved }: { challenge: Challenge; onSolved: (stats:
   });
 
   function execute() {
+    if (runner.running || solved || editor.blocks.length === 0) return;
     ranProgram.current = editor.blocks;
     setRuns((n) => n + 1);
     setBoardMood("idle");
@@ -204,16 +206,22 @@ function Play({ challenge, onSolved }: { challenge: Challenge; onSolved: (stats:
           </>
         ) : (
           <>
-            <BlockEditor policy={policy} state={editor} dispatch={dispatch} disabled={busy} active={highlight} />
+            {challenge.level === "inicial" ? (
+              <Suspense fallback={<p role="status">Cargando el editor…</p>}>
+                <InitialProgramEditor policy={policy} state={editor} dispatch={dispatch} disabled={busy} active={highlight} onExecute={execute} />
+              </Suspense>
+            ) : (
+              <BlockEditor policy={policy} state={editor} dispatch={dispatch} disabled={busy} active={highlight} />
+            )}
             {challenge.kind === "efficient" && (
               <p className="small" data-over={used > challenge.maxBlocks || undefined}>
                 Bloques: <strong>{used}</strong> de {challenge.maxBlocks} como máximo
               </p>
             )}
             <div className="row">
-              <button className="btn btn-primary" type="button" style={{ flex: 1 }} disabled={busy || editor.blocks.length === 0} onClick={execute}>
+              {challenge.level !== "inicial" && <button className="btn btn-primary" type="button" style={{ flex: 1 }} disabled={busy || editor.blocks.length === 0} onClick={execute}>
                 <Icon name="play" /> Ejecutar
-              </button>
+              </button>}
               <button
                 className="btn"
                 type="button"
