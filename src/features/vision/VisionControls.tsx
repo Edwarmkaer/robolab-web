@@ -1,6 +1,8 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import type { Command } from "@robolab/backend/domain/game/program";
 import { Icon } from "../../shared/ui/Icon";
+import { BLOCK_LOOK } from "../game/blocks";
+import { PieceFrame } from "../game/PieceFrame";
 import { speak } from "../student/speech";
 import { startCameraSession } from "./cameraSession";
 import { GESTURES, GestureGate, type GestureFeedback } from "./gestureGate";
@@ -12,6 +14,9 @@ type Props = {
   onCommand: (command: Command) => void;
   onConfirm: () => void;
 };
+/** Lo que explica el ⓘ de la cámara; el lector de pantalla lo oye una vez, junto al botón. */
+const CAMERA_HOW = "Apunta con el índice y recoge los otros dedos.";
+const CAMERA_PRIVACY = "La imagen se procesa en tu equipo. No se graba ni se envía.";
 const idle: GestureFeedback = { action: null, candidate: null, progress: 0, releaseRequired: true };
 
 export function VisionControls(props: Props) {
@@ -19,6 +24,9 @@ export function VisionControls(props: Props) {
   const [status, setStatus] = useState<"off" | "loading" | "ready" | "error">("off");
   const [message, setMessage] = useState("Activa la cámara y muestra una sola mano.");
   const [feedback, setFeedback] = useState(idle);
+  // Ficha de gesto con su información abierta por un toque (en tablet no hay mouse).
+  const [openTip, setOpenTip] = useState<string | null>(null);
+  const helpId = useId();
   const video = useRef<HTMLVideoElement>(null);
   const gate = useRef(new GestureGate());
   const latest = useRef(props);
@@ -71,6 +79,18 @@ export function VisionControls(props: Props) {
     return () => { document.removeEventListener("visibilitychange", hide); stop(); };
   }, [enabled]);
 
+  useEffect(() => {
+    if (openTip === null) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpenTip(null);
+    const onPointer = (e: Event) => !(e.target as Element | null)?.closest?.(".vision-legend") && setOpenTip(null);
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("pointerdown", onPointer);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("pointerdown", onPointer);
+    };
+  }, [openTip]);
+
   const currentGesture = GESTURES.find((gesture) => gesture.action === feedback.candidate);
   const instruction = props.disabled ? "Espera a que Kusi termine."
     : feedback.releaseRequired ? "Retira la mano entre cada gesto."
@@ -91,23 +111,34 @@ export function VisionControls(props: Props) {
           <progress aria-label="Gesto sostenido" max={1} value={props.disabled ? 0 : feedback.progress} />
         </div>
       )}
-      <div className="vision-legend" aria-label="Guía de gestos">
+      <ul className="vision-legend" aria-label="Guía de gestos">
         {GESTURES.map((gesture) => (
-          <div key={gesture.name} className="vision-gesture" data-current={status === "ready" && !props.disabled && feedback.candidate === gesture.action || undefined}>
-            <span className="vision-emoji" aria-hidden="true">{gesture.emoji}</span><span><strong className="vision-gesture-prompt">{gesture.prompt}</strong>{gesture.label}</span>
-          </div>
+          <PieceFrame
+            key={gesture.name}
+            as="li"
+            label={gesture.prompt}
+            detail={gesture.label}
+            open={openTip === gesture.name}
+            onClick={() => setOpenTip(openTip === gesture.name ? null : gesture.name)}
+          >
+            <span className="gesture-tile" data-current={(status === "ready" && !props.disabled && feedback.candidate === gesture.action) || undefined}>
+              <span className="gesture-emoji" aria-hidden="true">{gesture.emoji}</span>
+              {gesture.action === "confirm" ? <Icon name="play" size={20} /> : <img className="gesture-piece" src={BLOCK_LOOK[gesture.action].icon} alt="" />}
+              <span className="sr-only">{gesture.prompt}: {gesture.label}</span>
+            </span>
+          </PieceFrame>
         ))}
-      </div>
-      <p className="small muted">Apunta con el índice y recoge los otros dedos. Sigue las direcciones como las ves en la cámara. Para confirmar, mantén 👍.</p>
+      </ul>
       <div className="row">
-        {enabled ? (
-          <button className="btn btn-sm" type="button" onClick={() => { setEnabled(false); setStatus("off"); setFeedback(idle); setMessage("Cámara apagada. Tu programa sigue aquí."); }}><Icon name="cameraOff" />{status === "loading" ? "Cancelar" : "Apagar cámara"}</button>
-        ) : (
-          <button className="btn btn-sm" type="button" disabled={props.disabled} onClick={() => { setStatus("loading"); setFeedback(idle); setMessage("Permite la cámara. La primera carga necesita internet."); setEnabled(true); }}><Icon name="camera" />Activar cámara</button>
-        )}
+        <PieceFrame label={CAMERA_HOW} detail={CAMERA_PRIVACY} wide>
+          {enabled ? (
+            <button className="btn btn-sm" type="button" aria-describedby={helpId} onClick={() => { setEnabled(false); setStatus("off"); setFeedback(idle); setMessage("Cámara apagada. Tu programa sigue aquí."); }}><Icon name="cameraOff" />{status === "loading" ? "Cancelar" : "Apagar cámara"}</button>
+          ) : (
+            <button className="btn btn-sm" type="button" aria-describedby={helpId} disabled={props.disabled} onClick={() => { setStatus("loading"); setFeedback(idle); setMessage("Permite la cámara. La primera carga necesita internet."); setEnabled(true); }}><Icon name="camera" />Activar cámara</button>
+          )}
+        </PieceFrame>
+        <span id={helpId} className="sr-only">{CAMERA_HOW} {CAMERA_PRIVACY}</span>
       </div>
-      <p className="small muted">La imagen se procesa en tu equipo. No se graba ni se envía.</p>
-      <button className="btn btn-primary" type="button" disabled={props.disabled || !props.canConfirm} onClick={() => { gate.current.reset(); props.onConfirm(); }}><Icon name="check" />Confirmar y ejecutar</button>
     </div>
   );
 }

@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, expect, it, vi } from "vitest";
 import { ToastProvider } from "../../shared/ui/Toast";
@@ -42,10 +42,10 @@ it("los cuatro movimientos, incluido retroceder, generan el programa que ejecuta
   gesture("Pointing_Up", 800);
   gesture("Pointing_Up", 800);
   gesture("Pointing_Up", 800);
-  expect(screen.getAllByRole("listitem")).toHaveLength(5);
+  expect(within(screen.getByRole("list", { name: "Tu secuencia" })).getAllByRole("listitem")).toHaveLength(5);
   expect(boundary.record).not.toHaveBeenCalled();
   gesture("Thumb_Up", 1200);
-  expect((screen.getByRole("button", { name: "Confirmar y ejecutar" }) as HTMLButtonElement).disabled).toBe(true);
+  expect((screen.getByRole("button", { name: "Ejecutar" }) as HTMLButtonElement).disabled).toBe(true);
   act(() => { vi.advanceTimersByTime(2700); });
   act(() => { vi.advanceTimersByTime(1200); });
   expect(screen.getByRole("heading", { name: "¡Reto logrado!" })).toBeTruthy();
