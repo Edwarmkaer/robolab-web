@@ -119,7 +119,9 @@ export function NewChallengePage() {
         </p>
       )}
 
-      <div className="row creator-actions">
+      {/* `key` por paso: el botón de cada paso es un nodo distinto. Si React reutilizara el mismo
+          <button> y lo volviera type="submit" durante el clic, el navegador enviaría el formulario. */}
+      <div key={step} className="row creator-actions">
         {step === 0 ? (
           <>
             <button type="button" className="link-btn" onClick={() => navigate("/docente")}>

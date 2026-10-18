@@ -54,6 +54,21 @@ describe("creador de retos (T3 → T4 → T6 → T7)", () => {
     expect(create).not.toHaveBeenCalled();
   });
 
+  it("«Usar este juego» no publica: el botón de publicar es otro nodo, no el mismo cambiado de tipo", () => {
+    // En el navegador, si React reutiliza el mismo <button> y lo vuelve type="submit" durante el
+    // clic, la acción por defecto envía el formulario y el reto se publica sin pasar por el paso 3.
+    renderCreator();
+    fireEvent.click(button(/Tecnología/));
+    fireEvent.click(button(/^Primaria/));
+    fireEvent.click(button(/continuar/i));
+    fireEvent.click(screen.getAllByRole("button", { name: new RegExp(MISSIONS[0]!.title) })[0]!);
+    const use = button(/usar este juego/i);
+    fireEvent.click(use);
+    expect(use.isConnected).toBe(false);
+    expect(button(/publicar reto/i)).not.toBe(use);
+    expect(create).not.toHaveBeenCalled();
+  });
+
   it("al publicar muestra el enlace <origen>/reto/<id> y deja asignarlo a una clase", async () => {
     create.mockResolvedValue("asg-1");
     assign.mockResolvedValue("asg-1");
