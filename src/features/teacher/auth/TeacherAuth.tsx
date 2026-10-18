@@ -10,6 +10,7 @@ import { APP_NAME } from "../../../shared/brand";
 import { userMessage } from "../../../shared/errors";
 import { Icon } from "../../../shared/ui/Icon";
 import { useToast } from "../../../shared/ui/Toast";
+import { usePageTitle } from "../../../shared/usePageTitle";
 import { PasswordField } from "./PasswordField";
 
 type View = "signIn" | "signUp" | "forgot" | "verify";
@@ -112,6 +113,8 @@ export function TeacherAuth() {
         : true;
 
   const heading = HEADINGS[view];
+  // En la pestaña: "Ingresar · RoboLab", "Crea tu cuenta de docente · RoboLab"…
+  usePageTitle(view === "signIn" ? "Ingresar" : heading.title);
   const submitLabel: Record<View, [string, string]> = {
     signIn: ["Ingresar", "Ingresando…"],
     signUp: ["Crear cuenta", "Creando tu cuenta…"],
@@ -123,7 +126,7 @@ export function TeacherAuth() {
   if (view === "verify") {
     fields = (
       <>
-        <p className="alert alert-ok row" style={{ flexWrap: "nowrap", alignItems: "flex-start" }}>
+        <p className="alert alert-ok row" role="status" style={{ flexWrap: "nowrap", alignItems: "flex-start" }}>
           <Icon name="mail" />
           <span>
             Enviamos un código a <strong>{maskEmail(sentTo)}</strong>. Si no llega en unos minutos, revisa la carpeta de

@@ -18,7 +18,7 @@ export function HomePage() {
     <div className="stack" style={{ gap: 28 }}>
       <div className="page-head">
         <div>
-          <h2>{firstName ? `Hola, ${firstName}` : "Hola"}</h2>
+          <h1>{firstName ? `Hola, ${firstName}` : "Hola"}</h1>
           <p className="muted">{capitalize(longDate.format(new Date()))}</p>
         </div>
         <Link className="btn btn-primary" to="/docente/evaluaciones/nueva">

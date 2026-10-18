@@ -1,0 +1,5 @@
+/* Docente: los títulos de página son <h1> y se ven con el mismo tamaño que tenían como <h2>. */
+.has-bottom-nav .page-head h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}

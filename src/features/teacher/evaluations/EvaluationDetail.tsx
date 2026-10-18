@@ -51,7 +51,7 @@ export function EvaluationDetail() {
       </div>
       <div className="page-head">
         <div>
-          <h2>{detail.title}</h2>
+          <h1>{detail.title}</h1>
           <p className="muted">
             {detail.classroomLabel} · {isToday ? "hoy" : shortLabel(detail.scheduledDate)} · {detail.questionCount}{" "}
             {detail.questionCount === 1 ? "pregunta" : "preguntas"} · {detail.maxScore} puntos

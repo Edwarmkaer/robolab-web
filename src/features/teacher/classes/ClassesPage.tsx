@@ -284,7 +284,7 @@ export function ClassesPage() {
   return (
     <div className="stack">
       <div className="page-head">
-        <h2>Mis clases</h2>
+        <h1>Mis clases</h1>
         {!creating && !noClasses && (
           <button className="btn btn-primary" type="button" onClick={() => setCreating(true)}>
             <Icon name="plus" /> Nueva clase

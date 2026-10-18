@@ -12,6 +12,7 @@ import { ActionBar } from "../../shared/ui/ActionBar";
 import { Guide } from "../../shared/ui/Guide";
 import { Icon } from "../../shared/ui/Icon";
 import { useFocusOnMount } from "../../shared/useFocusOnMount";
+import { usePageTitle } from "../../shared/usePageTitle";
 import { BlockEditor } from "../game/BlockEditor";
 import { Board } from "../game/Board";
 import { RobotSend } from "../robot/RobotSend";
@@ -143,6 +144,7 @@ export function GamePage({ token }: { token: string }) {
   const { attemptId } = useParams();
   const id = attemptId as Id<"attempts">;
   const attempt = useQuery(api.student.attempt, { token, attemptId: id });
+  usePageTitle(attempt?.title);
 
   if (attempt === undefined) return <p className="page muted">Cargando…</p>;
 

@@ -6,6 +6,7 @@ import { shortLabel } from "@robolab/backend/domain/evaluation/calendar";
 import { APP_NAME } from "../../shared/brand";
 import { userMessage } from "../../shared/errors";
 import { Icon } from "../../shared/ui/Icon";
+import { usePageTitle } from "../../shared/usePageTitle";
 import { speak } from "./speech";
 
 type Props = { token: string; onSignOut: () => void };
@@ -18,6 +19,8 @@ export function StudentHome({ token, onSignOut }: Props) {
   const signOut = useMutation(api.student.signOut);
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  usePageTitle("Inicio");
 
   const evaluation = home?.evaluation ?? null;
   const name = home?.displayName;
@@ -28,21 +31,27 @@ export function StudentHome({ token, onSignOut }: Props) {
   async function begin() {
     if (!evaluation) return;
     setError(null);
+    setBusy(true);
     try {
       const attemptId = evaluation.attemptId ?? (await start({ token, evaluationId: evaluation.evaluationId }));
       navigate(`/alumno/juego/${attemptId}`);
     } catch (e) {
       setError(userMessage(e));
+    } finally {
+      setBusy(false);
     }
   }
 
   async function playAgain() {
     if (!evaluation) return;
     setError(null);
+    setBusy(true);
     try {
       navigate(`/alumno/juego/${await retry({ token, evaluationId: evaluation.evaluationId })}`);
     } catch (e) {
       setError(userMessage(e));
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -91,12 +100,12 @@ export function StudentHome({ token, onSignOut }: Props) {
                   {error}
                 </p>
               )}
-              <button className="btn btn-primary" type="button" onClick={() => void begin()}>
+              <button className="btn btn-primary" type="button" disabled={busy} aria-busy={busy} onClick={() => void begin()}>
                 {!evaluation.finished && <Icon name="play" />}
                 {evaluation.finished ? "Ver mi resultado" : evaluation.attemptId ? "Seguir jugando" : "¡Empezar!"}
               </button>
               {evaluation.finished && (
-                <button className="btn" type="button" onClick={() => void playAgain()}>
+                <button className="btn" type="button" disabled={busy} aria-busy={busy} onClick={() => void playAgain()}>
                   <Icon name="rotate" /> Intentar de nuevo
                 </button>
               )}

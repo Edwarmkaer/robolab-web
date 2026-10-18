@@ -16,6 +16,7 @@ import { ChallengeRoute } from "./ChallengePage";
 
 const NOW = Date.UTC(2026, 9, 17, 20, 0);
 const ROBOT_KEY = "robolab.robot";
+const scrollTo = vi.fn();
 
 function renderChallenge(id = "inicial-paseo") {
   return render(
@@ -36,6 +37,9 @@ beforeEach(() => {
   window.localStorage.clear();
   status.mockReset();
   mutation.mockClear();
+  // jsdom no hace scroll: se vigila que cada fase nueva pida empezar arriba.
+  window.scrollTo = scrollTo as unknown as typeof window.scrollTo;
+  scrollTo.mockClear();
 });
 
 afterEach(() => {
@@ -50,6 +54,13 @@ describe("pantalla del reto: Robot y Ejecutar", () => {
     const title = screen.getByRole("heading", { level: 1 });
     expect(title.textContent).toBe("Primer paseo.");
     expect(document.activeElement).toBe(title);
+  });
+
+  it("cada fase nueva (ficha, juego) empieza arriba de la pantalla", () => {
+    renderChallenge();
+    scrollTo.mockClear();
+    fireEvent.click(screen.getByRole("button", { name: /Empezar el reto/ }));
+    expect(scrollTo).toHaveBeenCalledWith(0, 0);
   });
 
   it("Robot y Ejecutar van juntos en la barra de acciones (fija al pie en el celular)", () => {

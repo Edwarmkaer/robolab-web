@@ -1,5 +1,5 @@
 import { useMutation } from "convex/react";
-import { useReducer, useRef, useState } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { api } from "@robolab/backend/convex/_generated/api";
 import { capacityText, evidenceFor } from "@robolab/backend/domain/curriculum/competencias";
@@ -257,6 +257,11 @@ function ChallengePage({ challenge }: { challenge: Challenge }) {
   const { record } = useExploreProgress();
   const recordPlay = useMutation(api.explore.recordPlay);
   const topic = topicInfo(challenge.topic)!;
+
+  // Cada fase nueva (ficha, juego, resultado) empieza arriba: la anterior pudo ser más larga.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [phase, round]);
 
   function solved(result: Stats, submission: Submission) {
     record(challenge.id, { solved: true, ...result });

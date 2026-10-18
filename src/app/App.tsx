@@ -5,15 +5,18 @@ import { MyProgressPage } from "../features/explore/MyProgressPage";
 import { TopicPage } from "../features/explore/TopicPage";
 import { ImpactPage } from "../features/impact/ImpactPage";
 import { Landing } from "../features/landing/Landing";
+import { NotFoundPage } from "../features/notfound/NotFoundPage";
 import { StudentApp } from "../features/student/StudentApp";
 import { TeacherApp } from "../features/teacher/TeacherApp";
 import { ConnectionBanner } from "../shared/ui/ConnectionBanner";
+import { ScrollToTop } from "../shared/ui/ScrollToTop";
 import { AppErrorBoundary } from "./AppErrorBoundary";
 
 export function App() {
   return (
     <AppErrorBoundary>
       <ConnectionBanner />
+      <ScrollToTop />
       <Routes>
         {/* Modo abierto: retos sin cuenta. */}
         <Route path="/" element={<Landing />} />
@@ -26,7 +29,7 @@ export function App() {
         {/* Clases: evaluaciones del docente y alumnos con código. */}
         <Route path="/docente/*" element={<TeacherApp />} />
         <Route path="/alumno/*" element={<StudentApp />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </AppErrorBoundary>
   );

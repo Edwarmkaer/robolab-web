@@ -208,12 +208,17 @@ export function ProgressPage() {
   if (classes === undefined) return <p className="muted">Cargando…</p>;
   if (classes.length === 0) {
     return (
-      <div className="empty">
-        <Icon name="users" size={32} />
-        <p>Primero crea una clase y agrega a tus alumnos.</p>
-        <Link className="btn btn-primary" to="/docente/clases">
-          <Icon name="plus" /> Crear clase
-        </Link>
+      <div className="stack">
+        <div className="page-head">
+          <h1>Progreso</h1>
+        </div>
+        <div className="empty">
+          <Icon name="users" size={32} />
+          <p>Primero crea una clase y agrega a tus alumnos.</p>
+          <Link className="btn btn-primary" to="/docente/clases">
+            <Icon name="plus" /> Crear clase
+          </Link>
+        </div>
       </div>
     );
   }
@@ -222,7 +227,7 @@ export function ProgressPage() {
   return (
     <div className="stack">
       <div className="page-head">
-        <h2>Progreso</h2>
+        <h1>Progreso</h1>
         <select className="select" style={{ maxWidth: 360 }} value={selected} onChange={(e) => setClassroomId(e.target.value)} aria-label="Clase">
           {classes.map((c) => (
             <option key={c._id} value={c._id}>

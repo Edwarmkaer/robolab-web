@@ -60,10 +60,11 @@ export function ResultView({ token, attemptId }: { token: string; attemptId: Id<
           {result.runs} {result.runs === 1 ? "vez" : "veces"}
         </strong>
       </p>
-      <div className="row" style={{ justifyContent: "center" }} aria-label="Tus respuestas">
+      <div className="row" style={{ justifyContent: "center" }} role="list" aria-label="Tus respuestas">
         {result.answers.map((a) => (
           <span
             key={a.stage}
+            role="listitem"
             className={a.isCorrect ? "badge badge-ok" : "badge badge-warn"}
             title={`Respondiste en ${formatDuration(a.responseMs)}`}
           >
