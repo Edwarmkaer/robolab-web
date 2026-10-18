@@ -6,7 +6,8 @@ export default defineConfig({
       {
         test: {
           name: "web",
-          include: ["src/**/*.test.ts"],
+          // Las pruebas de componentes (.test.tsx) piden jsdom con `// @vitest-environment jsdom`.
+          include: ["src/**/*.test.{ts,tsx}"],
           environment: "node",
           // El paquete del backend trae TypeScript sin compilar: Vite lo transforma al vuelo.
           server: { deps: { inline: ["@robolab/backend"] } },

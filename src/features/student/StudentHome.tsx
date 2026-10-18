@@ -85,7 +85,11 @@ export function StudentHome({ token, onSignOut }: Props) {
                     ? "Lleva al robot a la estrella. Ahí hay una pregunta."
                     : `Lleva al robot a ${evaluation.questionCount} estrellas. En cada estrella hay una pregunta.`}
               </p>
-              {error && <p className="alert alert-error">{error}</p>}
+              {error && (
+                <p className="alert alert-error" role="alert">
+                  {error}
+                </p>
+              )}
               <button className="btn btn-primary" type="button" onClick={() => void begin()}>
                 {!evaluation.finished && <Icon name="play" />}
                 {evaluation.finished ? "Ver mi resultado" : evaluation.attemptId ? "Seguir jugando" : "¡Empezar!"}

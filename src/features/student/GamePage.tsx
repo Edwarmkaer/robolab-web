@@ -97,7 +97,11 @@ function StageView({
           }
           message={feedback ? `${feedback.title} ${feedback.detail}` : "Arma el programa y lleva al robot a la estrella. ¡Tú puedes!"}
         />
-        {error && <p className="alert alert-error">{error}</p>}
+        {error && !question && (
+          <p className="alert alert-error" role="alert">
+            {error}
+          </p>
+        )}
       </div>
       <div className="stack">
         <BlockEditor policy={policy} state={editor} dispatch={dispatch} disabled={runner.running || question !== null} active={highlight} />
@@ -126,7 +130,7 @@ function StageView({
         </div>
         <RobotSend program={editor.blocks} disabled={runner.running} />
       </div>
-      {question && <QuestionDialog question={question} busy={busy} onAnswer={(o) => void onAnswer(o)} />}
+      {question && <QuestionDialog question={question} busy={busy} error={error} onAnswer={(o) => void onAnswer(o)} />}
     </div>
   );
 }
