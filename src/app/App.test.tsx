@@ -51,6 +51,7 @@ describe("página que no existe", () => {
   });
 
   it("la portada y las rutas conocidas siguen funcionando", () => {
+    document.title = "RoboLab"; // el de index.html: la portada no lo cambia
     renderApp("/");
     expect(screen.getByRole("heading", { level: 1, name: "Resuelve retos STEAM" })).toBeTruthy();
     expect(document.title).toBe("RoboLab");

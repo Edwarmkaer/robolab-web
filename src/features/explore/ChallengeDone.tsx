@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { type Challenge, nextChallenge, topicInfo } from "@robolab/backend/domain/explore/challenges";
-import { formatClock } from "../../shared/format";
+import { clock } from "../../shared/format";
 import { Guide } from "../../shared/ui/Guide";
 import { Icon } from "../../shared/ui/Icon";
 import { useFocusOnMount } from "../../shared/useFocusOnMount";
@@ -46,7 +46,7 @@ export function ChallengeDone({ challenge, stats, onRepeat }: Props) {
             <span>{stats.hints === 1 ? "pista" : "pistas"}</span>
           </div>
           <div className="stat">
-            <strong>{formatClock(stats.ms)}</strong>
+            <strong>{clock(stats.ms)}</strong>
             <span>tiempo</span>
           </div>
         </div>

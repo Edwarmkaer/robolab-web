@@ -9,6 +9,7 @@ import { userMessage } from "../../../shared/errors";
 import { Icon } from "../../../shared/ui/Icon";
 import { IconButton } from "../../../shared/ui/IconButton";
 import { useToast } from "../../../shared/ui/Toast";
+import { usePageTitle } from "../../../shared/usePageTitle";
 import { MAX_OPTIONS, MAX_QUESTIONS, MIN_OPTIONS, type QuestionDraft, draftsReducer, emptyQuestion, toPayload } from "./questionDraft";
 
 const LETTERS = ["A", "B", "C", "D"];
@@ -23,6 +24,7 @@ function FieldError({ issue, id }: { issue: QuestionIssue | undefined; id: strin
 }
 
 export function EvaluationForm() {
+  usePageTitle("Nueva evaluación");
   const classes = useQuery(api.classrooms.listMine);
   const create = useMutation(api.evaluations.create);
   const navigate = useNavigate();

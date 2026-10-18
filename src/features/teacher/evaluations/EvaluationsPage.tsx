@@ -4,9 +4,11 @@ import { api } from "@robolab/backend/convex/_generated/api";
 import { localCalendarDate, shortLabel } from "@robolab/backend/domain/evaluation/calendar";
 import { Icon } from "../../../shared/ui/Icon";
 import { MOBILE_QUERY, useMediaQuery } from "../../../shared/useMediaQuery";
+import { usePageTitle } from "../../../shared/usePageTitle";
 import "./evaluations.css";
 
 export function EvaluationsPage() {
+  usePageTitle("Evaluaciones");
   const evaluations = useQuery(api.evaluations.listMine);
   const today = localCalendarDate();
   // En el celular la tabla se recortaba y partía la columna Clase palabra por palabra: van tarjetas.

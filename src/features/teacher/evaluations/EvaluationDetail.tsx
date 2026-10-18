@@ -6,6 +6,7 @@ import { EVALUATION_EVIDENCE, capacityText } from "@robolab/backend/domain/curri
 import { localCalendarDate, shortLabel } from "@robolab/backend/domain/evaluation/calendar";
 import { formatDuration } from "@robolab/backend/domain/evaluation/scoring";
 import { Icon } from "../../../shared/ui/Icon";
+import { usePageTitle } from "../../../shared/usePageTitle";
 
 const STATUS = {
   pending: { text: "Sin empezar", className: "badge badge-muted" },
@@ -33,6 +34,7 @@ const LETTERS = ["A", "B", "C", "D"];
 export function EvaluationDetail() {
   const { evaluationId } = useParams();
   const detail = useQuery(api.evaluations.get, { evaluationId: evaluationId as Id<"evaluations"> });
+  usePageTitle(detail?.title);
 
   if (detail === undefined) return <p className="muted">Cargando…</p>;
 

@@ -1,6 +1,7 @@
 import { Link, Navigate, useParams } from "react-router-dom";
-import { challengesFor, topicInfo } from "@robolab/backend/domain/explore/challenges";
+import { topicInfo } from "@robolab/backend/domain/explore/challenges";
 import { EDUCATION_LEVELS } from "@robolab/backend/domain/game/levels";
+import { countLabel, openCountFor } from "./catalog";
 import { Breadcrumbs, ExploreLayout, LEVEL_INFO, TOPIC_COLOR } from "./ExploreLayout";
 
 /** Un tópico: elige tu nivel. */
@@ -24,7 +25,7 @@ export function TopicPage() {
       <div className="level-grid">
         {EDUCATION_LEVELS.map((level) => {
           const info = LEVEL_INFO[level];
-          const count = challengesFor(topic.id, level).length;
+          const count = openCountFor(topic.id, level);
           const body = (
             <>
               <span className="level-dots" aria-hidden="true">
@@ -36,7 +37,7 @@ export function TopicPage() {
               <span className="level-ages">{info.ages}</span>
               <span className="small muted">{info.description}</span>
               <span className={count > 0 ? "badge" : "badge badge-muted"}>
-                {count > 0 ? `${count} retos` : "Próximamente"}
+                {count > 0 ? countLabel(level, count) : "Próximamente"}
               </span>
             </>
           );

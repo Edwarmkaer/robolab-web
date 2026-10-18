@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { coverage } from "@robolab/backend/domain/curriculum/competencias";
-import { CHALLENGES, TOPICS } from "@robolab/backend/domain/explore/challenges";
-import { topicProgress } from "@robolab/backend/domain/explore/progress";
+import { TOPICS } from "@robolab/backend/domain/explore/challenges";
+import { openChallenges, topicProgress } from "@robolab/backend/domain/explore/progress";
+import { MISSIONS } from "@robolab/backend/domain/lab/mission";
 import { Guide } from "../../shared/ui/Guide";
+import { ClassTag } from "../student/ClassTag";
 import { ExploreLayout, TOPIC_COLOR } from "./ExploreLayout";
 import { useExploreProgress } from "./storage";
 
@@ -13,11 +15,14 @@ export function MyProgressPage() {
   const [confirming, setConfirming] = useState(false);
   const solvedTotal = Object.values(progress.records).filter((r) => r.solved).length;
   const solvedIds = new Set(Object.entries(progress.records).flatMap(([id, r]) => (r.solved ? [id] : [])));
-  const competencies = coverage(CHALLENGES, solvedIds);
+  const competencies = coverage([...openChallenges(), ...MISSIONS], solvedIds);
 
   return (
     <ExploreLayout title="Mi avance" backTo="/">
-      <h1 style={{ margin: 0 }}>Mi avance</h1>
+      <div className="row" style={{ gap: 12 }}>
+        <h1 style={{ margin: 0 }}>Mi avance</h1>
+        <ClassTag />
+      </div>
       <p className="small muted">Se guarda solo en este dispositivo. Si borras los datos del navegador, se pierde.</p>
       <Guide
         mood={solvedTotal > 0 ? "happy" : "idle"}
@@ -48,7 +53,7 @@ export function MyProgressPage() {
           <h2 id="competencies-title" style={{ margin: 0 }}>
             Competencias del Currículo Nacional
           </h2>
-          <p className="small muted">De los retos que evidencian cada competencia del MINEDU, cuántos resolviste.</p>
+          <p className="small muted">De los retos y misiones que evidencian cada competencia del MINEDU, cuántos resolviste.</p>
         </div>
         {competencies.map(({ competency, solved, total }) => (
           <div key={competency.id} className="progress-row" data-wide style={{ ["--topic" as string]: "var(--c-brand)" }}>

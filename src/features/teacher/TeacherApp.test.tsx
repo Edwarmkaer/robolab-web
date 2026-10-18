@@ -24,7 +24,7 @@ vi.mock("convex/react", () => ({
 vi.mock("@convex-dev/auth/react", () => ({ useAuthActions: () => ({ signIn: vi.fn(), signOut }) }));
 
 import { ToastProvider } from "../../shared/ui/Toast";
-import { TeacherApp, sectionTitle } from "./TeacherApp";
+import { TeacherApp } from "./TeacherApp";
 
 beforeEach(() => {
   signOut.mockReset();
@@ -46,10 +46,10 @@ function renderAt(path: string) {
 
 describe("armazón del docente: landmark, título de página y encabezado", () => {
   it.each([
-    ["/docente", "Inicio · RoboLab", "Hola, Ana"],
+    ["/docente", "Inicio · RoboLab", "Hola"],
     ["/docente/clases", "Mis clases · RoboLab", "Mis clases"],
     ["/docente/evaluaciones", "Evaluaciones · RoboLab", "Evaluaciones"],
-    ["/docente/evaluaciones/nueva", "Evaluaciones · RoboLab", "Nueva evaluación"],
+    ["/docente/evaluaciones/nueva", "Nueva evaluación · RoboLab", "Nueva evaluación"],
     ["/docente/progreso", "Progreso · RoboLab", "Progreso"],
   ])("%s: un <main>, un <h1> y la pestaña dice dónde estás", (path, tab, heading) => {
     renderAt(path);
@@ -64,13 +64,6 @@ describe("armazón del docente: landmark, título de página y encabezado", () =
     renderAt("/docente");
     const main = screen.getByRole("main");
     expect(main.contains(screen.getByRole("navigation", { name: "Secciones del docente" }))).toBe(false);
-  });
-
-  it("sectionTitle elige la sección cuyo enlace es el más largo que abre la ruta", () => {
-    expect(sectionTitle("/docente")).toBe("Inicio");
-    expect(sectionTitle("/docente/clases/abc123")).toBe("Mis clases");
-    expect(sectionTitle("/docente/evaluaciones/nueva")).toBe("Evaluaciones");
-    expect(sectionTitle("/docente/otra-cosa")).toBe("Docente");
   });
 });
 

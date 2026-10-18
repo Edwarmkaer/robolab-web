@@ -6,6 +6,7 @@ import { api } from "@robolab/backend/convex/_generated/api";
 import type { Id } from "@robolab/backend/convex/_generated/dataModel";
 import { shortLabel } from "@robolab/backend/domain/evaluation/calendar";
 import { Icon } from "../../../shared/ui/Icon";
+import { usePageTitle } from "../../../shared/usePageTitle";
 import { type ChartSeries, ProgressChart } from "./ProgressChart";
 import { scaleFor } from "./chartLayout";
 
@@ -202,6 +203,7 @@ function ClassProgress({ classroomId }: { classroomId: Id<"classrooms"> }) {
 }
 
 export function ProgressPage() {
+  usePageTitle("Progreso");
   const classes = useQuery(api.classrooms.listMine);
   const [classroomId, setClassroomId] = useState<string>("");
 
@@ -214,7 +216,7 @@ export function ProgressPage() {
         </div>
         <div className="empty">
           <Icon name="users" size={32} />
-          <p>Primero crea una clase y agrega a tus alumnos.</p>
+          <p>Primero crea una clase: tus alumnos se unen con su código.</p>
           <Link className="btn btn-primary" to="/docente/clases">
             <Icon name="plus" /> Crear clase
           </Link>

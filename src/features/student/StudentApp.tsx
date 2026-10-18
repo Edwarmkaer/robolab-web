@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { ErrorBoundary } from "../../shared/ui/ErrorBoundary";
 import { GamePage } from "./GamePage";
+import { JoinClass } from "./JoinClass";
 import { StudentHome } from "./StudentHome";
 import { StudentLogin } from "./StudentLogin";
 import { useStudentToken } from "./session";
@@ -8,7 +9,17 @@ import { useStudentToken } from "./session";
 export function StudentApp() {
   const [token, setToken] = useStudentToken();
 
-  if (!token) return <StudentLogin onSignedIn={setToken} />;
+  if (!token) {
+    return (
+      <Routes>
+        <Route index element={<JoinClass onJoined={setToken} />} />
+        {/* Las tarjetas con código por alumno de la fase 1 siguen entrando por aquí. */}
+        <Route path="codigo" element={<StudentLogin onSignedIn={setToken} />} />
+        {/* Sin sesión, un enlace viejo a un juego lleva a "Únete a tu clase"; al unirse, ya está en la portada. */}
+        <Route path="*" element={<Navigate to="/alumno" replace />} />
+      </Routes>
+    );
+  }
 
   return (
     <ErrorBoundary
@@ -26,7 +37,7 @@ export function StudentApp() {
                 reset();
               }}
             >
-              Volver a escribir mi código
+              Volver a unirme a mi clase
             </button>
           </div>
         </main>

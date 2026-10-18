@@ -1,0 +1,397 @@
+/* Laboratorio multigrado: tablero 6×6 con energía, flechas y paneles. Usa los tokens de styles.css. */
+
+/* ---------- Tablero ---------- */
+.lab-board {
+  position: relative;
+  display: grid;
+  gap: 4px;
+  padding: 10px;
+  border-radius: var(--radius-lg);
+  background: var(--c-line);
+  user-select: none;
+  width: 100%;
+  max-width: min(100%, 72vh, 520px);
+  margin: 0 auto;
+}
+
+.lab-tile {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 10px;
+  background: var(--c-surface);
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: clamp(0.9rem, 2.6vw, 1.3rem);
+  color: var(--c-muted);
+}
+
+.lab-tile[data-kind="wall"] {
+  background: var(--c-wall);
+}
+
+.lab-tile[data-kind="rough"] {
+  background: var(--c-warn-soft);
+  color: var(--c-warn);
+  box-shadow: inset 0 0 0 2px var(--c-warn-edge);
+}
+
+.lab-tile[data-kind="station"] {
+  background: var(--c-brand-soft);
+  color: var(--c-brand-strong);
+}
+
+.lab-tile[data-kind="goal"] {
+  background: var(--c-ok-soft);
+}
+
+.lab-tile[data-kind="start"] {
+  background: var(--c-surface-2);
+}
+
+.lab-tile[data-visited] {
+  box-shadow: inset 0 0 0 3px var(--c-ok);
+}
+
+.lab-tile[data-kind="rough"][data-visited] {
+  box-shadow: inset 0 0 0 3px var(--c-ok);
+}
+
+.lab-star {
+  width: 62%;
+  filter: drop-shadow(0 2px 2px rgb(0 0 0 / 20%));
+}
+
+.lab-mark {
+  line-height: 1;
+}
+
+.lab-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.lab-legend .chip::before {
+  content: "";
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+  background: var(--swatch, var(--c-line));
+  box-shadow: var(--swatch-ring, none);
+}
+
+/* ---------- Miniatura para tarjetas ---------- */
+.mission-thumb {
+  display: grid;
+  gap: 2px;
+  padding: 6px;
+  border-radius: 12px;
+  background: var(--c-line);
+  width: 100%;
+  max-width: 120px;
+}
+
+.mission-thumb span {
+  aspect-ratio: 1;
+  border-radius: 3px;
+  background: var(--c-surface);
+}
+
+.mission-thumb span[data-kind="wall"] {
+  background: var(--c-wall);
+}
+
+.mission-thumb span[data-kind="rough"] {
+  background: var(--c-warn-edge);
+}
+
+.mission-thumb span[data-kind="station"] {
+  background: var(--c-brand);
+}
+
+.mission-thumb span[data-kind="goal"] {
+  background: var(--c-ok);
+}
+
+.mission-thumb span[data-kind="start"] {
+  background: var(--c-path);
+}
+
+.mission-card .challenge-art {
+  padding: 10px;
+  height: auto;
+  background: var(--c-surface-2);
+}
+
+/* ---------- Subniveles ---------- */
+.lab-levels {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+}
+
+.lab-level {
+  display: grid;
+  gap: 4px;
+  align-content: start;
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  border: 2px solid var(--c-line);
+  background: var(--c-surface);
+  cursor: pointer;
+  color: var(--c-ink);
+  transition: border-color 120ms var(--ease);
+}
+
+.lab-level:hover:not(:disabled) {
+  border-color: var(--c-brand);
+}
+
+.lab-level[aria-pressed="true"] {
+  border-color: var(--c-brand);
+  background: var(--c-brand-soft);
+}
+
+.lab-level-num {
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--c-brand-strong);
+  font-weight: 800;
+}
+
+.lab-level strong {
+  font-size: 1.05rem;
+}
+
+.lab-level .badge {
+  justify-self: start;
+}
+
+/* ---------- Programa con flechas ---------- */
+.lab-arrows {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.lab-arrow {
+  min-height: 56px;
+  border-radius: var(--radius);
+  border: 2px solid var(--c-line);
+  background: var(--c-brand-soft);
+  color: var(--c-brand-strong);
+  font-size: 1.6rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    border-color 120ms var(--ease),
+    transform 120ms var(--ease);
+}
+
+.lab-arrow:hover:not(:disabled) {
+  border-color: var(--c-brand);
+}
+
+.lab-arrow:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.lab-arrow:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.lab-program {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 6px;
+  min-height: 88px;
+  padding: 10px;
+  border-radius: var(--radius);
+  border: 2px dashed var(--c-line);
+  background: var(--c-surface);
+}
+
+/* Los pasos son una lista: sin viñetas ni sangría, y vacía no ocupa lugar. */
+.lab-steps {
+  display: flex;
+  flex: 1 1 100%;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lab-steps:empty {
+  display: none;
+}
+
+.lab-cmd {
+  min-height: 40px;
+  padding: 0 10px;
+  border-radius: 10px;
+  border: 0;
+  background: var(--c-brand);
+  color: var(--c-brand-ink);
+  font-weight: 800;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.lab-cmd:hover:not(:disabled) {
+  background: var(--c-error);
+}
+
+.lab-cmd:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.lab-cmd[data-state="error"] {
+  background: var(--c-error);
+}
+
+.lab-meters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.lab-meters .chip[data-over] {
+  background: var(--c-error-soft);
+  border-color: var(--c-error-line);
+  color: var(--c-error);
+}
+
+.lab-meters .chip[data-done] {
+  background: var(--c-ok-soft);
+  border-color: var(--c-ok-line);
+  color: var(--c-ok);
+}
+
+/* ---------- Creador del docente ---------- */
+.lab-steps {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.lab-steps li {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--c-surface-2);
+  border: 1px solid var(--c-line);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--c-muted);
+}
+
+.lab-steps li[aria-current="step"] {
+  background: var(--c-brand-soft);
+  border-color: transparent;
+  color: var(--c-brand-strong);
+}
+
+.lab-steps li[data-done] {
+  color: var(--c-ok);
+}
+
+.lab-validation {
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  background: var(--c-surface-2);
+  border: 1px solid var(--c-line);
+}
+
+.lab-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.72rem;
+  color: var(--c-brand-strong);
+  font-weight: 800;
+}
+
+.lab-preview {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 120px minmax(0, 1fr);
+  align-items: start;
+}
+
+@media (max-width: 480px) {
+  .lab-preview {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Resultados del docente ---------- */
+.lab-kpis {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.lab-logs {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.lab-log {
+  padding: 10px 12px;
+  border: 1px solid var(--c-line);
+  border-radius: 10px;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.lab-log[data-ok] {
+  border-color: var(--c-ok-line);
+  background: var(--c-ok-wash);
+}
+
+/* ---------- Vitrina ---------- */
+.lab-hero {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+@media (max-width: 640px) {
+  .lab-hero {
+    grid-template-columns: 1fr;
+  }
+}
+
+.lab-mission-card {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 120px minmax(0, 1fr);
+  align-items: start;
+  color: var(--c-ink);
+  text-decoration: none;
+}
+
+.lab-mission-card .row {
+  gap: 6px;
+}
+
+@media (max-width: 480px) {
+  .lab-mission-card {
+    grid-template-columns: 1fr;
+  }
+}

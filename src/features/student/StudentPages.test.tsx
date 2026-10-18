@@ -68,7 +68,7 @@ describe("portada del alumno", () => {
         <StudentHome token="t-1" onSignOut={() => undefined} />
       </MemoryRouter>,
     );
-    expect(document.title).toBe("Inicio · RoboLab");
+    expect(document.title).toBe("Mi clase · RoboLab");
   });
 
   it("'¡Empezar!' queda ocupado y deshabilitado mientras el servidor responde (no se toca dos veces)", async () => {

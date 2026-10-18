@@ -81,6 +81,7 @@ describe("cabecera del modo abierto en pantalla ancha", () => {
   beforeEach(() => pretendViewport(false));
 
   it("muestra las secciones sin necesidad del menú", () => {
+    document.title = "RoboLab"; // el de index.html: una pantalla sin título no lo cambia
     renderAt("/", <ExploreLayout>hola</ExploreLayout>);
     expect(screen.getByRole("link", { name: "Mi avance" })).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Menú" })).toBeNull();

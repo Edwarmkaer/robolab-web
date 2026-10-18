@@ -4,6 +4,8 @@ import { ChallengeRoute } from "../features/explore/ChallengePage";
 import { MyProgressPage } from "../features/explore/MyProgressPage";
 import { TopicPage } from "../features/explore/TopicPage";
 import { ImpactPage } from "../features/impact/ImpactPage";
+import { LabListPage } from "../features/lab/LabListPage";
+import { LabMissionPage } from "../features/lab/LabMissionPage";
 import { Landing } from "../features/landing/Landing";
 import { NotFoundPage } from "../features/notfound/NotFoundPage";
 import { StudentApp } from "../features/student/StudentApp";
@@ -26,6 +28,8 @@ export function App() {
         <Route path="/reto/:id" element={<ChallengeRoute />} />
         <Route path="/mi-avance" element={<MyProgressPage />} />
         <Route path="/impacto" element={<ImpactPage />} />
+        <Route path="/laboratorio" element={<LabListPage />} />
+        <Route path="/laboratorio/:id" element={<LabMissionPage />} />
         {/* Clases: evaluaciones del docente y alumnos con código. */}
         <Route path="/docente/*" element={<TeacherApp />} />
         <Route path="/alumno/*" element={<StudentApp />} />

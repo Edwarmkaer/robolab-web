@@ -78,6 +78,7 @@ describe("contraste de los tokens (WCAG 2.2 AA)", () => {
     ["texto atenuado sobre las tarjetas", "--c-muted", "--c-surface", TEXT],
     ["placeholder de los campos", "--c-placeholder", "--c-surface", TEXT],
     ["texto de botón principal", "--c-brand-ink", "--c-brand", TEXT],
+    ["letra de la meta en el mapa de misiones", "--c-goal-ink", "--c-goal", TEXT],
     ["borde del camino contra el pasto del tablero", "--c-path-edge", "--c-grass", GRAPHIC],
     ["borde del camino contra el camino", "--c-path-edge", "--c-path", GRAPHIC],
   ] as const)("%s", (_name, fg, bg, min) => {
