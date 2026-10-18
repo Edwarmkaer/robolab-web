@@ -1,46 +1,141 @@
 import { useQuery } from "convex/react";
 import { Link } from "react-router-dom";
 import { api } from "@robolab/backend/convex/_generated/api";
-import { localCalendarDate } from "@robolab/backend/domain/evaluation/calendar";
+import { topicInfo } from "@robolab/backend/domain/explore/challenges";
 import { Icon } from "../../../shared/ui/Icon";
+import { usePageTitle } from "../../../shared/usePageTitle";
+import { LEVEL_INFO } from "../../explore/ExploreLayout";
+import { emojiFor } from "../../explore/catalog";
+import { useEnsureJoinCodes } from "../classes/useEnsureJoinCodes";
+import "./home.css";
 
-const longDate = new Intl.DateTimeFormat("es-PE", { weekday: "long", day: "numeric", month: "long" });
-const capitalize = (text: string) => text.charAt(0).toLocaleUpperCase("es") + text.slice(1);
+const SHOWN_CHALLENGES = 6;
 
+/** Inicio del docente (T2): tres cifras, los retos disponibles y sus clases con su código. */
 export function HomePage() {
-  const today = localCalendarDate();
-  const me = useQuery(api.users.me);
-  const classes = useQuery(api.classrooms.listMine);
-  const todays = useQuery(api.evaluations.listForDate, { date: today });
-  const firstName = me?.name.trim().split(" ")[0];
+  usePageTitle("Inicio");
+  const home = useQuery(api.teacherHome.home);
+  const available = useQuery(api.assignments.available);
+  useEnsureJoinCodes(home?.classes.some((c) => c.joinCode === null) ?? false);
 
   return (
-    <div className="stack" style={{ gap: 28 }}>
-      <div className="page-head">
-        <div>
-          <h2>{firstName ? `Hola, ${firstName}` : "Hola"}</h2>
-          <p className="muted">{capitalize(longDate.format(new Date()))}</p>
-        </div>
-        <Link className="btn btn-primary" to="/docente/evaluaciones/nueva">
-          <Icon name="plus" /> Nueva evaluación
+    <div className="stack" style={{ gap: 24 }}>
+      <div className="row spread" style={{ alignItems: "center", flexWrap: "wrap" }}>
+        <h2 className="home-greeting" style={{ margin: 0 }}>
+          {home?.firstName ? `Hola, ${home.firstName}` : "Hola"}
+        </h2>
+        <Link className="btn" to="/docente/laboratorio/nueva">
+          <Icon name="plus" /> Crear misión multigrado
         </Link>
       </div>
 
+      <div className="stat-grid" aria-label="Resumen">
+        <Stat value={home?.activeClasses} label={home?.activeClasses === 1 ? "clase activa" : "clases activas"} />
+        <Stat value={home?.students} label={home?.students === 1 ? "estudiante" : "estudiantes"} />
+        <Stat value={home?.availableChallenges} label="retos disponibles" />
+      </div>
+
+      <div className="home-grid">
+        <section className="card stack" aria-labelledby="available-title">
+          <div className="row spread">
+            <h3 id="available-title" style={{ margin: 0 }}>
+              Retos disponibles
+            </h3>
+            <Link className="link-btn small" to="/docente/retos/nuevo">
+              <Icon name="plus" size={16} /> Crear reto
+            </Link>
+          </div>
+          {available === undefined ? (
+            <p className="muted">Cargando…</p>
+          ) : available.length === 0 ? (
+            <div className="empty">
+              <Icon name="clipboard" size={32} />
+              <p>Todavía no hay retos listos.</p>
+            </div>
+          ) : (
+            <ul className="home-list">
+              {available.slice(0, SHOWN_CHALLENGES).map((c) => (
+                <li key={c.challengeId} className="home-item">
+                  <span className="home-item-art" aria-hidden="true">
+                    {emojiFor(c.challengeId)}
+                  </span>
+                  <span className="home-item-text">
+                    <Link to={`/reto/${c.challengeId}`}>{c.title}</Link>
+                    <span className="small muted">
+                      {topicInfo(c.topic)?.name ?? c.topic} · {LEVEL_INFO[c.level].name}
+                    </span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+          {available !== undefined && available.length > SHOWN_CHALLENGES && (
+            <Link className="link-btn small" to="/docente/retos/nuevo">
+              Ver los {available.length} retos <Icon name="chevronRight" size={16} />
+            </Link>
+          )}
+        </section>
+
+        <section className="card stack" aria-labelledby="classes-title">
+          <div className="row spread">
+            <h3 id="classes-title" style={{ margin: 0 }}>
+              Mis clases
+            </h3>
+            <Link className="link-btn small" to="/docente/clases/nueva">
+              <Icon name="plus" size={16} /> Nueva clase
+            </Link>
+          </div>
+          {home === undefined ? (
+            <p className="muted">Cargando…</p>
+          ) : home.classes.length === 0 ? (
+            <div className="empty">
+              <Icon name="users" size={32} />
+              <p>Todavía no tienes clases. Crea la primera: tus alumnos entran con su código.</p>
+              <Link className="btn btn-primary" to="/docente/clases/nueva">
+                <Icon name="plus" /> Crear clase
+              </Link>
+            </div>
+          ) : (
+            <ul className="home-list">
+              {home.classes.map((c) => (
+                <li key={c._id} className="home-item">
+                  <span className="home-item-text">
+                    <Link to={`/docente/clases/${c._id}`}>{c.label}</Link>
+                    <span className="small muted">
+                      {c.studentCount} {c.studentCount === 1 ? "estudiante" : "estudiantes"} · {LEVEL_INFO[c.level].name}
+                    </span>
+                  </span>
+                  {c.joinCode === null ? (
+                    <span className="badge badge-muted">Generando código…</span>
+                  ) : (
+                    <span className="badge code-badge">Código {c.joinCode}</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      </div>
+
       <section className="stack" aria-labelledby="today-title">
-        <h3 id="today-title">Evaluaciones de hoy</h3>
-        {todays === undefined ? (
+        <div className="row spread">
+          <h3 id="today-title" style={{ margin: 0 }}>
+            Evaluaciones de hoy
+          </h3>
+          <Link className="link-btn small" to="/docente/evaluaciones/nueva">
+            <Icon name="plus" size={16} /> Nueva evaluación
+          </Link>
+        </div>
+        {home === undefined ? (
           <p className="muted">Cargando…</p>
-        ) : todays.length === 0 ? (
+        ) : home.todays.length === 0 ? (
           <div className="empty">
             <Icon name="calendar" size={32} />
             <p>No tienes evaluaciones programadas para hoy.</p>
-            <Link className="btn" to="/docente/evaluaciones/nueva">
-              <Icon name="plus" /> Programar una
-            </Link>
           </div>
         ) : (
           <div className="grid-cards">
-            {todays.map((e) => {
+            {home.todays.map((e) => {
               const share = e.studentCount === 0 ? 0 : Math.round((e.finishedCount / e.studentCount) * 100);
               return (
                 <Link key={e._id} className="card card-link" to={`/docente/evaluaciones/${e._id}`}>
@@ -62,39 +157,15 @@ export function HomePage() {
           </div>
         )}
       </section>
+    </div>
+  );
+}
 
-      <section className="stack" aria-labelledby="classes-title">
-        <div className="row spread">
-          <h3 id="classes-title" style={{ margin: 0 }}>
-            Mis clases
-          </h3>
-          <Link className="link-btn" to="/docente/clases">
-            Administrar clases <Icon name="chevronRight" size={18} />
-          </Link>
-        </div>
-        {classes === undefined ? (
-          <p className="muted">Cargando…</p>
-        ) : classes.length === 0 ? (
-          <div className="empty">
-            <Icon name="users" size={32} />
-            <p>Todavía no tienes clases. Crea la primera y agrega a tus alumnos.</p>
-            <Link className="btn btn-primary" to="/docente/clases">
-              <Icon name="plus" /> Crear clase
-            </Link>
-          </div>
-        ) : (
-          <div className="grid-cards">
-            {classes.map((c) => (
-              <Link key={c._id} className="card card-link" to={`/docente/clases/${c._id}`}>
-                <strong>{c.label}</strong>
-                <span className="muted small row" style={{ gap: 6 }}>
-                  <Icon name="users" size={16} /> {c.studentCount} {c.studentCount === 1 ? "alumno" : "alumnos"}
-                </span>
-              </Link>
-            ))}
-          </div>
-        )}
-      </section>
+function Stat({ value, label }: { value: number | undefined; label: string }) {
+  return (
+    <div className="card stat-card">
+      <strong>{value ?? "…"}</strong>
+      <span className="small muted">{label}</span>
     </div>
   );
 }

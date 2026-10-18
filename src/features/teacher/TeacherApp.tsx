@@ -5,13 +5,18 @@ import { api } from "@robolab/backend/convex/_generated/api";
 import { APP_NAME } from "../../shared/brand";
 import { type IconName, Icon } from "../../shared/ui/Icon";
 import { IconButton } from "../../shared/ui/IconButton";
+import { LabCreatePage } from "../lab/LabCreatePage";
+import { LabResultsPage } from "../lab/LabResultsPage";
 import { TeacherAuth } from "./auth/TeacherAuth";
+import { ClassDetailPage } from "./classes/ClassDetailPage";
 import { ClassesPage } from "./classes/ClassesPage";
+import { ResultsPage } from "./classes/ResultsPage";
 import { EvaluationDetail } from "./evaluations/EvaluationDetail";
 import { EvaluationForm } from "./evaluations/EvaluationForm";
 import { EvaluationsPage } from "./evaluations/EvaluationsPage";
 import { HomePage } from "./home/HomePage";
 import { ProgressPage } from "./progress/ProgressPage";
+import { NewChallengePage } from "./retos/NewChallengePage";
 
 const TABS: readonly { to: string; label: string; icon: IconName; end: boolean }[] = [
   { to: "/docente", label: "Inicio", icon: "home", end: true },
@@ -63,11 +68,17 @@ function TeacherShell() {
       <Routes>
         <Route index element={<HomePage />} />
         <Route path="clases" element={<ClassesPage />} />
-        <Route path="clases/:classroomId" element={<ClassesPage />} />
+        <Route path="clases/nueva" element={<ClassesPage creating />} />
+        <Route path="clases/:classroomId" element={<ClassDetailPage tab="students" />} />
+        <Route path="clases/:classroomId/retos" element={<ClassDetailPage tab="challenges" />} />
+        <Route path="clases/:classroomId/retos/:assignmentId" element={<ResultsPage />} />
+        <Route path="retos/nuevo" element={<NewChallengePage />} />
         <Route path="evaluaciones" element={<EvaluationsPage />} />
         <Route path="evaluaciones/nueva" element={<EvaluationForm />} />
         <Route path="evaluaciones/:evaluationId" element={<EvaluationDetail />} />
         <Route path="progreso" element={<ProgressPage />} />
+        <Route path="laboratorio/nueva" element={<LabCreatePage />} />
+        <Route path="laboratorio/:missionId/resultados" element={<LabResultsPage />} />
         <Route path="*" element={<Navigate to="/docente" replace />} />
       </Routes>
     </div>

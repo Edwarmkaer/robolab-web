@@ -10,12 +10,15 @@ import { editorReducer } from "@robolab/backend/domain/game/editor";
 import { policyFor } from "@robolab/backend/domain/game/levels";
 import type { Cell } from "@robolab/backend/domain/game/map";
 import { type Program, countBlocks } from "@robolab/backend/domain/game/program";
+import { missionById } from "@robolab/backend/domain/lab/mission";
 import { Guide, type Mood } from "../../shared/ui/Guide";
 import { Icon } from "../../shared/ui/Icon";
+import { MissionRoute } from "../lab/MissionRoute";
 import { BlockEditor } from "../game/BlockEditor";
 import { Board } from "../game/Board";
 import { RobotSend } from "../robot/RobotSend";
 import { STEP_MS, useRunner } from "../game/useRunner";
+import { useStudentToken } from "../student/session";
 import { speak } from "../student/speech";
 import { Breadcrumbs, ExploreLayout, LEVEL_INFO } from "./ExploreLayout";
 import { deviceId, useExploreProgress } from "./storage";
@@ -294,6 +297,8 @@ function ChallengePage({ challenge }: { challenge: Challenge }) {
   const [round, setRound] = useState(0);
   const { record } = useExploreProgress();
   const recordPlay = useMutation(api.explore.recordPlay);
+  const recordClassPlay = useMutation(api.student.recordChallengePlay);
+  const [token] = useStudentToken();
   const topic = topicInfo(challenge.topic)!;
 
   function solved(result: Stats, submission: Submission) {
@@ -304,6 +309,12 @@ function ChallengePage({ challenge }: { challenge: Challenge }) {
     recordPlay({ deviceId: deviceId(), challengeId: challenge.id, ...submission, ...result }).catch((error: unknown) =>
       console.warn("No se pudo registrar la partida", error),
     );
+    // Con sesión de alumno, la partida también cuenta para su clase (el servidor la vuelve a revisar).
+    if (token) {
+      recordClassPlay({ token, challengeId: challenge.id, ...submission, ...result }).catch((error: unknown) =>
+        console.warn("No se pudo registrar la partida en la clase", error),
+      );
+    }
   }
 
   return (
@@ -340,9 +351,11 @@ function ChallengePage({ challenge }: { challenge: Challenge }) {
   );
 }
 
-/** /reto/:id. Cambiar de reto monta una pantalla nueva (estado limpio). */
+/** /reto/:id: un reto de bloques (Inicial) o una misión (Primaria). Cambiar de reto monta una pantalla nueva (estado limpio). */
 export function ChallengeRoute() {
   const { id = "" } = useParams();
+  const mission = missionById(id);
+  if (mission) return <MissionRoute key={mission.id} mission={mission} />;
   const challenge = challengeById(id);
   if (!challenge) return <Navigate to="/" replace />;
   return <ChallengePage key={challenge.id} challenge={challenge} />;

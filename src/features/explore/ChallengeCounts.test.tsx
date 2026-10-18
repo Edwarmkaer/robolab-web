@@ -27,7 +27,7 @@ describe("lista de retos: contadores", () => {
 
   it("el contador de Primaria cuenta las misiones", () => {
     at("/explorar/artes/primaria");
-    expect(screen.getByText("4 retos")).toBeTruthy();
+    expect(screen.getByText("4 misiones")).toBeTruthy();
   });
 
   it("lista los retos de bloques de Inicial de Matemáticas", () => {

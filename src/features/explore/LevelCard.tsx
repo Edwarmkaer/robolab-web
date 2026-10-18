@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import type { Topic } from "@robolab/backend/domain/explore/challenges";
 import type { EducationLevel } from "@robolab/backend/domain/game/levels";
 import type { ProgressSummary } from "@robolab/backend/domain/explore/progress";
+import { countLabel } from "./catalog";
 import { LEVEL_INFO } from "./ExploreLayout";
 import { ProgressChip } from "./ProgressChip";
 import "./explore-topics.css";
@@ -21,7 +22,7 @@ export function LevelCard({ topic, level, progress }: { topic: Topic; level: Edu
       <span className="level-ages">{info.ages}</span>
       <span className="small muted">{info.description}</span>
       <span className="level-chips">
-        <span className={count > 0 ? "badge" : "badge badge-muted"}>{count > 0 ? `${count} ${count === 1 ? "reto" : "retos"}` : "Próximamente"}</span>
+        <span className={count > 0 ? "badge" : "badge badge-muted"}>{count > 0 ? countLabel(level, count) : "Próximamente"}</span>
         {count > 0 && <ProgressChip solved={progress.solved} total={count} />}
       </span>
     </>

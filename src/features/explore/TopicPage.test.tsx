@@ -37,7 +37,7 @@ describe("tópico: tarjetas de nivel con su avance", () => {
     expect(inicial.getAttribute("href")).toBe("/explorar/ciencia/inicial");
 
     const primaria = levelCard("Primaria");
-    expect(within(primaria).getByText("6 retos")).toBeTruthy();
+    expect(within(primaria).getByText("6 misiones")).toBeTruthy();
     expect(within(primaria).getByText("1/6 ✓")).toBeTruthy();
     expect(within(primaria).getByText("Retos con más pasos y razonamiento.")).toBeTruthy();
     expect(primaria.getAttribute("href")).toBe("/explorar/ciencia/primaria");
