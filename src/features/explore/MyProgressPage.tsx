@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { TOPICS } from "@robolab/backend/domain/explore/challenges";
+import { coverage } from "@robolab/backend/domain/curriculum/competencias";
+import { CHALLENGES, TOPICS } from "@robolab/backend/domain/explore/challenges";
 import { topicProgress } from "@robolab/backend/domain/explore/progress";
 import { Guide } from "../../shared/ui/Guide";
 import { ExploreLayout, TOPIC_COLOR } from "./ExploreLayout";
@@ -11,6 +12,8 @@ export function MyProgressPage() {
   const { progress, clear } = useExploreProgress();
   const [confirming, setConfirming] = useState(false);
   const solvedTotal = Object.values(progress.records).filter((r) => r.solved).length;
+  const solvedIds = new Set(Object.entries(progress.records).flatMap(([id, r]) => (r.solved ? [id] : [])));
+  const competencies = coverage(CHALLENGES, solvedIds);
 
   return (
     <ExploreLayout>
@@ -39,6 +42,28 @@ export function MyProgressPage() {
             </div>
           );
         })}
+      </section>
+      <section className="card stack" aria-labelledby="competencies-title">
+        <div>
+          <h2 id="competencies-title" style={{ margin: 0 }}>
+            Competencias del Currículo Nacional
+          </h2>
+          <p className="small muted">De los retos que evidencian cada competencia del MINEDU, cuántos resolviste.</p>
+        </div>
+        {competencies.map(({ competency, solved, total }) => (
+          <div key={competency.id} className="progress-row" data-wide style={{ ["--topic" as string]: "var(--c-brand)" }}>
+            <span className="progress-label">
+              <strong>Competencia {competency.id}</strong>
+              <span className="small muted"> · {competency.name}</span>
+            </span>
+            <div className="meter topic-meter" role="img" aria-label={`${solved} de ${total} retos`}>
+              <span style={{ ["--value" as string]: solved / total }} />
+            </div>
+            <span className="small muted progress-count">
+              {solved} de {total}
+            </span>
+          </div>
+        ))}
       </section>
       <div className="row">
         <Link className="btn btn-primary" to="/explorar/tecnologia">
