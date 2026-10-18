@@ -16,7 +16,12 @@ vi.mock("convex/react", () => ({
   Authenticated: ({ children }: { children: React.ReactNode }) => children,
   AuthLoading: () => null,
   Unauthenticated: () => null,
-  useQuery: (ref: Parameters<typeof getFunctionName>[0], args: unknown) => (args === "skip" ? undefined : answers[getFunctionName(ref)]),
+  useQuery: (ref: Parameters<typeof getFunctionName>[0], args: unknown) => {
+    const answer = args === "skip" ? undefined : answers[getFunctionName(ref)];
+    // Como una consulta de Convex que falla en el servidor: el error se lanza al pintar.
+    if (answer instanceof Error) throw answer;
+    return answer;
+  },
   useMutation: () => vi.fn(),
   useAction: () => vi.fn(),
 }));
@@ -26,6 +31,7 @@ import { ToastProvider } from "../../shared/ui/Toast";
 import { TeacherApp } from "./TeacherApp";
 
 beforeEach(() => {
+  answers["assignments:listMine"] = [];
   signOut.mockReset();
   document.title = "";
 });
@@ -40,6 +46,8 @@ function renderAt(path: string) {
         </Routes>
       </MemoryRouter>
     </ToastProvider>,
+    // React avisa por consola del error atrapado; aquí es lo esperado.
+    { onCaughtError: () => undefined, onRecoverableError: () => undefined },
   );
 }
 
@@ -77,6 +85,32 @@ describe("armazón del docente: landmark, título de página y encabezado", () =
     renderAt("/docente");
     const main = screen.getByRole("main");
     expect(main.contains(screen.getByRole("navigation", { name: "Secciones del docente" }))).toBe(false);
+  });
+});
+
+describe("si una pantalla falla al cargar", () => {
+  it("la barra y las pestañas siguen ahí, avisa en el lugar de la pantalla y deja reintentar", () => {
+    answers["assignments:listMine"] = new Error("Server Error");
+    renderAt("/docente/retos");
+    // No se cae toda la app: el docente sigue viendo dónde está y puede ir a otra pestaña.
+    expect(screen.queryByRole("heading", { name: "Algo salió mal" })).toBeNull();
+    expect(screen.getByRole("navigation", { name: "Secciones del docente" })).toBeTruthy();
+    expect(screen.getByText("No pudimos cargar esta pantalla.")).toBeTruthy();
+    expect(screen.getByRole("alert").textContent).toBe("Algo salió mal. Intenta de nuevo.");
+    expect(screen.getByRole("link", { name: "Ir al inicio" }).getAttribute("href")).toBe("/docente");
+
+    answers["assignments:listMine"] = [];
+    fireEvent.click(screen.getByRole("button", { name: "Reintentar" }));
+    expect(screen.getByRole("heading", { level: 1, name: "Retos" })).toBeTruthy();
+    expect(screen.queryByText("No pudimos cargar esta pantalla.")).toBeNull();
+  });
+
+  it("al cambiar de pestaña se reinicia: la otra pantalla no hereda el error", () => {
+    answers["assignments:listMine"] = new Error("Server Error");
+    renderAt("/docente/retos");
+    fireEvent.click(screen.getByRole("link", { name: "Mis clases" }));
+    expect(screen.getByRole("heading", { level: 1, name: "Mis clases" })).toBeTruthy();
+    expect(screen.queryByText("No pudimos cargar esta pantalla.")).toBeNull();
   });
 });
 
