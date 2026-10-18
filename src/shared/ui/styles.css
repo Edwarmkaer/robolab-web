@@ -1384,6 +1384,15 @@ textarea.input {
   font-size: 1.75rem;
 }
 
+.vision-gesture-prompt {
+  display: block;
+  margin-bottom: 2px;
+}
+
+.vision-gesture:last-child {
+  grid-column: 1 / -1;
+}
+
 .block-btn {
   display: grid;
   place-items: center;

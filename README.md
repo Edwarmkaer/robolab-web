@@ -57,8 +57,8 @@ aquí como el paquete npm `@robolab/backend`.
 **Alumno**
 
 - Entra con su código, sin cuenta ni contraseña, y ve su evaluación del día.
-- Arma un programa tocando bloques (avanzar, girar; en Primaria también
-  retroceder y repetir) y lo ejecuta. Si el robot se sale del camino, se le
+- Arma un programa tocando bloques (avanzar, retroceder y girar; en Primaria
+  también repetir) y lo ejecuta. Si el robot se sale del camino, se le
   dice en qué paso y se marca ese bloque.
 - Al llegar a la estrella aparece la pregunta, que también se lee en voz alta.
 - Al final ve su puntaje, el tiempo y cuántas veces ejecutó el robot. Puede
@@ -73,9 +73,10 @@ En los retos abiertos de Inicial que permiten editar el programa aparece el modo
 
 | Gesto | Acción |
 | --- | --- |
-| ☝️ Índice levantado | Avanzar |
-| ✌️ Índice y medio | Girar a la derecha |
-| 🤟 Pulgar, índice y meñique | Girar a la izquierda |
+| ☝️ Índice apuntando arriba | Avanzar |
+| 👇 Índice apuntando abajo | Retroceder |
+| 👈 Índice apuntando a la izquierda | Girar a la izquierda |
+| 👉 Índice apuntando a la derecha | Girar a la derecha |
 | 👍 Pulgar arriba | Confirmar y ejecutar el programa visible |
 
 Mantén el gesto hasta llenar la barra (0,8 segundos para bloques; 1,2 para
@@ -83,6 +84,18 @@ confirmar). Retira la mano durante al menos 0,4 segundos entre gestos, también
 para repetir el mismo bloque. Puedes quitar un bloque tocándolo, borrar el
 programa o cambiar a **Botones** sin perder la secuencia. Un programa vacío no
 se ejecuta y la entrada queda en pausa mientras Kusi se mueve.
+
+Usa el índice extendido con los otros dedos recogidos. Las cuatro direcciones
+se calculan con los puntos de la mano de MediaPipe y coinciden con la vista en
+espejo; no dependen de los gestos «Victoria» o «Te quiero». Una dirección
+diagonal o un dedo apuntando hacia la cámara no agrega bloques. Las órdenes
+siguen siendo relativas al robot: arriba agrega Avanzar, abajo Retroceder y
+los lados agregan un giro, cualquiera sea la orientación actual de Kusi.
+
+Retroceder en Inicial requiere el cambio compartido del
+[PR del backend #6](https://github.com/orinqq/robolab-backend/pull/6).
+El paquete queda fijado al commit de ese PR para probarlo. Antes de usarlo en
+producción, hay que fusionar y desplegar ese cambio del backend.
 
 La cámara se activa solo al pedirla; se apaga al salir del reto, cambiar a
 Botones, ocultar la pestaña o fallar la captura. No se pide micrófono, no se

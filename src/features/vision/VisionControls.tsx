@@ -74,8 +74,8 @@ export function VisionControls(props: Props) {
   const currentGesture = GESTURES.find((gesture) => gesture.action === feedback.candidate);
   const instruction = props.disabled ? "Espera a que Kusi termine."
     : feedback.releaseRequired ? "Retira la mano entre cada gesto."
-      : currentGesture ? `Mantén el gesto: ${currentGesture.label.toLowerCase()}.`
-        : "Muestra un gesto con una sola mano.";
+      : currentGesture ? `${currentGesture.prompt} y espera a llenar la barra.`
+        : "Apunta con el índice en una dirección.";
 
   return (
     <div className="vision-controls">
@@ -94,11 +94,11 @@ export function VisionControls(props: Props) {
       <div className="vision-legend" aria-label="Guía de gestos">
         {GESTURES.map((gesture) => (
           <div key={gesture.name} className="vision-gesture" data-current={status === "ready" && !props.disabled && feedback.candidate === gesture.action || undefined}>
-            <span className="vision-emoji" aria-hidden="true">{gesture.emoji}</span><span>{gesture.label}</span>
+            <span className="vision-emoji" aria-hidden="true">{gesture.emoji}</span><span><strong className="vision-gesture-prompt">{gesture.prompt}</strong>{gesture.label}</span>
           </div>
         ))}
       </div>
-      <p className="small muted">Mantén cada gesto hasta llenar la barra. Para confirmar, mantén 👍 un poco más.</p>
+      <p className="small muted">Apunta con el índice y recoge los otros dedos. Sigue las direcciones como las ves en la cámara. Para confirmar, mantén 👍.</p>
       <div className="row">
         {enabled ? (
           <button className="btn btn-sm" type="button" onClick={() => { setEnabled(false); setStatus("off"); setFeedback(idle); setMessage("Cámara apagada. Tu programa sigue aquí."); }}><Icon name="cameraOff" />{status === "loading" ? "Cancelar" : "Apagar cámara"}</button>

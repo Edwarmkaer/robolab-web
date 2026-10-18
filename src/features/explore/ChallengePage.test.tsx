@@ -20,7 +20,7 @@ vi.mock("../vision/cameraSession", () => ({
 }));
 afterEach(() => { cleanup(); vi.useRealTimers(); vi.clearAllMocks(); localStorage.clear(); });
 
-it("los gestos generan el programa que ejecuta el reto y registra el servidor", async () => {
+it("los cuatro movimientos, incluido retroceder, generan el programa que ejecuta el reto y registra el servidor", async () => {
   render(<MemoryRouter initialEntries={["/reto/inicial-paseo"]}><ToastProvider><Routes><Route path="/reto/:id" element={<ChallengeRoute />} /></Routes></ToastProvider></MemoryRouter>);
   fireEvent.click(screen.getByRole("button", { name: "Empezar el reto" }));
   fireEvent.click(await screen.findByRole("button", { name: "Activar cámara" }));
@@ -37,17 +37,19 @@ it("los gestos generan el programa que ejecuta el reto y registra el servidor", 
     time += duration + 100;
   }
   gesture("Pointing_Up", 800);
+  gesture("Pointing_Down", 800);
   gesture("Pointing_Up", 800);
   gesture("Pointing_Up", 800);
-  expect(screen.getAllByRole("listitem")).toHaveLength(3);
+  gesture("Pointing_Up", 800);
+  expect(screen.getAllByRole("listitem")).toHaveLength(5);
   expect(boundary.record).not.toHaveBeenCalled();
   gesture("Thumb_Up", 1200);
   expect((screen.getByRole("button", { name: "Confirmar y ejecutar" }) as HTMLButtonElement).disabled).toBe(true);
-  act(() => { vi.advanceTimersByTime(1800); });
+  act(() => { vi.advanceTimersByTime(2700); });
   act(() => { vi.advanceTimersByTime(1200); });
   expect(screen.getByRole("heading", { name: "¡Reto logrado!" })).toBeTruthy();
   expect(boundary.record).toHaveBeenCalledWith(expect.objectContaining({
     challengeId: "inicial-paseo", runs: 1,
-    program: [{ kind: "move", command: "FORWARD" }, { kind: "move", command: "FORWARD" }, { kind: "move", command: "FORWARD" }],
+    program: [{ kind: "move", command: "FORWARD" }, { kind: "move", command: "BACKWARD" }, { kind: "move", command: "FORWARD" }, { kind: "move", command: "FORWARD" }, { kind: "move", command: "FORWARD" }],
   }));
 });

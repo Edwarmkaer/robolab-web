@@ -1,5 +1,6 @@
 import { FilesetResolver, GestureRecognizer } from "@mediapipe/tasks-vision";
 import type { RecognitionMessage } from "./cameraSession";
+import { gestureSample } from "./pointingGesture";
 
 type Request = { type: "init" } | { type: "frame"; bitmap: ImageBitmap; time: number };
 let recognizer: GestureRecognizer | null = null;
@@ -24,8 +25,7 @@ self.onmessage = async (event: MessageEvent<Request>) => {
       reply({ type: "ready" });
     } else if (recognizer) {
       const result = recognizer.recognizeForVideo(request.bitmap, request.time);
-      const gesture = result.gestures[0]?.[0];
-      reply({ type: "sample", sample: { name: gesture?.categoryName ?? "", score: gesture?.score ?? 0, hands: result.landmarks.length }, time: request.time });
+      reply({ type: "sample", sample: gestureSample(result, request.bitmap.width, request.bitmap.height), time: request.time });
     }
   } catch {
     reply({ type: "error" });

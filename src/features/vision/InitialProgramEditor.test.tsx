@@ -53,11 +53,17 @@ describe("programar Inicial con gestos", () => {
     sample("Pointing_Up", 500);
     expect(screen.getByRole("listitem", { name: /Paso 1: Avanzar/ })).toBeTruthy();
     release(1400);
-    sample("Victory", 1900);
+    sample("Pointing_Right", 1900);
     expect(screen.getByRole("listitem", { name: /Paso 2: Girar a la derecha/ })).toBeTruthy();
     expect(onExecute).not.toHaveBeenCalled();
     release(2800);
-    sample("Thumb_Up", 3300, 1200);
+    sample("Pointing_Down", 3300);
+    expect(screen.getByRole("listitem", { name: /Paso 3: Retroceder/ })).toBeTruthy();
+    release(4200);
+    sample("Pointing_Left", 4700);
+    expect(screen.getByRole("listitem", { name: /Paso 4: Girar a la izquierda/ })).toBeTruthy();
+    release(5600);
+    sample("Thumb_Up", 6100, 1200);
     expect(onExecute).toHaveBeenCalledOnce();
   });
 

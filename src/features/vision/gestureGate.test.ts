@@ -19,8 +19,9 @@ function hold(gate: GestureGate, name: string, start = 500, duration = 800) {
 describe("gestos como entrada del editor", () => {
   it.each([
     ["Pointing_Up", "FORWARD"],
-    ["Victory", "TURN_RIGHT"],
-    ["ILoveYou", "TURN_LEFT"],
+    ["Pointing_Down", "BACKWARD"],
+    ["Pointing_Right", "TURN_RIGHT"],
+    ["Pointing_Left", "TURN_LEFT"],
   ])("acumula un solo bloque de %s después de sostenerlo", (name, action) => {
     const gate = new GestureGate();
     release(gate);
@@ -32,7 +33,7 @@ describe("gestos como entrada del editor", () => {
     const gate = new GestureGate();
     release(gate);
     hold(gate, "Pointing_Up");
-    expect(hold(gate, "Victory", 1400).action).toBeNull();
+    expect(hold(gate, "Pointing_Right", 1400).action).toBeNull();
     release(gate, 2300);
     expect(hold(gate, "Pointing_Up", 2800).action).toBe("FORWARD");
   });
@@ -47,7 +48,7 @@ describe("gestos como entrada del editor", () => {
   it("rechaza poca confianza, dos manos y gestos ajenos al editor", () => {
     const gate = new GestureGate();
     release(gate);
-    for (const sample of [hand("Victory", 0.4), hand("Victory", 0.95, 2), hand("Closed_Fist")]) {
+    for (const sample of [hand("Pointing_Right", 0.4), hand("Pointing_Right", 0.95, 2), hand("Closed_Fist"), hand("Victory"), hand("ILoveYou")]) {
       for (let t = 500; t <= 1800; t += 100) expect(gate.update(sample, t).action).toBeNull();
     }
   });
@@ -60,12 +61,18 @@ describe("gestos como entrada del editor", () => {
     expect(hold(gate, "Pointing_Up", 1500).action).toBeNull();
   });
 
-  it("acepta un pulgar sostenido con la confianza observada en la imagen oficial", () => {
+  it("acepta un pulgar sostenido con la confianza observada tras cambiar de dirección", () => {
     const gate = new GestureGate();
     release(gate);
     let action: string | null = null;
-    for (let t = 500; t <= 1700; t += 100) action = gate.update(hand("Thumb_Up", 0.7455), t).action;
+    for (let t = 500; t <= 1700; t += 100) action = gate.update(hand("Thumb_Up", 0.6909), t).action;
     expect(action).toBe("confirm");
+  });
+
+  it("no confirma un pulgar de poca confianza aunque se mantenga", () => {
+    const gate = new GestureGate();
+    release(gate);
+    for (let t = 500; t <= 2500; t += 100) expect(gate.update(hand("Thumb_Up", 0.4), t).action).toBeNull();
   });
 
   it("una pausa de la pestaña no completa un gesto con fotogramas viejos", () => {
