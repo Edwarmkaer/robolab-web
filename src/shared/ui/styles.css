@@ -13,8 +13,12 @@
   --c-brand-soft: #e6eefc;
   --c-ok: #1f8a4c;
   --c-ok-soft: #e3f4ea;
+  --c-ok-line: #9fd9b4;
+  --c-ok-wash: #f3fbf6;
   --c-warn: #9a4f00;
   --c-warn-soft: #fdf0e1;
+  --c-warn-line: #f1c99a;
+  --c-warn-wash: #fffaf2;
   --c-error: #b8322a;
   --c-error-soft: #fbe7e4;
   --c-path: #f3e3b5;
@@ -1904,50 +1908,6 @@ a.level-card:hover {
 .program[data-readonly] {
   border-style: solid;
   background: var(--c-surface-2);
-}
-
-/* Wayra, la guía */
-.guide {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-}
-
-.guide-avatar {
-  flex: none;
-  filter: drop-shadow(0 4px 6px rgb(31 36 48 / 15%));
-}
-
-.guide-bubble {
-  position: relative;
-  flex: 1;
-  display: grid;
-  gap: 6px;
-  padding: 12px 14px;
-  border-radius: 4px 18px 18px 18px;
-  background: var(--c-surface);
-  border: 1px solid var(--c-line);
-  box-shadow: var(--shadow);
-}
-
-.guide-bubble .btn {
-  justify-self: start;
-}
-
-.guide-name {
-  font-size: 0.8rem;
-  color: #17703d;
-}
-
-.guide[data-mood="happy"] .guide-bubble {
-  border-color: #9fd9b4;
-  background: #f3fbf6;
-}
-
-.guide[data-mood="surprised"] .guide-bubble,
-.guide[data-mood="sad"] .guide-bubble {
-  border-color: #f1c99a;
-  background: #fffaf2;
 }
 
 /* Mi avance */
