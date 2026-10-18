@@ -1313,17 +1313,221 @@ textarea.input {
   min-height: 72px;
 }
 
+/*
+ * El juego: a la derecha (arriba en el celular) el reto con Wayra, el jardín y la
+ * cámara; a la izquierda el espacio de trabajo (programa, papelera, Ejecutar y piezas).
+ */
 .game {
   display: grid;
-  gap: 16px;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 380px);
+  gap: 20px;
+  grid-template-columns: minmax(0, 1fr) 360px;
   align-items: start;
+}
+
+.board-column {
+  grid-column: 2;
+  grid-row: 1;
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+.workspace {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-self: stretch;
+  padding: 18px;
+}
+
+.goal-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.goal-card {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  padding: 16px;
+}
+
+.goal-card .badge {
+  justify-self: start;
+}
+
+/* La tarjeta del reto ya es la caja: el texto no lleva otra adentro. */
+.goal-card .play-goal {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.wayra-card {
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  align-content: center;
+  padding: 10px 12px;
+}
+
+/* El jardín es la propia tarjeta blanca: el tablero no lleva marco ni fondo aparte. */
+.board-panel {
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+  padding: 16px;
+}
+
+.board-panel h2 {
+  justify-self: start;
+  margin: 0;
+  font-size: 1.4rem;
+  text-transform: uppercase;
+}
+
+.board-panel .board,
+.board-panel .board[data-topic] {
+  width: 100%;
+  max-width: 300px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.camera-slot:empty {
+  display: none;
+}
+
+.camera-slot .vision-controls {
+  background: var(--c-surface-2);
 }
 
 @media (max-width: 860px) {
   .game {
     grid-template-columns: 1fr;
   }
+
+  /* En el celular lo primero que se ve es el reto con el tablero: ahí está el robot y la estrella. */
+  .board-column,
+  .workspace {
+    grid-column: 1;
+  }
+
+  .workspace {
+    grid-row: 2;
+  }
+
+  /* La cámara es opcional: en el celular ocupa poco para que las piezas queden cerca. */
+  .vision-camera {
+    aspect-ratio: 16 / 7;
+  }
+}
+
+/* Programar: «Tu programa» arriba, el cuadro de la secuencia (con papelera y Ejecutar) y las piezas debajo. */
+.program-workspace,
+.editor {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.program-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.program-title {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.program-head-actions,
+.mode-toggle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.mode-toggle .btn[data-active] {
+  background: var(--c-action);
+}
+
+.sequence[data-editable] {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 150px;
+  padding: 16px;
+  border: 2px solid var(--c-ink);
+  border-radius: var(--radius);
+  background: var(--c-surface);
+}
+
+.sequence[data-editable] .program {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.program-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: auto;
+}
+
+/* La bandeja de piezas: un panel amarillo claro. */
+.piece-tray {
+  padding: 14px;
+  border: 3px solid var(--c-ink);
+  border-radius: var(--radius-lg);
+  background: var(--c-surface-2);
+}
+
+/* Con gestos, la pieza es la mano que la pide (sin flechas ni texto). */
+.piece-hand {
+  font-size: 2.6rem;
+  line-height: 1;
+}
+
+.block-btn.piece-thumb {
+  font-size: 2.6rem;
+  cursor: default;
+}
+
+@media (max-width: 640px) {
+  .palette-sep {
+    display: none;
+  }
+}
+
+.palette-sep {
+  width: 4px;
+  height: 56px;
+  border-radius: 2px;
+  background: var(--c-ink);
+}
+
+/* La pieza del gesto que la cámara está viendo. */
+.block-btn[data-current] {
+  background: var(--c-action);
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow);
 }
 
 .progress-dots {
@@ -1399,16 +1603,6 @@ textarea.input {
 }
 
 /* Cámara de Inicial: conserva los tokens y el editor común. */
-.vision-modes {
-  display: flex;
-  gap: 4px;
-}
-
-.vision-modes .btn[aria-pressed="true"] {
-  background: var(--c-action);
-  color: var(--c-action-ink);
-}
-
 .vision-controls {
   display: grid;
   gap: 12px;
@@ -1419,9 +1613,30 @@ textarea.input {
   box-shadow: var(--shadow);
 }
 
+.vision-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-right: 24px;
+}
+
+.vision-title {
+  font-family: var(--font-head);
+  font-size: 1.1rem;
+}
+
+.vision-state {
+  padding: 2px 10px;
+  border: 2px solid var(--c-ink);
+  border-radius: 999px;
+  background: var(--c-surface);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
 .vision-camera {
   position: relative;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
   border-radius: 10px;
   background: var(--c-surface-2);
@@ -1446,18 +1661,6 @@ textarea.input {
   color: var(--c-muted);
 }
 
-.vision-camera-label {
-  position: absolute;
-  bottom: 8px;
-  left: 8px;
-  padding: 4px 10px;
-  border-radius: 6px;
-  color: var(--c-ink);
-  background: var(--c-surface);
-  font-size: 0.875rem;
-  font-weight: 800;
-}
-
 .vision-feedback {
   display: grid;
   gap: 6px;
@@ -1467,60 +1670,6 @@ textarea.input {
   width: 100%;
   height: 10px;
   accent-color: var(--c-brand);
-}
-
-/* Guía de gestos: solo el gesto y la pieza que agrega. El nombre va en el ⓘ (PieceFrame). */
-.vision-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.gesture-tile {
-  display: grid;
-  place-items: center;
-  align-content: center;
-  gap: 2px;
-  width: 62px;
-  height: 74px;
-  border-radius: var(--radius);
-  border: 2px solid var(--c-line);
-  background: var(--c-surface);
-}
-
-.gesture-tile[data-current] {
-  border-color: var(--c-brand);
-  background: var(--c-brand-soft);
-}
-
-.gesture-emoji {
-  font-size: 1.9rem;
-  line-height: 1;
-}
-
-.gesture-piece {
-  width: 26px;
-  height: 22px;
-  object-fit: contain;
-}
-
-@media (max-width: 640px) {
-  .vision-legend {
-    gap: 6px;
-  }
-
-  .gesture-tile {
-    width: 58px;
-    height: 70px;
-  }
-}
-
-/* El ⓘ de la cámara queda a la derecha del botón sin pisar su texto. */
-.piece[data-wide] > .btn {
-  padding-right: 28px;
 }
 
 .block-btn {
