@@ -54,6 +54,13 @@ el `.env.local` de aquí como `VITE_CONVEX_URL`.
 
 ## Cuidado con
 
+- Estilo «Bee-Bot»: contornos de tinta de 3 px (`var(--c-ink)`) y sombra dura
+  (`var(--shadow)`, `--shadow-sm`, `--shadow-lg`) en tarjetas, botones y
+  campos; el botón principal, la pestaña actual y lo elegido van en amarillo
+  (`--c-action` con `--c-action-ink`); el azul (`--c-brand`) es para enlaces y
+  énfasis. Títulos con Lilita One (`--font-head`) y el resto con Baloo 2. Una
+  tarjeta nueva usa `.card`; una pieza que se toca, `.btn`: no copies bordes.
+
 - Colores: solo los tokens de `src/shared/ui/styles.css` (`var(--c-…)`). Una prueba
   (`tokens.test.ts`) falla si aparece un `#hex` suelto en un CSS o componente, y
   también revisa el contraste de los pares de texto/fondo. `styles.css` se

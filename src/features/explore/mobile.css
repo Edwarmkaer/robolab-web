@@ -34,7 +34,7 @@
 
   .explore-header-inner .brand {
     flex: 1;
-    color: var(--c-brand-strong);
+    color: var(--c-ink);
   }
 
   /* Menú desplegable: una sección por fila, al alcance del pulgar. */
@@ -42,7 +42,7 @@
     display: grid;
     gap: 4px;
     padding: 4px 12px 12px;
-    border-top: 1px solid var(--c-line);
+    border-top: 3px solid var(--c-ink);
     overflow: visible;
   }
 
@@ -57,8 +57,9 @@
   }
 
   .explore-header .explore-nav a[aria-current="page"] {
-    color: var(--c-brand-strong);
-    background: var(--c-brand-soft);
+    color: var(--c-ink);
+    background: var(--c-surface);
+    border-color: var(--c-ink);
   }
 
   /* Con la flecha de volver en la cabecera, las migas repiten lo mismo. */

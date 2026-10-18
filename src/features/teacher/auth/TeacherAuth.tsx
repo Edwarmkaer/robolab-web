@@ -216,7 +216,6 @@ export function TeacherAuth() {
     <main className="auth">
       <section className="card auth-card stack">
         <Link className="brand" to="/">
-          <img src="/robot/robot.svg" alt="" />
           {APP_NAME}
         </Link>
 
