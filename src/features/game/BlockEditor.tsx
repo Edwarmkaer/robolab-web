@@ -15,11 +15,13 @@ type Props = {
   readonly active?: { path: BlockPath; tone: "active" | "error" } | null;
   /** Solo muestra el programa (retos de predecir): sin paleta y sin quitar bloques. */
   readonly readOnly?: boolean;
+  /** La cámara reemplaza la paleta, pero conserva la edición de la secuencia. */
+  readonly hidePalette?: boolean;
 };
 
 const samePath = (a: BlockPath, b: BlockPath) => a.length === b.length && a.every((v, i) => v === b[i]);
 
-export function BlockEditor({ policy, state, dispatch, disabled: busy, active, readOnly = false }: Props) {
+export function BlockEditor({ policy, state, dispatch, disabled: busy, active, readOnly = false, hidePalette = false }: Props) {
   const disabled = busy || readOnly;
   const commands = COMMANDS.filter((c) => policy.palette.has(c));
   const toneOf = (path: BlockPath) => (active && samePath(active.path, path) ? active.tone : undefined);
@@ -32,7 +34,7 @@ export function BlockEditor({ policy, state, dispatch, disabled: busy, active, r
 
   return (
     <div className="stack">
-      <div className="palette" role="group" aria-label="Bloques disponibles" hidden={readOnly}>
+      <div className="palette" role="group" aria-label="Bloques disponibles" hidden={readOnly || hidePalette}>
         {commands.map((command) => (
           <button
             key={command}
@@ -62,7 +64,7 @@ export function BlockEditor({ policy, state, dispatch, disabled: busy, active, r
       </div>
 
       <div className="program" role="list" aria-label={readOnly ? "Programa de Kusi" : "Tu programa"} data-readonly={readOnly || undefined}>
-        {state.blocks.length === 0 && <span className="muted">Toca los bloques para armar tu programa.</span>}
+        {state.blocks.length === 0 && <span className="muted">{hidePalette ? "Tus gestos aparecerán aquí como bloques." : "Toca los bloques para armar tu programa."}</span>}
         {state.blocks.map((block, i) => {
           if (block.kind === "move") {
             const stepNumber = stepNumbers[i];
