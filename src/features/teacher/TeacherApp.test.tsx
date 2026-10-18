@@ -9,6 +9,7 @@ const answers: Record<string, unknown> = {
   "users:me": { name: "Ana Pérez", email: "ana@colegio.edu.pe" },
   "classrooms:listMine": [],
   "assignments:listMine": [],
+  "liveRooms:listMine": [],
 };
 const signOut = vi.fn();
 
@@ -57,6 +58,7 @@ describe("armazón del docente: landmark, título de página y encabezado", () =
     ["/docente/clases", "Mis clases · RoboLab", "Mis clases"],
     ["/docente/retos", "Retos · RoboLab", "Retos"],
     ["/docente/evaluaciones", "Retos · RoboLab", "Retos"],
+    ["/docente/en-vivo", "Partidas en vivo · RoboLab", "Partidas en vivo"],
     ["/docente/progreso", "Progreso · RoboLab", "Progreso"],
   ])("%s: un <main>, un <h1> y la pestaña dice dónde estás", (path, tab, heading) => {
     renderAt(path);
@@ -70,7 +72,7 @@ describe("armazón del docente: landmark, título de página y encabezado", () =
   it("la pestaña dice Retos (ya no Evaluaciones) y marca dónde estás", () => {
     renderAt("/docente/retos");
     const nav = screen.getByRole("navigation", { name: "Secciones del docente" });
-    expect(Array.from(nav.querySelectorAll("a")).map((a) => a.textContent)).toEqual(["Inicio", "Mis clases", "Retos", "Progreso"]);
+    expect(Array.from(nav.querySelectorAll("a")).map((a) => a.textContent)).toEqual(["Inicio", "Mis clases", "Retos", "En vivo", "Progreso"]);
     expect(nav.querySelector('a[aria-current="page"]')?.textContent).toBe("Retos");
     expect(nav.querySelector('a[href="/docente/evaluaciones"]')).toBeNull();
   });

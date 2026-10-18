@@ -48,6 +48,7 @@ describe("portada del alumno", () => {
     renderHome();
     expect(screen.getByRole("heading", { name: "¡Hola, Pingüino veloz!" })).toBeTruthy();
     expect(screen.getByText(/Clase TEC-482/)).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Jugar en vivo" }).getAttribute("href")).toBe("/alumno/en-vivo");
     const done = screen.getByRole("link", { name: /El charquito/ }) as HTMLAnchorElement;
     expect(done.getAttribute("href")).toBe("/reto/inicial-charquito");
     expect(done.textContent).toMatch(/Logrado/);

@@ -1,5 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { getFunctionName } from "convex/server";
+import { ConvexError } from "convex/values";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -13,11 +15,16 @@ const HOME = {
     { assignmentId: "a1", challengeId: "inicial-paseo", title: "Primer paseo", level: "inicial", kind: "sequence", solved: false },
   ],
 };
-vi.mock("convex/react", () => ({ useMutation: () => join, useQuery: () => HOME }));
+vi.mock("convex/react", () => ({ useMutation: () => join, useQuery: (ref: Parameters<typeof getFunctionName>[0]) => {
+  const name = getFunctionName(ref);
+  if (name === "liveRooms:studentView") throw new ConvexError("No encontramos esa sala.");
+  if (name === "liveRooms:listForStudent") return [];
+  return HOME;
+} }));
 
 import { StudentApp } from "./StudentApp";
 
-beforeEach(() => window.localStorage.clear());
+beforeEach(() => { window.localStorage.clear(); window.scrollTo = () => undefined; });
 afterEach(() => {
   cleanup();
   join.mockReset();
@@ -30,6 +37,7 @@ function renderAt(path: string) {
         <Route path="/alumno/*" element={<StudentApp />} />
       </Routes>
     </MemoryRouter>,
+    { onCaughtError: () => undefined },
   );
 }
 
@@ -58,6 +66,16 @@ describe("/alumno", () => {
     window.localStorage.setItem("robolab.alumno.token", "t-1");
     renderAt("/alumno/juego/un-intento-viejo");
     expect(screen.getByRole("heading", { name: "¡Hola, Pingüino veloz!" })).toBeTruthy();
+  });
+
+  it("una sala inexistente permite volver a partidas sin borrar la sesión ni volver a registrarse", async () => {
+    window.localStorage.setItem("robolab.alumno.token", "t-1");
+    renderAt("/alumno/en-vivo/sala-ajena");
+    expect(screen.getByRole("heading", { name: "No pudimos abrir esta partida" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Volver a unirme a mi clase" })).toBeNull();
+    fireEvent.click(screen.getByRole("link", { name: "Volver a partidas" }));
+    await waitFor(() => expect(screen.getByRole("heading", { name: "Jugar en vivo" })).toBeTruthy());
+    expect(window.localStorage.getItem("robolab.alumno.token")).toBe("t-1");
   });
 
   it("las tarjetas con código por alumno de la fase 1 siguen entrando por /alumno/codigo", () => {
