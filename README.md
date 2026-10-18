@@ -29,8 +29,12 @@ aquí como el paquete npm `@robolab/backend`.
 
 **Explorar retos**
 
-- Portada con los cinco tópicos STEAM; Tecnología ya tiene 11 retos (5 de
-  Inicial y 6 de Primaria) y los demás se muestran como "Próximamente".
+- Portada con los cinco tópicos STEAM, cada uno con su avance "n/m ✓": Ciencia
+  y Tecnología tienen 12 retos, Ingeniería 10, Artes 9 y Matemáticas 11. En
+  Inicial son retos de bloques; en Primaria, misiones con energía.
+- El tablero de bloques se ambienta según el tópico: el jardín (Tecnología), el
+  laboratorio (Ciencia), el taller (Ingeniería), la galería (Artes) y los números
+  (Matemáticas).
 - Cada reto tiene una ficha (historia, tiempo, habilidad, vista previa del
   tablero), el juego con Wayra y sus pistas, y "¡Reto logrado!" con intentos,
   pistas y tiempo.
