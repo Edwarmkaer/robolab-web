@@ -5,6 +5,8 @@ import type { ReactNode } from "react";
  * que van en línea en vez de sumar una librería.
  */
 const PATHS = {
+  camera: <><path d="M8 6 9.5 3h5L16 6h4a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1z" /><circle cx="12" cy="12.5" r="3.5" /></>,
+  cameraOff: <><path d="m3 3 18 18M5.5 6H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h15M9.5 3h5L16 6h4a1 1 0 0 1 1 1v9M9.5 10a3.5 3.5 0 0 0 5 5" /></>,
   trash: (
     <>
       <path d="M4 7h16" />

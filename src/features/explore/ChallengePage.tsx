@@ -16,6 +16,7 @@ import { Icon } from "../../shared/ui/Icon";
 import { useFocusOnMount } from "../../shared/useFocusOnMount";
 import { MissionRoute } from "../lab/MissionRoute";
 import { BlockEditor } from "../game/BlockEditor";
+import { InitialProgramEditor } from "../vision/InitialProgramEditor";
 import { Board } from "../game/Board";
 import { RobotSend } from "../robot/RobotSend";
 import { useRobotLink } from "../robot/useRobotLink";
@@ -155,6 +156,7 @@ function Play({ challenge, onSolved }: { challenge: Challenge; onSolved: (stats:
   });
 
   function execute() {
+    if (runner.running || solved || editor.blocks.length === 0) return;
     ranProgram.current = editor.blocks;
     setRuns((n) => n + 1);
     setBoardMood("idle");
@@ -226,17 +228,32 @@ function Play({ challenge, onSolved }: { challenge: Challenge; onSolved: (stats:
           </>
         ) : (
           <>
-            <BlockEditor
-              policy={policy}
-              state={editor}
-              dispatch={dispatch}
-              disabled={busy}
-              active={highlight}
-              onClear={() => {
-                setBoardMood("idle");
-                reset();
-              }}
-            />
+            {challenge.level === "inicial" ? (
+              <InitialProgramEditor
+                  policy={policy}
+                  state={editor}
+                  dispatch={dispatch}
+                  disabled={busy}
+                  active={highlight}
+                  onExecute={execute}
+                  onClear={() => {
+                    setBoardMood("idle");
+                    reset();
+                  }}
+                />
+            ) : (
+              <BlockEditor
+                policy={policy}
+                state={editor}
+                dispatch={dispatch}
+                disabled={busy}
+                active={highlight}
+                onClear={() => {
+                  setBoardMood("idle");
+                  reset();
+                }}
+              />
+            )}
             {challenge.kind === "efficient" && (
               <p className="small" data-over={used > challenge.maxBlocks || undefined}>
                 Bloques: <strong>{used}</strong> de {challenge.maxBlocks} como máximo

@@ -20,6 +20,8 @@ type Props = {
   readonly readOnly?: boolean;
   /** Qué hacer al tocar la papelera además de vaciar la secuencia (por ejemplo, devolver al robot al inicio). */
   readonly onClear?: () => void;
+  /** La cámara reemplaza la paleta, pero conserva la edición de la secuencia. */
+  readonly hidePalette?: boolean;
 };
 
 const samePath = (a: BlockPath, b: BlockPath) => a.length === b.length && a.every((v, i) => v === b[i]);
@@ -29,7 +31,7 @@ const samePath = (a: BlockPath, b: BlockPath) => a.length === b.length && a.ever
  * es una lista real (`<ul>/<li>`) con un botón dentro de cada paso: el lector
  * de pantalla cuenta los pasos y sabe que cada uno se puede quitar.
  */
-export function BlockEditor({ policy, state, dispatch, disabled: busy, active, readOnly = false, onClear }: Props) {
+export function BlockEditor({ policy, state, dispatch, disabled: busy, active, readOnly = false, onClear, hidePalette = false }: Props) {
   const disabled = busy || readOnly;
   const commands = COMMANDS.filter((c) => policy.palette.has(c));
   const toneOf = (path: BlockPath) => (active && samePath(active.path, path) ? active.tone : undefined);
@@ -51,7 +53,7 @@ export function BlockEditor({ policy, state, dispatch, disabled: busy, active, r
 
   return (
     <div className="stack editor">
-      {!readOnly && (
+      {!readOnly && !hidePalette && (
         <div className="stack-sm">
           <span className="editor-label" id={paletteLabel}>
             Pasos

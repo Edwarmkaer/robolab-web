@@ -72,14 +72,66 @@ aquí como el paquete npm `@robolab/backend`.
 - Se une a su clase con el código de la clase y un apodo, sin cuenta ni
   contraseña, y ve su evaluación del día y los retos de su clase. En "Mi avance"
   aparece su apodo y su clase.
-- Arma un programa tocando bloques (avanzar, girar; en Primaria también
-  retroceder y repetir) y lo ejecuta. Si el robot se sale del camino, se le
+- Arma un programa tocando bloques (avanzar, retroceder y girar; en Primaria
+  también repetir) y lo ejecuta. Si el robot se sale del camino, se le
   dice en qué paso y se marca ese bloque.
 - Al llegar a la estrella aparece la pregunta, que también se lee en voz alta.
 - Al final ve su puntaje, el tiempo y cuántas veces ejecutó el robot. Puede
   intentarlo de nuevo.
 
 ## Arquitectura
+
+### Programar con gestos en Inicial
+
+En los retos abiertos de Inicial que permiten editar el programa aparece el modo
+**Gestos** (por defecto se programa con **Botones**). Elige **Gestos**, luego
+**Activar cámara**, permite el acceso y muestra una sola mano:
+
+| Gesto | Acción |
+| --- | --- |
+| ☝️ Índice apuntando arriba | Avanzar |
+| 👇 Índice apuntando abajo | Retroceder |
+| 👈 Índice apuntando a la izquierda | Girar a la izquierda |
+| 👉 Índice apuntando a la derecha | Girar a la derecha |
+| 👍 Pulgar arriba | Confirmar y ejecutar el programa visible |
+
+Mantén el gesto hasta llenar la barra (0,8 segundos para bloques; 1,2 para
+confirmar). Retira la mano durante al menos 0,4 segundos entre gestos, también
+para repetir el mismo bloque. Puedes quitar un bloque tocándolo, borrar el
+programa o cambiar a **Botones** sin perder la secuencia. Un programa vacío no
+se ejecuta y la entrada queda en pausa mientras Kusi se mueve.
+
+Usa el índice extendido con los otros dedos recogidos. Las cuatro direcciones
+se calculan con los puntos de la mano de MediaPipe y coinciden con la vista en
+espejo; no dependen de los gestos «Victoria» o «Te quiero». Una dirección
+diagonal o un dedo apuntando hacia la cámara no agrega bloques. Las órdenes
+siguen siendo relativas al robot: arriba agrega Avanzar, abajo Retroceder y
+los lados agregan un giro, cualquiera sea la orientación actual de Kusi.
+
+Retroceder en Inicial requiere el cambio compartido del
+[PR del backend #6](https://github.com/orinqq/robolab-backend/pull/6).
+El paquete queda fijado al commit de ese PR para probarlo. Antes de usarlo en
+producción, hay que fusionar y desplegar ese cambio del backend.
+
+La cámara se activa solo al pedirla; se apaga al salir del reto, cambiar a
+Botones, ocultar la pestaña o fallar la captura. No se pide micrófono, no se
+graba vídeo y las imágenes se procesan en el equipo con MediaPipe en un worker.
+El modelo y WebAssembly se descargan de Google y jsDelivr al activar la cámara;
+se necesita internet para esa carga. Las versiones están fijadas. HTTPS (o
+localhost) es obligatorio. Si se deniega el permiso o falla el modelo, sigue
+disponible el modo Botones.
+
+**Para probar:** abre `/reto/inicial-paseo`, empieza el reto y arma una secuencia
+con la cámara. Revisa los bloques y confirma con 👍 o con el botón de confirmación.
+Prueba también `/reto/inicial-gira` para los giros. Los retos de predicción,
+Primaria y las evaluaciones de clase mantienen su entrada habitual.
+
+El enlace publicado `/r/cie-inicial/` pertenece a otra versión de la web:
+su reto «El tubo de ensayo» no está en el catálogo `@robolab/backend` de este
+repositorio. Esta implementación usa los retos actuales de Inicial; no crea
+mapas ni reglas de juego en la web.
+
+### Flujo compartido
 
 ```mermaid
 flowchart LR
