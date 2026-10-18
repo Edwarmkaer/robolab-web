@@ -9,11 +9,10 @@ Retos de programación con un robot, para Inicial y Primaria, en dos modos:
   reacciona a cada intento y da hasta 3 pistas. El avance se guarda en el
   dispositivo.
 - **Clases.** Cada clase tiene un código (como `TEC-482`): el alumno se une con
-  ese código y un apodo, sin cuenta. El docente asigna retos a la clase y ve
-  quién los logró; también arma evaluaciones (preguntas, alternativas,
-  respuesta correcta y puntaje) donde cada vez que el alumno llega a una
-  estrella se desbloquea una pregunta. El docente ve los resultados en vivo, un
-  ranking y el desarrollo del aprendizaje.
+  ese código y un apodo, sin cuenta. El docente crea retos, los asigna a la
+  clase y desde la pestaña **Retos** controla todo: quién los logró, asignarlos
+  a otra clase, cerrarlos y reabrirlos. En **Progreso** ve cómo aprende la clase
+  reto por reto.
 
 Como extra, el mismo programa se puede enviar a un robot físico (ESP32) por
 wifi con el botón "Enviar al robot". El relé, el protocolo y el firmware están
@@ -58,26 +57,26 @@ aquí como el paquete npm `@robolab/backend`.
 - Crea retos: tópico y nivel, un juego ya hecho (bloques en Inicial, misiones en
   Primaria) y quién lo verá (público, solo su clase o borrador). Obtiene un
   enlace para compartir y lo asigna a una clase.
-- Ve los retos de cada clase con el porcentaje que lo logró y, por reto, la
-  tabla por apodo (intentos, pistas y tiempo) con lo que se observó. Solo se
-  muestra lo observable; no se diagnostica.
-- Crea evaluaciones: título, clase, fecha y de 1 a 10 preguntas con 2 a 4
-  alternativas, respuesta correcta y puntaje.
-- Ve los resultados en vivo, un ranking que solo ve el docente y el desarrollo
-  del aprendizaje con cuatro medidas (logro, intentos por estrella, tiempo y
-  veces que la rindió), con gráfica y tabla de detalle.
+- En **Retos** ve todos sus retos (de todas sus clases y los que aún no asignó)
+  con filtros por clase, tópico y estado (activos y cerrados). En el detalle de
+  un reto ve el porcentaje que lo logró y la tabla por apodo (intentos, pistas y
+  tiempo) con lo que se observó; puede asignarlo a otra clase y cerrarlo o
+  reabrirlo (un reto cerrado deja de verse para los alumnos y conserva sus
+  resultados). Solo se muestra lo observable; no se diagnostica.
+- En **Progreso** ve, por clase, un punto por reto asignado con cuatro medidas
+  (intentos, pistas, tiempo y cuántos lo lograron), una tabla por alumno y
+  «Para mirar de cerca» (retos seguidos sin lograr y retos sin empezar).
 
 **Alumno**
 
 - Se une a su clase con el código de la clase y un apodo, sin cuenta ni
-  contraseña, y ve su evaluación del día y los retos de su clase. En "Mi avance"
+  contraseña, y ve los retos de su clase. En "Mi avance"
   aparece su apodo y su clase.
 - Arma un programa tocando bloques (avanzar, retroceder y girar; en Primaria
   también repetir) y lo ejecuta. Si el robot se sale del camino, se le
   dice en qué paso y se marca ese bloque.
-- Al llegar a la estrella aparece la pregunta, que también se lee en voz alta.
-- Al final ve su puntaje, el tiempo y cuántas veces ejecutó el robot. Puede
-  intentarlo de nuevo.
+- Al terminar un reto ve cuántas veces ejecutó el robot, las pistas que usó y
+  el tiempo. Puede repetirlo.
 
 ## Arquitectura
 
@@ -124,7 +123,7 @@ disponible el modo Botones.
 **Para probar:** abre `/reto/inicial-paseo`, empieza el reto y arma una secuencia
 con la cámara. Revisa los bloques y confirma con 👍 o con el botón de confirmación.
 Prueba también `/reto/inicial-gira` para los giros. Los retos de predicción,
-Primaria y las evaluaciones de clase mantienen su entrada habitual.
+Primaria mantienen su entrada habitual.
 
 El enlace publicado `/r/cie-inicial/` pertenece a otra versión de la web:
 su reto «El tubo de ensayo» no está en el catálogo `@robolab/backend` de este

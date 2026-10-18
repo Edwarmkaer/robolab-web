@@ -1,7 +1,7 @@
 # Guía para agentes y colaboradores
 
 Web de RoboLab: retos de programación con un robot (modo abierto, sin cuenta) y
-evaluaciones que se juegan (docente + alumnos con código). Vite + React 19 +
+clases con retos (docente + alumnos con código). Vite + React 19 +
 TypeScript. El backend (Convex) y el dominio compartido están en otro repo,
 [robolab-backend](https://github.com/orinqq/robolab-backend), y llegan como el
 paquete `@robolab/backend`. El README explica el producto; aquí van las reglas
