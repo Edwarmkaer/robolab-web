@@ -42,7 +42,7 @@
   <header class="hero">
     <p class="kicker">Hack the Andes 2026 · Educación escolar</p>
     <h1>RoboLab: retos de programación con un robot, medibles para el docente</h1>
-    <p class="lead">En Inicial se programa con bloques; en Primaria se resuelven misiones con energía y estaciones. Cada niño deja evidencia observable: ejecuciones, pistas, tiempo y competencias del Currículo Nacional.</p>
+    <p class="lead">En Inicial se programa con bloques, tocando piezas o con gestos de la mano frente a la cámara; en Primaria se resuelven misiones con energía y estaciones. Cada niño deja evidencia observable: ejecuciones, pistas, tiempo y competencias del Currículo Nacional.</p>
     <div class="links">
       <a class="btn" href="/">Probar la app</a>
       <a class="btn ghost" href="/impacto">Panel de impacto en vivo</a>
@@ -60,7 +60,7 @@
 
   <h2>Qué hace RoboLab</h2>
   <div class="grid">
-    <div class="card"><h3>Retos abiertos, sin cuenta</h3><p class="muted">Cinco tópicos STEAM. Inicial: bloques (avanzar, girar, repetir). Primaria: misiones 6×6 con paredes, terreno difícil, estaciones y presupuesto de energía, en tres subniveles validados por un algoritmo que rechaza misiones sin solución.</p></div>
+    <div class="card"><h3>Retos abiertos, sin cuenta</h3><p class="muted">Cinco tópicos STEAM. Inicial: bloques (avanzar, retroceder, girar), tocando piezas o apuntando con el índice frente a la cámara; los gestos se reconocen en el propio equipo y la imagen no se envía. Primaria: misiones 6×6 con paredes, terreno difícil, estaciones y presupuesto de energía, en tres subniveles validados por un algoritmo que rechaza misiones sin solución.</p></div>
     <div class="card"><h3>Wayra, la guía</h3><p class="muted">Hasta tres pistas por reto. El servidor registra cuántas se pidieron y si sirvieron.</p></div>
     <div class="card"><h3>Clases con código y apodo</h3><p class="muted">El alumno entra con el código de su clase y un apodo. El docente crea retos en tres pasos y ve, por reto, quién lo logró, intentos, pistas, tiempo y "qué se observó".</p></div>
     <div class="card"><h3>Evaluaciones jugadas</h3><p class="muted">Preguntas que se abren al llegar a cada estrella; ranking por puntaje, veces, ejecuciones y tiempo; gráfica de desarrollo por alumno.</p></div>
@@ -89,7 +89,7 @@
 
   <h2>Tecnología y confianza</h2>
   <ul>
-    <li>Vite + React 19 + TypeScript; backend Convex en tiempo real; dominio en TypeScript puro compartido por navegador y servidor.</li>
+    <li>Vite + React 19 + TypeScript; backend Convex en tiempo real; dominio en TypeScript puro compartido por navegador y servidor; gestos con MediaPipe en un worker del navegador.</li>
     <li>Pruebas automáticas de dominio, backend (convex-test) y componentes (jsdom); CI en GitHub Actions; web en Vercel.</li>
     <li>Apodos en vez de nombres; contraseñas con reglas y recuperación por código; freno a la fuerza bruta; fecha decidida por el servidor; claves del robot solo hasheadas; sin analítica de terceros.</li>
     <li>Firmware del ESP32 y protocolo del robot en el repositorio del backend.</li>
