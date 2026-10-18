@@ -21,7 +21,7 @@
     "@blobatar/react": "2.7.0",
     "@convex-dev/auth": "0.0.96",
     "@fontsource-variable/nunito": "5.3.0",
-    "@robolab/backend": "github:orinqq/robolab-backend#acceace18590af08b858e76e8f847bbaade608ce",
+    "@robolab/backend": "github:orinqq/robolab-backend#3cbda631f0dd895262d43000f5f8d8a9b80f45ca",
     "blobatar": "2.7.0",
     "convex": "1.47.0",
     "qrcode": "1.5.4",

@@ -17,8 +17,14 @@ export function StudentLogin({ onSignedIn }: { onSignedIn: (token: string) => vo
     setBusy(true);
     setError(null);
     try {
-      const { token } = await signIn({ code });
-      onSignedIn(token);
+      // El servidor devuelve el error (no lo lanza) para poder contar los intentos fallidos.
+      const result = await signIn({ code });
+      if ("error" in result) {
+        setError(result.error);
+        setBusy(false);
+        return;
+      }
+      onSignedIn(result.token);
     } catch (e) {
       setError(userMessage(e));
       setBusy(false);

@@ -2,7 +2,7 @@ import { useMutation, useQuery } from "convex/react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "@robolab/backend/convex/_generated/api";
-import { localCalendarDate } from "@robolab/backend/domain/evaluation/calendar";
+import { shortLabel } from "@robolab/backend/domain/evaluation/calendar";
 import { APP_NAME } from "../../shared/brand";
 import { userMessage } from "../../shared/errors";
 import { Icon } from "../../shared/ui/Icon";
@@ -11,8 +11,8 @@ import { speak } from "./speech";
 type Props = { token: string; onSignOut: () => void };
 
 export function StudentHome({ token, onSignOut }: Props) {
-  const today = localCalendarDate();
-  const home = useQuery(api.student.home, { token, today });
+  // El día lo decide el servidor (hora de Perú), no el reloj de la tablet.
+  const home = useQuery(api.student.home, { token });
   const start = useMutation(api.student.start);
   const retry = useMutation(api.student.retry);
   const signOut = useMutation(api.student.signOut);
@@ -74,6 +74,7 @@ export function StudentHome({ token, onSignOut }: Props) {
             <div className="empty">
               <Icon name="calendar" size={32} />
               <p>Hoy no tienes evaluaciones. ¡Vuelve pronto!</p>
+              <p className="small muted">Hoy es {shortLabel(home.today)}.</p>
             </div>
           ) : (
             <>
