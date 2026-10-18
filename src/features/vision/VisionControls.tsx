@@ -1,7 +1,6 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import type { Command } from "@robolab/backend/domain/game/program";
 import { Icon } from "../../shared/ui/Icon";
-import { BLOCK_LOOK } from "../game/blocks";
 import { PieceFrame } from "../game/PieceFrame";
 import { speak } from "../student/speech";
 import { startCameraSession } from "./cameraSession";
@@ -13,23 +12,32 @@ type Props = {
   full: boolean;
   onCommand: (command: Command) => void;
   onConfirm: () => void;
+  /** Qué pieza está pidiendo la cámara ahora (la mano que ve y sostiene), para resaltarla en la bandeja. */
+  onCandidate?: (command: Command | null) => void;
+  /** La cámara no se pudo encender (permiso negado, sin HTTPS…): la pantalla vuelve a los botones y lo avisa. */
+  onUnavailable?: (reason: string) => void;
 };
 /** Lo que explica el ⓘ de la cámara; el lector de pantalla lo oye una vez, junto al botón. */
 const CAMERA_HOW = "Apunta con el índice y recoge los otros dedos.";
 const CAMERA_PRIVACY = "La imagen se procesa en tu equipo. No se graba ni se envía.";
+/** La primera vez baja el modelo (~12 MB): se avisa que puede tardar, y que la cámara no se usa hasta que esté lista. */
+const LOADING = "Permite la cámara. La primera vez puede tardar un poco: se baja el modelo de gestos.";
 const idle: GestureFeedback = { action: null, candidate: null, progress: 0, releaseRequired: true };
 
+/**
+ * La cámara de Gestos: se enciende sola al montarse (la pantalla la monta solo
+ * mientras Gestos está elegido) y se apaga al desmontarse o al salir de la pestaña.
+ */
 export function VisionControls(props: Props) {
-  const [enabled, setEnabled] = useState(false);
-  const [status, setStatus] = useState<"off" | "loading" | "ready" | "error">("off");
-  const [message, setMessage] = useState("Activa la cámara y muestra una sola mano.");
+  const [enabled, setEnabled] = useState(true);
+  const [status, setStatus] = useState<"off" | "loading" | "ready" | "error">("loading");
+  const [message, setMessage] = useState(LOADING);
   const [feedback, setFeedback] = useState(idle);
-  // Ficha de gesto con su información abierta por un toque (en tablet no hay mouse).
-  const [openTip, setOpenTip] = useState<string | null>(null);
   const helpId = useId();
   const video = useRef<HTMLVideoElement>(null);
   const gate = useRef(new GestureGate());
   const latest = useRef(props);
+  const failed = useRef(false);
 
   useLayoutEffect(() => {
     latest.current = props;
@@ -42,7 +50,7 @@ export function VisionControls(props: Props) {
     const stop = startCameraSession(video.current, {
       isPaused: () => latest.current.disabled,
       onReady: () => { setStatus("ready"); setMessage("Retira la mano y luego elige un gesto."); },
-      onError: (error) => { setStatus("error"); setMessage(error); setEnabled(false); },
+      onError: (error) => { failed.current = true; setStatus("error"); setMessage(error); setEnabled(false); latest.current.onUnavailable?.(error); },
       onSample: (sample, time) => {
         if (latest.current.disabled) return;
         const next = gate.current.update(sample, time);
@@ -67,29 +75,30 @@ export function VisionControls(props: Props) {
         }
       },
     });
-    const hide = () => {
-      if (document.hidden) {
-        stop();
-        setEnabled(false);
-        setStatus("off");
-        setMessage("Cámara apagada al salir de la pestaña. Actívala para continuar.");
-      }
-    };
-    document.addEventListener("visibilitychange", hide);
-    return () => { document.removeEventListener("visibilitychange", hide); stop(); };
+    return stop;
   }, [enabled]);
 
+  // Al salir de la pestaña la cámara se apaga; al volver se enciende otra vez (salvo que haya fallado).
   useEffect(() => {
-    if (openTip === null) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpenTip(null);
-    const onPointer = (e: Event) => !(e.target as Element | null)?.closest?.(".vision-legend") && setOpenTip(null);
-    document.addEventListener("keydown", onKey);
-    document.addEventListener("pointerdown", onPointer);
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.removeEventListener("pointerdown", onPointer);
+    const change = () => {
+      if (document.hidden) {
+        setEnabled(false);
+        setStatus("off");
+        setFeedback(idle);
+        setMessage("Cámara apagada al salir de la pestaña.");
+      } else if (!failed.current) {
+        setStatus("loading");
+        setMessage(LOADING);
+        setEnabled(true);
+      }
     };
-  }, [openTip]);
+    document.addEventListener("visibilitychange", change);
+    return () => document.removeEventListener("visibilitychange", change);
+  }, []);
+
+  const seen = status === "ready" && !props.disabled && feedback.candidate !== "confirm" ? feedback.candidate : null;
+  const { onCandidate } = props;
+  useEffect(() => onCandidate?.(seen), [seen, onCandidate]);
 
   const currentGesture = GESTURES.find((gesture) => gesture.action === feedback.candidate);
   const instruction = props.disabled ? "Espera a que Kusi termine."
@@ -98,47 +107,25 @@ export function VisionControls(props: Props) {
         : "Apunta con el índice en una dirección.";
 
   return (
-    <div className="vision-controls">
-      <div className="vision-camera" data-ready={status === "ready" || undefined}>
-        <video ref={video} className="vision-video" muted playsInline aria-label="Vista de tu cámara" hidden={status !== "ready"} />
-        {status !== "ready" && <div className="vision-placeholder"><Icon name="camera" size={32} /><span>{status === "loading" ? "Preparando los gestos…" : "Programa con tus manos"}</span></div>}
-        {status === "ready" && <span className="vision-camera-label">{props.disabled ? "En pausa" : "Cámara activa"}</span>}
-      </div>
-      <p className="small" role={status === "error" ? "alert" : "status"}>{message}</p>
-      {status === "ready" && (
-        <div className="vision-feedback">
-          <span className="small">{instruction}</span>
-          <progress aria-label="Gesto sostenido" max={1} value={props.disabled ? 0 : feedback.progress} />
+    <PieceFrame label={CAMERA_HOW} detail={CAMERA_PRIVACY} wide info>
+      <div className="vision-controls">
+        <div className="vision-head">
+          <span className="vision-title">Cámara</span>
+          {status === "ready" && props.disabled && <span className="vision-state">En pausa</span>}
         </div>
-      )}
-      <ul className="vision-legend" aria-label="Guía de gestos">
-        {GESTURES.map((gesture) => (
-          <PieceFrame
-            key={gesture.name}
-            as="li"
-            label={gesture.prompt}
-            detail={gesture.label}
-            open={openTip === gesture.name}
-            onClick={() => setOpenTip(openTip === gesture.name ? null : gesture.name)}
-          >
-            <span className="gesture-tile" data-current={(status === "ready" && !props.disabled && feedback.candidate === gesture.action) || undefined}>
-              <span className="gesture-emoji" aria-hidden="true">{gesture.emoji}</span>
-              {gesture.action === "confirm" ? <Icon name="play" size={20} /> : <img className="gesture-piece" src={BLOCK_LOOK[gesture.action].icon} alt="" />}
-              <span className="sr-only">{gesture.prompt}: {gesture.label}</span>
-            </span>
-          </PieceFrame>
-        ))}
-      </ul>
-      <div className="row">
-        <PieceFrame label={CAMERA_HOW} detail={CAMERA_PRIVACY} wide>
-          {enabled ? (
-            <button className="btn btn-sm" type="button" aria-describedby={helpId} onClick={() => { setEnabled(false); setStatus("off"); setFeedback(idle); setMessage("Cámara apagada. Tu programa sigue aquí."); }}><Icon name="cameraOff" />{status === "loading" ? "Cancelar" : "Apagar cámara"}</button>
-          ) : (
-            <button className="btn btn-sm" type="button" aria-describedby={helpId} disabled={props.disabled} onClick={() => { setStatus("loading"); setFeedback(idle); setMessage("Permite la cámara. La primera carga necesita internet."); setEnabled(true); }}><Icon name="camera" />Activar cámara</button>
-          )}
-        </PieceFrame>
+        <div className="vision-camera" data-ready={status === "ready" || undefined}>
+          <video ref={video} className="vision-video" muted playsInline aria-label="Vista de tu cámara" aria-describedby={helpId} hidden={status !== "ready"} />
+          {status !== "ready" && <div className="vision-placeholder"><Icon name="camera" size={32} /><span>{status === "loading" ? "Preparando los gestos…" : "Programa con tus manos"}</span></div>}
+        </div>
+        <p className="small" role={status === "error" ? "alert" : "status"}>{message}</p>
+        {status === "ready" && (
+          <div className="vision-feedback">
+            <span className="small">{instruction}</span>
+            <progress aria-label="Gesto sostenido" max={1} value={props.disabled ? 0 : feedback.progress} />
+          </div>
+        )}
         <span id={helpId} className="sr-only">{CAMERA_HOW} {CAMERA_PRIVACY}</span>
       </div>
-    </div>
+    </PieceFrame>
   );
 }
