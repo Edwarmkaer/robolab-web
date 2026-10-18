@@ -90,6 +90,7 @@ function Intro({ challenge, onStart }: { challenge: Challenge; onStart: () => vo
           robot={{ cell: challenge.map.start, heading: challenge.map.startHeading }}
           mood="idle"
           stepMs={STEP_MS}
+          topic={challenge.topic}
         />
         <Guide message={`¡Hola! Soy Wayra. Si te trabas, pídeme una pista: tienes 3.`} />
       </section>
@@ -185,6 +186,7 @@ function Play({ challenge, onSolved }: { challenge: Challenge; onSolved: (stats:
           robot={runner.robot}
           mood={boardMood}
           stepMs={STEP_MS}
+          topic={challenge.topic}
           {...(challenge.kind === "predict" && !busy ? { onPick: setPicked, picked } : { picked })}
         />
       </div>
