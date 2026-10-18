@@ -5,10 +5,10 @@ export const CREATOR_STEPS = ["Tópico y nivel", "Juego", "Publicar"] as const;
 export type CreatorStep = 0 | 1 | 2;
 
 /** "1 Tópico y nivel — 2 Juego — 3 Publicar": los pasos hechos llevan un check. */
-export function CreatorStepper({ current }: { current: CreatorStep }) {
+export function CreatorStepper({ current, labels = CREATOR_STEPS }: { current: CreatorStep; labels?: readonly string[] }) {
   return (
     <ol className="stepper" aria-label="Pasos para crear el reto">
-      {CREATOR_STEPS.map((label, i) => {
+      {labels.map((label, i) => {
         const state = i < current ? "done" : i === current ? "current" : "todo";
         return (
           <li key={label} className="stepper-step" data-state={state} aria-current={state === "current" ? "step" : undefined}>
