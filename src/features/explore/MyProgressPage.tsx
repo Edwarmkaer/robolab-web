@@ -51,7 +51,7 @@ export function MyProgressPage() {
           <p className="small muted">De los retos que evidencian cada competencia del MINEDU, cuántos resolviste.</p>
         </div>
         {competencies.map(({ competency, solved, total }) => (
-          <div key={competency.id} className="progress-row" style={{ ["--topic" as string]: "var(--c-brand)" }}>
+          <div key={competency.id} className="progress-row" data-wide style={{ ["--topic" as string]: "var(--c-brand)" }}>
             <span className="progress-label">
               <strong>Competencia {competency.id}</strong>
               <span className="small muted"> · {competency.name}</span>

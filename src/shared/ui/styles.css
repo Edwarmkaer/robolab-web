@@ -2148,3 +2148,27 @@ details > summary {
   display: grid;
   gap: 6px;
 }
+
+/* Filas con etiqueta larga (competencias): la etiqueta ocupa más y, en celular, toda la línea. */
+.progress-row[data-wide] {
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) 72px;
+}
+
+@media (max-width: 640px) {
+  .progress-row[data-wide] {
+    grid-template-columns: minmax(0, 1fr) 72px;
+  }
+
+  .progress-row[data-wide] .progress-label {
+    grid-column: 1 / -1;
+  }
+
+  .progress-row[data-wide] .meter {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .progress-row[data-wide] .progress-count {
+    grid-row: 2;
+  }
+}
