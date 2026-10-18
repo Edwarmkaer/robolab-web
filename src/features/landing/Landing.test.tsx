@@ -79,3 +79,22 @@ describe("portada: tarjetas de tópico con su avance", () => {
     expect(within(card("Artes")).getByText("0/9 ✓").closest(".progress-chip")?.hasAttribute("data-complete")).toBe(false);
   });
 });
+
+describe("portada: entradas", () => {
+  it("ya no ofrece el Laboratorio multigrado", () => {
+    renderLanding();
+    expect(screen.queryByText("Laboratorio multigrado")).toBeNull();
+    expect(screen.queryByRole("link", { name: /Ver misiones/ })).toBeNull();
+    expect(document.querySelector('a[href="/laboratorio"]')).toBeNull();
+  });
+
+  it("deja la entrada de alumnos con código y la de docentes, que habla de retos", () => {
+    renderLanding();
+    const join = screen.getAllByRole("link", { name: /Unirme a una clase/ });
+    expect(join.length).toBeGreaterThan(0);
+    expect(join.every((l) => l.getAttribute("href") === "/alumno")).toBe(true);
+    expect(screen.getByRole("link", { name: /Iniciar sesión/ }).getAttribute("href")).toBe("/docente");
+    expect(screen.getByText("Crea retos para tu clase y sigue cómo aprende cada alumno.")).toBeTruthy();
+    expect(screen.queryByText(/evaluaciones/i)).toBeNull();
+  });
+});

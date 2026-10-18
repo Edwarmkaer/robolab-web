@@ -40,24 +40,9 @@ export function Landing() {
           <img src="/roles/docente.svg" alt="" />
           <span className="stack-sm">
             <strong>¿Eres docente?</strong>
-            <span className="small muted">Crea evaluaciones para tu clase y sigue cómo aprende cada alumno.</span>
+            <span className="small muted">Crea retos para tu clase y sigue cómo aprende cada alumno.</span>
             <span className="btn btn-sm">
               Iniciar sesión <Icon name="chevronRight" size={18} />
-            </span>
-          </span>
-        </Link>
-      </section>
-
-      <section aria-label="Laboratorio multigrado">
-        <Link className="role-card" to="/laboratorio">
-          <span className="topic-emoji" aria-hidden="true" style={{ width: 96, height: 96, fontSize: "2.6rem", margin: 0, flex: "none" }}>
-            🧪
-          </span>
-          <span className="stack-sm">
-            <strong>Laboratorio multigrado</strong>
-            <span className="small muted">Misiones de Primaria creadas por docentes: un tablero de 6 × 6, tres niveles y un solo robot para toda el aula.</span>
-            <span className="btn btn-sm">
-              Ver misiones <Icon name="chevronRight" size={18} />
             </span>
           </span>
         </Link>
