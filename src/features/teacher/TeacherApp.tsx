@@ -7,6 +7,7 @@ import { type IconName, Icon } from "../../shared/ui/Icon";
 import { ErrorBoundary } from "../../shared/ui/ErrorBoundary";
 import { IconButton } from "../../shared/ui/IconButton";
 import { useToast } from "../../shared/ui/Toast";
+import { TeacherLivePage, TeacherLiveRoom } from "../live/TeacherLivePage";
 import { LabCreatePage } from "../lab/LabCreatePage";
 import { LabResultsPage } from "../lab/LabResultsPage";
 import { TeacherAuth } from "./auth/TeacherAuth";
@@ -26,6 +27,7 @@ const TABS: readonly { to: string; label: string; icon: IconName; end: boolean }
   { to: "/docente", label: "Inicio", icon: "home", end: true },
   { to: "/docente/clases", label: "Mis clases", icon: "users", end: false },
   { to: "/docente/retos", label: "Retos", icon: "clipboard", end: false },
+  { to: "/docente/en-vivo", label: "En vivo", icon: "play", end: false },
   { to: "/docente/progreso", label: "Progreso", icon: "chart", end: false },
 ];
 
@@ -112,6 +114,8 @@ function TeacherShell() {
               <Route path="retos/nuevo/asistente" element={<AssistantPage />} />
               <Route path="retos/:assignmentId" element={<RetoDetailPage />} />
               <Route path="evaluaciones/*" element={<Navigate to="/docente/retos" replace />} />
+              <Route path="en-vivo" element={<TeacherLivePage />} />
+              <Route path="en-vivo/:roomId" element={<TeacherLiveRoom />} />
               <Route path="progreso" element={<ProgressPage />} />
               <Route path="laboratorio/nueva" element={<LabCreatePage />} />
               <Route path="laboratorio/:missionId/resultados" element={<LabResultsPage />} />
