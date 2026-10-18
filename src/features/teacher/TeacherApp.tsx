@@ -16,6 +16,8 @@ import { ClassesPage } from "./classes/ClassesPage";
 import { HomePage } from "./home/HomePage";
 import { ProgressPage } from "./progress/ProgressPage";
 import { LegacyResultsRedirect } from "./retos/LegacyRoutes";
+import { AssistantPage } from "./retos/assistant/AssistantPage";
+import { NewRetoChoice } from "./retos/assistant/NewRetoChoice";
 import { NewChallengePage } from "./retos/NewChallengePage";
 import { RetoDetailPage } from "./retos/RetoDetailPage";
 import { RetosPage } from "./retos/RetosPage";
@@ -107,7 +109,9 @@ function TeacherShell() {
               <Route path="clases/:classroomId/retos" element={<ClassDetailPage tab="challenges" />} />
               <Route path="clases/:classroomId/retos/:assignmentId" element={<LegacyResultsRedirect />} />
               <Route path="retos" element={<RetosPage />} />
-              <Route path="retos/nuevo" element={<NewChallengePage />} />
+              <Route path="retos/nuevo" element={<NewRetoChoice />} />
+              <Route path="retos/nuevo/juego" element={<NewChallengePage />} />
+              <Route path="retos/nuevo/asistente" element={<AssistantPage />} />
               <Route path="retos/:assignmentId" element={<RetoDetailPage />} />
               <Route path="evaluaciones/*" element={<Navigate to="/docente/retos" replace />} />
               <Route path="en-vivo" element={<TeacherLivePage />} />

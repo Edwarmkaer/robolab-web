@@ -353,3 +353,144 @@
   margin-top: 4px;
   color: var(--c-muted);
 }
+
+/* ---------- Nuevo reto: dos caminos (juego ya hecho / asistente) ---------- */
+.way-grid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.way-card h2 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.way-card p {
+  margin: 0;
+}
+
+.way-card-ai {
+  position: relative;
+  background: var(--c-surface-2);
+}
+
+.way-emoji {
+  font-size: 2.2rem;
+  line-height: 1;
+}
+
+.way-badge {
+  position: absolute;
+  top: 18px;
+  left: 74px;
+}
+
+.way-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 12px 16px;
+  border: 3px solid var(--c-ink);
+  border-radius: var(--radius);
+  background: var(--c-surface);
+  font-weight: 800;
+}
+
+/* ---------- Asistente de misiones ---------- */
+.assistant-form {
+  padding: 22px;
+}
+
+.assistant-count {
+  justify-self: end;
+}
+
+.assistant-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px 40px;
+}
+
+.chip-group {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.chip-group legend {
+  padding: 0;
+  margin-bottom: 6px;
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+
+.chip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 44px;
+  padding: 6px 16px;
+  border: 3px solid var(--c-ink);
+  border-radius: 999px;
+  background: var(--c-surface);
+  color: var(--c-ink);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+}
+
+.chip-btn[aria-pressed="true"] {
+  background: var(--c-action);
+}
+
+.chip-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.proposal-grid {
+  display: grid;
+  gap: 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.proposal-card {
+  align-content: start;
+  padding: 18px;
+}
+
+.proposal-grade {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.proposal-title {
+  margin: 0;
+  font-family: var(--font-head);
+  font-size: 1.3rem;
+}
+
+.proposal-energy {
+  margin: 0;
+  font-weight: 800;
+}
+
+.mission-thumb-v1 {
+  grid-template-columns: repeat(var(--size, 4), minmax(0, 1fr));
+  align-items: start;
+  max-width: 260px;
+}
+
+.mission-cell[data-kind="water"] {
+  background: var(--c-water);
+}
+
+.mission-thumb-v1 .mission-cell {
+  font-size: 0.9rem;
+}

@@ -1,0 +1,245 @@
+// @vitest-environment jsdom
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { getFunctionName } from "convex/server";
+import { ConvexError } from "convex/values";
+import { missionFixtures } from "@robolab/backend/domain/mission/fixtures";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+const generate = vi.fn();
+const save = vi.fn();
+const status = vi.fn();
+vi.mock("convex/react", () => ({
+  useQuery: () => status(),
+  useAction: () => generate,
+  useMutation: () => save,
+}));
+
+import { AssistantPage } from "./AssistantPage";
+
+const M = (grade: 2 | 3 | 4) => missionFixtures.find((m) => m.grade === grade)!;
+const proposal = (grade: 2 | 3 | 4) => ({ grade, mission: M(grade), metrics: { solutionStatus: "SOLVED", minimumEnergy: 6 } });
+const OBJETIVO = "Comparar sumas de costos y elegir un recorrido con presupuesto limitado.";
+
+beforeEach(() => {
+  status.mockReturnValue({ configured: true });
+  generate.mockResolvedValue({ status: "ok", proposals: [proposal(2), proposal(3)], failed: [] });
+  save.mockResolvedValue("m1");
+  void getFunctionName;
+});
+afterEach(() => {
+  cleanup();
+  generate.mockReset();
+  save.mockReset();
+});
+
+function renderPage() {
+  render(
+    <MemoryRouter initialEntries={["/docente/retos/nuevo/asistente"]}>
+      <Routes>
+        <Route path="/docente/retos/nuevo/asistente" element={<AssistantPage />} />
+        <Route path="/docente/retos/nuevo" element={<p>Dos caminos</p>} />
+        <Route path="/docente/retos" element={<p>Lista de retos</p>} />
+      </Routes>
+    </MemoryRouter>,
+  );
+}
+const type = (text = OBJETIVO) => fireEvent.change(screen.getByLabelText("Aprendizaje"), { target: { value: text } });
+const propose = () => screen.getByRole("button", { name: "Proponer misiones" }) as HTMLButtonElement;
+const chip = (name: string) => screen.getByRole("button", { name }) as HTMLButtonElement;
+
+describe("asistente: describir el aprendizaje (G2)", () => {
+  it("pide solo lo necesario: aprendizaje, grados y dificultad; sin tipo de misión ni aviso de privacidad en pantalla", () => {
+    renderPage();
+    expect(document.title).toBe("Asistente de misiones · RoboLab");
+    expect(screen.getByRole("heading", { level: 1, name: "Cuéntale al asistente qué quieres que aprendan" })).toBeTruthy();
+    expect(screen.getByLabelText("Aprendizaje")).toBeTruthy();
+    expect(screen.queryByLabelText(/Tipo de misión/)).toBeNull();
+    expect(screen.queryByText(/Tipo de misión/)).toBeNull();
+    expect(screen.queryByText(/Escribe solo el aprendizaje/)).toBeNull();
+    expect(screen.getByText("0 de 800 letras")).toBeTruthy();
+  });
+
+  it("por defecto 2.º y 3.º con dificultad equilibrada; hay que escribir al menos 10 letras y elegir de 1 a 3 grados", () => {
+    renderPage();
+    expect(chip("2.º").getAttribute("aria-pressed")).toBe("true");
+    expect(chip("3.º").getAttribute("aria-pressed")).toBe("true");
+    expect(chip("4.º").getAttribute("aria-pressed")).toBe("false");
+    expect(chip("Equilibrada").getAttribute("aria-pressed")).toBe("true");
+    expect(propose().disabled).toBe(true);
+    type("corto");
+    expect(propose().disabled).toBe(true);
+    type();
+    expect(propose().disabled).toBe(false);
+    fireEvent.click(chip("2.º"));
+    fireEvent.click(chip("3.º"));
+    expect(propose().disabled).toBe(true);
+    fireEvent.click(chip("4.º"));
+    expect(propose().disabled).toBe(false);
+  });
+
+  it("manda el aprendizaje, los grados en orden y la dificultad elegida", async () => {
+    renderPage();
+    type(`  ${OBJETIVO}  `);
+    fireEvent.click(chip("4.º"));
+    fireEvent.click(chip("Desafío"));
+    fireEvent.click(propose());
+    await waitFor(() => expect(generate).toHaveBeenCalledWith({ objective: OBJETIVO, grades: [2, 3, 4], difficulty: "challenge" }));
+  });
+
+  it("mientras piensa lo dice, con su progreso, y no deja pedir dos veces", async () => {
+    let finish!: (v: unknown) => void;
+    generate.mockReturnValue(new Promise((resolve) => (finish = resolve)));
+    renderPage();
+    type();
+    fireEvent.click(propose());
+    expect(await screen.findByText(/Pensando la misión de 2\.º y 3\.º/)).toBeTruthy();
+    expect(screen.getByRole("progressbar", { name: "Pensando" })).toBeTruthy();
+    expect((screen.getByRole("button", { name: "Pensando…" }) as HTMLButtonElement).disabled).toBe(true);
+    finish({ status: "ok", proposals: [proposal(2)], failed: [] });
+    expect(await screen.findByRole("heading", { name: "Revisa las propuestas" })).toBeTruthy();
+  });
+
+  it("el servidor rechaza la solicitud o limita las peticiones: muestra su mensaje y se puede corregir", async () => {
+    generate.mockRejectedValue(new ConvexError("Hiciste muchas solicitudes seguidas. Espera un rato e inténtalo de nuevo."));
+    renderPage();
+    type();
+    fireEvent.click(propose());
+    expect((await screen.findByRole("alert")).textContent).toMatch(/muchas solicitudes seguidas/);
+    expect((screen.getByLabelText("Aprendizaje") as HTMLTextAreaElement).value).toBe(OBJETIVO);
+  });
+
+  it("un error inesperado no filtra detalles", async () => {
+    generate.mockRejectedValue(new Error("stack interno"));
+    renderPage();
+    type();
+    fireEvent.click(propose());
+    const alert = await screen.findByRole("alert");
+    expect(alert.textContent).not.toMatch(/stack interno/);
+    expect(alert.textContent).toMatch(/No pudimos/);
+  });
+
+  it.each([
+    ["PROVIDER_RATE_LIMIT", "Hay muchas solicitudes"],
+    ["PROVIDER_TIMEOUT", "No pudimos generar a tiempo"],
+    ["PROVIDER_UNAVAILABLE", "No pudimos generar a tiempo"],
+    ["UNSOLVABLE", "La respuesta llegó incompleta"],
+    ["SCHEMA_INVALID", "La respuesta llegó incompleta"],
+    ["PROVIDER_AUTH", "El asistente no está disponible"],
+  ])("si ningún grado salió bien (%s) lo explica con «%s» y deja reintentar sin perder lo escrito", async (code, title) => {
+    generate.mockResolvedValue({ status: "ok", proposals: [], failed: [{ grade: 2, code }] });
+    renderPage();
+    type();
+    fireEvent.click(propose());
+    expect(await screen.findByText(title)).toBeTruthy();
+    expect((screen.getByLabelText("Aprendizaje") as HTMLTextAreaElement).value).toBe(OBJETIVO);
+    expect(screen.queryByRole("heading", { name: "Revisa las propuestas" })).toBeNull();
+  });
+
+  it("si el servidor dice que el asistente no está activado, ofrece elegir un juego", async () => {
+    generate.mockResolvedValue({ status: "not_configured" });
+    renderPage();
+    type();
+    fireEvent.click(propose());
+    expect(await screen.findByText("El asistente no está disponible")).toBeTruthy();
+    expect((screen.getByRole("link", { name: /Elegir un juego/ }) as HTMLAnchorElement).getAttribute("href")).toBe("/docente/retos/nuevo/juego");
+  });
+
+  it("si ya se sabe que no está activado, no muestra el formulario", () => {
+    status.mockReturnValue({ configured: false });
+    renderPage();
+    expect(screen.getByRole("heading", { level: 1, name: "El asistente aún no está activado" })).toBeTruthy();
+    expect(screen.queryByLabelText("Aprendizaje")).toBeNull();
+  });
+
+  it("Cancelar vuelve a los dos caminos", () => {
+    renderPage();
+    fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
+    expect(screen.getByText("Dos caminos")).toBeTruthy();
+  });
+});
+
+describe("asistente: revisar y guardar (G3)", () => {
+  async function review() {
+    renderPage();
+    type();
+    fireEvent.click(propose());
+    await screen.findByRole("heading", { name: "Revisa las propuestas" });
+  }
+
+  it("muestra una tarjeta por misión verificada, con su tablero y su energía, y todas elegidas", async () => {
+    await review();
+    const cards = within(screen.getByRole("list", { name: "Propuestas" })).getAllByRole("listitem");
+    expect(cards).toHaveLength(2);
+    expect(within(cards[0]!).getByRole("heading", { name: "2.º grado" })).toBeTruthy();
+    expect(within(cards[0]!).getByText(M(2).title)).toBeTruthy();
+    expect(within(cards[0]!).getByText("Resuelta por el servidor")).toBeTruthy();
+    expect(within(cards[0]!).getByRole("img", { name: /^Tablero de \d por \d con \d estaci/ })).toBeTruthy();
+    expect(within(cards[0]!).getByText(/Energía mínima 6 de/)).toBeTruthy();
+    expect(screen.getByText("2 misiones elegidas")).toBeTruthy();
+    expect(screen.queryByText(/No pasó la revisión/i)).toBeNull();
+  });
+
+  it("lo que no pasó la revisión no se muestra como tarjeta; solo se avisa para qué grados hubo propuesta", async () => {
+    generate.mockResolvedValue({ status: "ok", proposals: [proposal(2)], failed: [{ grade: 3, code: "UNSOLVABLE" }] });
+    renderPage();
+    type();
+    fireEvent.click(propose());
+    await screen.findByRole("heading", { name: "Revisa las propuestas" });
+    expect(within(screen.getByRole("list", { name: "Propuestas" })).getAllByRole("listitem")).toHaveLength(1);
+    expect(screen.queryByText("3.º grado")).toBeNull();
+    expect(screen.queryByText("Intentar de nuevo")).toBeNull();
+    expect(screen.getByText(/Solo pudimos verificar misiones para 2\.º/)).toBeTruthy();
+  });
+
+  it("«Usar» elige o quita una misión y el contador y «Guardar» lo siguen", async () => {
+    await review();
+    fireEvent.click(screen.getAllByRole("button", { name: /Usar/ })[1]!);
+    expect(screen.getByText("1 misión elegida")).toBeTruthy();
+    fireEvent.click(screen.getAllByRole("button", { name: /Usar/ })[0]!);
+    expect((screen.getByRole("button", { name: "Guardar misiones" }) as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it("guarda solo las elegidas (el servidor vuelve a revisar) y avisa que quedan como borradores", async () => {
+    await review();
+    fireEvent.click(screen.getAllByRole("button", { name: /Usar/ })[1]!);
+    fireEvent.click(screen.getByRole("button", { name: "Guardar misiones" }));
+    expect(await screen.findByRole("heading", { name: "Guardamos tu misión" })).toBeTruthy();
+    expect(save).toHaveBeenCalledTimes(1);
+    expect(save).toHaveBeenCalledWith({ mission: M(2) });
+    expect(screen.getByText(/borradores/)).toBeTruthy();
+    expect((screen.getByRole("link", { name: "Volver a Retos" }) as HTMLAnchorElement).getAttribute("href")).toBe("/docente/retos");
+  });
+
+  it("si el servidor rechaza al guardar muestra su mensaje y conserva la revisión", async () => {
+    save.mockRejectedValueOnce(new ConvexError("La misión no se puede resolver."));
+    await review();
+    fireEvent.click(screen.getByRole("button", { name: "Guardar misiones" }));
+    expect((await screen.findByRole("alert")).textContent).toMatch(/no se puede resolver/);
+    expect(screen.getByRole("heading", { name: "Revisa las propuestas" })).toBeTruthy();
+  });
+
+  it("«Otra» pide una propuesta nueva solo para ese grado y la cambia en su tarjeta", async () => {
+    await review();
+    const fresh = { ...proposal(3), mission: { ...M(3), title: "Otra misión para tercero" } };
+    generate.mockResolvedValueOnce({ status: "ok", proposals: [fresh], failed: [] });
+    fireEvent.click(screen.getByRole("button", { name: "Pedir otra propuesta para 3.º grado" }));
+    expect(await screen.findByText("Otra misión para tercero")).toBeTruthy();
+    expect(generate).toHaveBeenLastCalledWith({ objective: OBJETIVO, grades: [3], difficulty: "balanced" });
+    expect(screen.getByText(M(2).title)).toBeTruthy();
+  });
+
+  it("si no sale otra propuesta verificada, conserva la anterior y lo dice", async () => {
+    await review();
+    generate.mockResolvedValueOnce({ status: "ok", proposals: [], failed: [{ grade: 2, code: "UNSOLVABLE" }] });
+    fireEvent.click(screen.getByRole("button", { name: "Pedir otra propuesta para 2.º grado" }));
+    expect((await screen.findByRole("alert")).textContent).toMatch(/Conservamos la anterior/);
+    expect(screen.getByText(M(2).title)).toBeTruthy();
+  });
+
+  it("«Atrás» vuelve a describir sin borrar lo escrito", async () => {
+    await review();
+    fireEvent.click(screen.getByRole("button", { name: /Atrás/ }));
+    expect((screen.getByLabelText("Aprendizaje") as HTMLTextAreaElement).value).toBe(OBJETIVO);
+  });
+});
