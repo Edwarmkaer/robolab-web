@@ -33,8 +33,8 @@ describe("editor de bloques", () => {
     render(<BlockEditor policy={policyFor("inicial")} state={{ blocks: [], openRepeat: null }} dispatch={() => undefined} disabled={false} />);
     const palette = screen.getByRole("group", { name: "Pasos" });
     const pieces = within(palette).getAllByRole("button");
-    expect(pieces.map((b) => b.getAttribute("aria-label"))).toEqual(["Avanzar", "Girar a la izquierda", "Girar a la derecha"]);
-    expect(pieces.map((b) => b.getAttribute("data-piece"))).toEqual(["FORWARD", "TURN_LEFT", "TURN_RIGHT"]);
+    expect(pieces.map((b) => b.getAttribute("aria-label"))).toEqual(["Avanzar", "Retroceder", "Girar a la izquierda", "Girar a la derecha"]);
+    expect(pieces.map((b) => b.getAttribute("data-piece"))).toEqual(["FORWARD", "BACKWARD", "TURN_LEFT", "TURN_RIGHT"]);
     // Inicial no tiene Retroceder ni Repetir.
     expect(within(palette).queryByRole("button", { name: /Repetir|Retroceder/ })).toBeNull();
 
@@ -87,8 +87,8 @@ describe("piezas sin texto: solo ícono, con su nombre en un ícono de informaci
       expect(hidden.getAttribute("aria-hidden")).toBe("true");
       expect(hidden.matches("button, a, [tabindex]")).toBe(false);
     }
-    // Un botón de pieza = una parada de Tab: 3 de la paleta, 1 del paso y la papelera.
-    expect(screen.getAllByRole("button")).toHaveLength(3 + 1 + 1);
+    // Un botón de pieza = una parada de Tab: 4 de la paleta, 1 del paso y la papelera.
+    expect(screen.getAllByRole("button")).toHaveLength(4 + 1 + 1);
   });
 
   it("los pasos de la secuencia también muestran su nombre en el ícono de información", () => {
