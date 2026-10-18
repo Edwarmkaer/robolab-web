@@ -1,11 +1,14 @@
 import { Link, Navigate, useParams } from "react-router-dom";
 import { KIND_LABEL, challengesFor, topicInfo } from "@robolab/backend/domain/explore/challenges";
+import { catalogFor } from "@robolab/backend/domain/explore/progress";
 import { EDUCATION_LEVELS, type EducationLevel } from "@robolab/backend/domain/game/levels";
 import { Icon } from "../../shared/ui/Icon";
 import { Breadcrumbs, ExploreLayout, LEVEL_INFO } from "./ExploreLayout";
 import { useExploreProgress } from "./storage";
 
 const isLevel = (value: string): value is EducationLevel => (EDUCATION_LEVELS as readonly string[]).includes(value);
+
+const countText = (count: number) => `${count} ${count === 1 ? "reto" : "retos"}`;
 
 /** Los retos de un tópico y nivel. */
 export function ChallengeListPage() {
@@ -26,7 +29,7 @@ export function ChallengeListPage() {
         </h1>
         <div className="segmented" role="group" aria-label="Nivel">
           {EDUCATION_LEVELS.map((l) =>
-            challengesFor(topic.id, l).length > 0 ? (
+            catalogFor(topic.id, l).length > 0 ? (
               <Link key={l} to={`/explorar/${topic.id}/${l}`} aria-current={l === level ? "page" : undefined} className="segmented-link">
                 {LEVEL_INFO[l].name}
               </Link>
@@ -34,6 +37,7 @@ export function ChallengeListPage() {
           )}
         </div>
       </div>
+      <p className="small muted">{countText(catalogFor(topic.id, level).length)}</p>
       {challenges.length === 0 ? (
         <div className="empty">
           <Icon name="clipboard" size={32} />
