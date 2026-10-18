@@ -13,6 +13,13 @@ type Props = {
 
 export type TileKind = "wall" | "rough" | "station" | "goal" | "start";
 
+/** Dónde cae una casilla del tablero, en palabras: "arriba a la izquierda", "abajo a la derecha", "en el centro"… */
+export function placeOf([row, col]: Cell): string {
+  const vertical = row <= 1 ? "arriba" : row >= 4 ? "abajo" : "en el medio";
+  const horizontal = col <= 1 ? "a la izquierda" : col >= 4 ? "a la derecha" : "al centro";
+  return vertical === "en el medio" && horizontal === "al centro" ? "en el centro" : `${vertical} ${horizontal}`;
+}
+
 /** Qué es cada casilla; una estación sobre el inicio o la meta no se da (parseMission lo impide). */
 export function tileKind(mission: Mission, cell: Cell, walls = cellSet(mission.walls), rough = cellSet(mission.rough)): TileKind | undefined {
   const key = cellKey(cell);
@@ -50,7 +57,7 @@ export function LabBoard({ mission, robot, visited, mood, stepMs }: Props) {
     <div
       className="lab-board"
       role="img"
-      aria-label={`Tablero de ${mission.size} por ${mission.size} con ${mission.walls.length} paredes y ${mission.stations.length} estaciones. El terreno amarillo cuesta ${ROUGH_COST}. Kusi empieza arriba a la izquierda y debe terminar en la meta.`}
+      aria-label={`Tablero de ${mission.size} por ${mission.size} con ${mission.walls.length} paredes y ${mission.stations.length} estaciones. El terreno amarillo cuesta ${ROUGH_COST}. Kusi empieza ${placeOf(mission.start)} y debe terminar en la meta, ${placeOf(mission.goal)}.`}
       style={{ gridTemplateColumns: `repeat(${mission.size}, 1fr)`, ["--step-ms" as string]: `${stepMs}ms` }}
     >
       {rows.flatMap((row) =>
