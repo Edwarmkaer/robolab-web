@@ -68,6 +68,25 @@ describe("ciclo de vida de la cámara", () => {
     expect(camera.onReady).not.toHaveBeenCalled();
   });
 
+  it("el modelo se empieza a bajar sin esperar el permiso de la cámara, y la cámara arranca cuando llegan las dos cosas", async () => {
+    let grant!: (stream: MediaStream) => void;
+    const permission = new Promise<MediaStream>((resolve) => { grant = resolve; });
+    const camera = setup(() => permission);
+    // Aún sin permiso: el worker ya recibió la orden de cargar el modelo.
+    expect(CameraWorker.latest.postMessage).toHaveBeenCalledWith({ type: "init" });
+    CameraWorker.latest.send({ type: "ready" });
+    expect(camera.onReady).not.toHaveBeenCalled();
+    grant(camera.stream);
+    await vi.waitFor(() => expect(camera.onReady).toHaveBeenCalledOnce());
+    expect(camera.video.srcObject).toBe(camera.stream);
+  });
+
+  it("un permiso denegado también libera el worker que ya estaba cargando el modelo", async () => {
+    const camera = setup(() => Promise.reject(new DOMException("Denied", "NotAllowedError")));
+    await vi.waitFor(() => expect(camera.onError).toHaveBeenCalledOnce());
+    expect(CameraWorker.latest.terminate).toHaveBeenCalledOnce();
+  });
+
   it("un error del modelo apaga la cámara y descarta resultados tardíos", async () => {
     const camera = setup();
     await vi.waitFor(() => expect(camera.video.srcObject).toBe(camera.stream));

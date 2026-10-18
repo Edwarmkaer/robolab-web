@@ -20,6 +20,8 @@ type Props = {
 /** Lo que explica el ⓘ de la cámara; el lector de pantalla lo oye una vez, junto al botón. */
 const CAMERA_HOW = "Apunta con el índice y recoge los otros dedos.";
 const CAMERA_PRIVACY = "La imagen se procesa en tu equipo. No se graba ni se envía.";
+/** La primera vez baja el modelo (~12 MB): se avisa que puede tardar, y que la cámara no se usa hasta que esté lista. */
+const LOADING = "Permite la cámara. La primera vez puede tardar un poco: se baja el modelo de gestos.";
 const idle: GestureFeedback = { action: null, candidate: null, progress: 0, releaseRequired: true };
 
 /**
@@ -29,7 +31,7 @@ const idle: GestureFeedback = { action: null, candidate: null, progress: 0, rele
 export function VisionControls(props: Props) {
   const [enabled, setEnabled] = useState(true);
   const [status, setStatus] = useState<"off" | "loading" | "ready" | "error">("loading");
-  const [message, setMessage] = useState("Permite la cámara. La primera carga necesita internet.");
+  const [message, setMessage] = useState(LOADING);
   const [feedback, setFeedback] = useState(idle);
   const helpId = useId();
   const video = useRef<HTMLVideoElement>(null);
@@ -86,7 +88,7 @@ export function VisionControls(props: Props) {
         setMessage("Cámara apagada al salir de la pestaña.");
       } else if (!failed.current) {
         setStatus("loading");
-        setMessage("Permite la cámara. La primera carga necesita internet.");
+        setMessage(LOADING);
         setEnabled(true);
       }
     };

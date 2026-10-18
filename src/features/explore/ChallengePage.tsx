@@ -16,6 +16,7 @@ import { Icon } from "../../shared/ui/Icon";
 import { useFocusOnMount } from "../../shared/useFocusOnMount";
 import { MissionRoute } from "../lab/MissionRoute";
 import { BlockEditor } from "../game/BlockEditor";
+import { prefetchGestureAssets } from "../vision/gestureAssets";
 import { InitialProgramEditor } from "../vision/InitialProgramEditor";
 import { Board } from "../game/Board";
 import { RobotSend } from "../robot/RobotSend";
@@ -52,6 +53,10 @@ const MOOD_FOR: Record<Exclude<CheckResult, { ok: true }>["reason"], Mood> = {
 
 function Intro({ challenge, onStart }: { challenge: Challenge; onStart: () => void }) {
   const topic = topicInfo(challenge.topic)!;
+  // Los retos de Inicial arrancan con Gestos: mientras lee la ficha se va bajando el modelo de la cámara.
+  useEffect(() => {
+    if (challenge.level === "inicial" && challenge.kind !== "predict") prefetchGestureAssets();
+  }, [challenge]);
   return (
     <div className="intro-grid">
       <section className="card stack">

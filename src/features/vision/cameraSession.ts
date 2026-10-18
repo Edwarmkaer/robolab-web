@@ -21,7 +21,8 @@ export function startCameraSession(video: HTMLVideoElement, callbacks: Callbacks
   let pending = false;
   let previousFrame = -Infinity;
   let previousVideoTime = -1;
-  const timeout = window.setTimeout(() => fail("La cámara tardó demasiado. Intenta otra vez o usa los botones."), 30000);
+  // La primera vez baja ~12 MB: con internet lento puede pasar de 30 s.
+  const timeout = window.setTimeout(() => fail("La cámara tardó demasiado. Intenta otra vez o usa los botones."), 60000);
 
   function stop() {
     if (stopped) return;
@@ -78,6 +79,34 @@ export function startCameraSession(video: HTMLVideoElement, callbacks: Callbacks
       fail("Este navegador no permite usar los gestos. Prueba Chrome o Edge, o usa los botones.");
       return;
     }
+    // El modelo se baja mientras el navegador pide el permiso de la cámara: las dos esperas se suman en vez de encadenarse.
+    let modelReady = false;
+    let cameraReady = false;
+    function begin() {
+      if (stopped || !modelReady || !cameraReady) return;
+      void video.play().then(() => {
+        if (stopped) return;
+        window.clearTimeout(timeout);
+        callbacks.onReady();
+        animation = window.requestAnimationFrame(frame);
+      }).catch(() => fail("No pudimos iniciar la cámara. Intenta otra vez o usa los botones."));
+    }
+    worker = new Worker(new URL("./recognizer.worker.ts", import.meta.url), { type: "module" });
+    worker.onerror = () => fail("No pudimos cargar los gestos. Revisa tu conexión e intenta otra vez.");
+    worker.onmessage = (event: MessageEvent<RecognitionMessage>) => {
+      if (stopped) return;
+      const message = event.data;
+      if (message.type === "error") {
+        fail("No pudimos cargar los gestos. Revisa tu conexión e intenta otra vez.");
+      } else if (message.type === "ready") {
+        modelReady = true;
+        begin();
+      } else {
+        pending = false;
+        if (!callbacks.isPaused()) callbacks.onSample(message.sample, message.time);
+      }
+    };
+    worker.postMessage({ type: "init" });
     try {
       const acquired = await navigator.mediaDevices.getUserMedia({
         audio: false,
@@ -90,26 +119,8 @@ export function startCameraSession(video: HTMLVideoElement, callbacks: Callbacks
       stream = acquired;
       stream.getTracks().forEach((track) => track.addEventListener("ended", ended));
       video.srcObject = stream;
-      worker = new Worker(new URL("./recognizer.worker.ts", import.meta.url), { type: "module" });
-      worker.onerror = () => fail("No pudimos cargar los gestos. Revisa tu conexión e intenta otra vez.");
-      worker.onmessage = (event: MessageEvent<RecognitionMessage>) => {
-        if (stopped) return;
-        const message = event.data;
-        if (message.type === "error") {
-          fail("No pudimos cargar los gestos. Revisa tu conexión e intenta otra vez.");
-        } else if (message.type === "ready") {
-          void video.play().then(() => {
-            if (stopped) return;
-            window.clearTimeout(timeout);
-            callbacks.onReady();
-            animation = window.requestAnimationFrame(frame);
-          }).catch(() => fail("No pudimos iniciar la cámara. Intenta otra vez o usa los botones."));
-        } else {
-          pending = false;
-          if (!callbacks.isPaused()) callbacks.onSample(message.sample, message.time);
-        }
-      };
-      worker.postMessage({ type: "init" });
+      cameraReady = true;
+      begin();
     } catch (error) {
       const name = error instanceof Error || error instanceof DOMException ? error.name : "";
       fail(name === "NotAllowedError" || name === "SecurityError"
