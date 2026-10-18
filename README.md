@@ -243,9 +243,9 @@ programa contiene retroceso, la web lo avisa y no lo envía. Los tiempos necesit
 calibración física; el recorrido dibujado no verifica el movimiento real.
 
 El contrato, pines y pruebas de aceptación están en
-[robot-bluetooth.md del backend](https://github.com/Edwarmkaer/robolab-backend/blob/codex/bluetooth-classic/docs/robot-bluetooth.md).
-Esta rama fija el commit de ese backend por `git+https` para poder probar los
-dos PRs juntos antes de fusionarlos. La API requiere un navegador con Web Serial;
+[robot-bluetooth.md del backend](https://github.com/orinqq/robolab-backend/blob/main/docs/robot-bluetooth.md).
+El lockfile fija el commit del backend oficial por `git+https`.
+La API requiere un navegador con Web Serial;
 si no está disponible, se muestra la alternativa Wifi.
 
 ## Pruebas y calidad
