@@ -70,6 +70,10 @@ export function Landing() {
           </span>
         </Link>
       </section>
+
+      <p className="small muted" style={{ textAlign: "center" }}>
+        <Link to="/impacto">Ver el impacto en vivo: retos resueltos, personas que juegan y cómo les va</Link>
+      </p>
     </ExploreLayout>
   );
 }

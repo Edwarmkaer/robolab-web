@@ -2,6 +2,7 @@ import { useQuery } from "convex/react";
 import { Link, useParams } from "react-router-dom";
 import { api } from "@robolab/backend/convex/_generated/api";
 import type { Id } from "@robolab/backend/convex/_generated/dataModel";
+import { EVALUATION_EVIDENCE, capacityText } from "@robolab/backend/domain/curriculum/competencias";
 import { localCalendarDate, shortLabel } from "@robolab/backend/domain/evaluation/calendar";
 import { formatDuration } from "@robolab/backend/domain/evaluation/scoring";
 import { Icon } from "../../../shared/ui/Icon";
@@ -54,6 +55,15 @@ export function EvaluationDetail() {
           <p className="muted">
             {detail.classroomLabel} · {isToday ? "hoy" : shortLabel(detail.scheduledDate)} · {detail.questionCount}{" "}
             {detail.questionCount === 1 ? "pregunta" : "preguntas"} · {detail.maxScore} puntos
+          </p>
+          <p className="small muted">
+            Evidencia del Currículo Nacional:{" "}
+            {EVALUATION_EVIDENCE.map((e, i) => (
+              <span key={e.competency}>
+                {i > 0 && " · "}
+                <strong>competencia {e.competency}</strong> ({capacityText(e).toLowerCase()})
+              </span>
+            ))}
           </p>
         </div>
       </div>

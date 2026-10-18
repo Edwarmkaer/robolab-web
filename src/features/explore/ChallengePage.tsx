@@ -2,6 +2,7 @@ import { useMutation } from "convex/react";
 import { useReducer, useRef, useState } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { api } from "@robolab/backend/convex/_generated/api";
+import { capacityText, evidenceFor } from "@robolab/backend/domain/curriculum/competencias";
 import { type Challenge, KIND_LABEL, challengeById, nextChallenge, topicInfo } from "@robolab/backend/domain/explore/challenges";
 import { type CheckResult, checkPrediction, checkProgram } from "@robolab/backend/domain/explore/check";
 import { formatDuration } from "@robolab/backend/domain/evaluation/scoring";
@@ -60,6 +61,17 @@ function Intro({ challenge, onStart }: { challenge: Challenge; onStart: () => vo
           <span className="chip">💡 3 pistas</span>
           <span className="chip">{KIND_LABEL[challenge.kind]}</span>
         </div>
+        <details className="small">
+          <summary className="muted">Competencias del Currículo Nacional que evidencia</summary>
+          <ul className="evidence">
+            {evidenceFor(challenge).map((e) => (
+              <li key={`${e.competency}-${e.capacity}`}>
+                <strong>Competencia {e.competency}</strong> · {capacityText(e)}
+                <span className="muted"> — {e.how}</span>
+              </li>
+            ))}
+          </ul>
+        </details>
         <div className="row">
           <button className="btn btn-primary" type="button" onClick={onStart}>
             <Icon name="play" /> Empezar el reto
