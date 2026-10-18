@@ -6,11 +6,14 @@ import { ToastProvider } from "../../shared/ui/Toast";
 
 /** `robot.status` del servidor y las mutaciones (envío al robot, registro de la partida): las decide cada prueba. */
 const status = vi.fn();
-const mutation = vi.fn(async (_args?: unknown) => ({ robotName: "Kusi-12", letters: "FFF" }));
+const mutation = vi.fn(async (_args?: unknown) => ({ robotName: "Wayra-12", letters: "FFF" }));
 vi.mock("convex/react", () => ({
   useQuery: (_fn: unknown, args: unknown) => (args === "skip" ? undefined : status(args)),
   useMutation: () => mutation,
 }));
+
+const voice = vi.hoisted(() => ({ speak: vi.fn() }));
+vi.mock("../student/speech", () => ({ speak: voice.speak, stopSpeaking: vi.fn(), canSpeak: () => true }));
 
 import { ChallengeRoute } from "./ChallengePage";
 
@@ -45,6 +48,17 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
   vi.useRealTimers();
+});
+
+describe("el personaje se llama Wayra", () => {
+  it("la ficha, la instrucción y el audio al empezar dicen Wayra, nunca Kusi", () => {
+    renderChallenge();
+    expect(screen.getByText(/Wayra quiere llegar a la estrella/)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: /Empezar el reto/ }));
+    expect(voice.speak).toHaveBeenCalledWith("Wayra quiere llegar a la estrella. ¡Está en línea recta!");
+    expect(screen.getAllByText(/Arma el programa para que Wayra llegue a la estrella/).length).toBeGreaterThan(0);
+    expect(document.body.textContent).not.toMatch(/Kusi/);
+  });
 });
 
 describe("pantalla del reto: Robot y Ejecutar", () => {
@@ -89,7 +103,7 @@ describe("pantalla del reto: Robot y Ejecutar", () => {
 
   it("con un robot conectado, Ejecutar también manda la secuencia al robot", async () => {
     window.localStorage.setItem(ROBOT_KEY, "K7Q4MZ");
-    status.mockReturnValue({ name: "Kusi-12", lastSeenAt: NOW - 1000, codeExpiresAt: NOW + 3_600_000, lastCommand: null });
+    status.mockReturnValue({ name: "Wayra-12", lastSeenAt: NOW - 1000, codeExpiresAt: NOW + 3_600_000, lastCommand: null });
     renderChallenge();
     fireEvent.click(screen.getByRole("button", { name: /Empezar el reto/ }));
     fireEvent.click(screen.getByRole("button", { name: "Avanzar" }));
@@ -118,7 +132,7 @@ describe("pantalla del reto: al lograrlo", () => {
     for (let i = 0; i < 3; i++) fireEvent.click(screen.getByRole("button", { name: "Avanzar" }));
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /Ejecutar/ }));
-      // La animación (4 pasos de 450 ms) y el momento de ver a Kusi en la estrella (1,2 s).
+      // La animación (4 pasos de 450 ms) y el momento de ver a Wayra en la estrella (1,2 s).
       await vi.advanceTimersByTimeAsync(4000);
     });
     const title = screen.getByRole("heading", { level: 1, name: "¡Reto logrado!" });

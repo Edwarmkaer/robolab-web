@@ -1,20 +1,24 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { startCameraSession } from "./cameraSession";
+import { disposeRecognizer } from "./recognizer";
 
 class CameraWorker {
   static latest: CameraWorker;
+  static created = 0;
   onmessage: ((event: MessageEvent) => void) | null = null;
   onerror: (() => void) | null = null;
   terminate = vi.fn();
   postMessage = vi.fn();
-  constructor() { CameraWorker.latest = this; }
+  constructor() { CameraWorker.latest = this; CameraWorker.created++; }
   send(data: unknown) { this.onmessage?.({ data } as MessageEvent); }
 }
 
 const stops: (() => void)[] = [];
 afterEach(() => {
   stops.splice(0).forEach((stop) => stop());
+  disposeRecognizer();
+  CameraWorker.created = 0;
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
 });
@@ -33,23 +37,44 @@ function setup(getUserMedia?: () => Promise<MediaStream>) {
   vi.spyOn(video, "play").mockResolvedValue();
   vi.spyOn(video, "pause").mockImplementation(() => undefined);
   const onError = vi.fn();
+  const onCamera = vi.fn();
   const onReady = vi.fn();
   const onSample = vi.fn();
-  const stop = startCameraSession(video, { onError, onReady, onSample, isPaused: () => false });
+  const stop = startCameraSession(video, { onError, onCamera, onReady, onSample, isPaused: () => false });
   stops.push(stop);
-  return { stop, stopTrack, stream, video, onError, onReady, onSample };
+  return { stop, stopTrack, stream, video, onError, onCamera, onReady, onSample };
 }
 
 describe("ciclo de vida de la cámara", () => {
-  it("libera la cámara y el worker al salir", async () => {
+  it("libera la cámara al salir, y deja el reconocedor listo para volver a Gestos", async () => {
     const camera = setup();
     await vi.waitFor(() => expect(camera.video.srcObject).toBe(camera.stream));
     CameraWorker.latest.send({ type: "ready" });
     await vi.waitFor(() => expect(camera.onReady).toHaveBeenCalledOnce());
     camera.stop();
     expect(camera.stopTrack).toHaveBeenCalledOnce();
-    expect(CameraWorker.latest.terminate).toHaveBeenCalledOnce();
+    expect(CameraWorker.latest.terminate).not.toHaveBeenCalled();
     expect(camera.video.srcObject).toBeNull();
+  });
+
+  it("la imagen se ve apenas llega el permiso, sin esperar a que el modelo esté listo", async () => {
+    const camera = setup();
+    await vi.waitFor(() => expect(camera.onCamera).toHaveBeenCalledOnce());
+    expect(camera.video.play).toHaveBeenCalled();
+    expect(camera.onReady).not.toHaveBeenCalled();
+    CameraWorker.latest.send({ type: "ready" });
+    await vi.waitFor(() => expect(camera.onReady).toHaveBeenCalledOnce());
+  });
+
+  it("volver a Gestos no vuelve a bajar ni a preparar el modelo", async () => {
+    const first = setup();
+    CameraWorker.latest.send({ type: "ready" });
+    await vi.waitFor(() => expect(first.onReady).toHaveBeenCalledOnce());
+    first.stop();
+    const second = setup();
+    await vi.waitFor(() => expect(second.onReady).toHaveBeenCalledOnce());
+    expect(CameraWorker.created).toBe(1);
+    expect(CameraWorker.latest.postMessage.mock.calls.filter(([message]) => message.type === "init")).toHaveLength(1);
   });
 
   it("detiene una cámara cuyo permiso llega después de salir", async () => {

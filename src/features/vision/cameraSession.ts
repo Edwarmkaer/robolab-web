@@ -1,22 +1,28 @@
 import type { GestureSample } from "./gestureGate";
-
-export type RecognitionMessage =
-  | { type: "ready" }
-  | { type: "sample"; sample: GestureSample; time: number }
-  | { type: "error" };
+import { type RecognizerUse, attachRecognizer, disposeRecognizer } from "./recognizer";
 
 type Callbacks = {
   onSample: (sample: GestureSample, time: number) => void;
+  /** Ya se ve la imagen de la cámara; los gestos pueden seguir preparándose. */
+  onCamera?: () => void;
+  /** Cámara y gestos listos: desde aquí llegan muestras. */
   onReady: () => void;
   onError: (message: string) => void;
   isPaused: () => boolean;
 };
 
-/** Una sesión posee cámara, worker y fotogramas. stop también cancela permisos pendientes. */
+const LOAD_ERROR = "No pudimos cargar los gestos. Revisa tu conexión e intenta otra vez.";
+const READ_ERROR = "No pudimos leer la cámara. Intenta otra vez o usa los botones.";
+
+/**
+ * Una sesión posee la cámara y sus fotogramas; el reconocedor es compartido y
+ * sigue listo al apagarla. La imagen se muestra apenas hay permiso, sin esperar
+ * al modelo. stop también cancela permisos pendientes.
+ */
 export function startCameraSession(video: HTMLVideoElement, callbacks: Callbacks): () => void {
   let stopped = false;
   let stream: MediaStream | null = null;
-  let worker: Worker | null = null;
+  let recognizer: RecognizerUse | null = null;
   let animation = 0;
   let pending = false;
   let previousFrame = -Infinity;
@@ -29,7 +35,7 @@ export function startCameraSession(video: HTMLVideoElement, callbacks: Callbacks
     stopped = true;
     window.clearTimeout(timeout);
     window.cancelAnimationFrame(animation);
-    worker?.terminate();
+    recognizer?.release();
     stream?.getTracks().forEach((track) => {
       track.removeEventListener("ended", ended);
       track.stop();
@@ -38,9 +44,11 @@ export function startCameraSession(video: HTMLVideoElement, callbacks: Callbacks
     video.srcObject = null;
   }
 
-  function fail(message: string) {
+  /** dispose también apaga el reconocedor: sin permiso de cámara no tiene sentido tenerlo en memoria. */
+  function fail(message: string, dispose = false) {
     if (stopped) return;
     stop();
+    if (dispose) disposeRecognizer();
     callbacks.onError(message);
   }
 
@@ -62,12 +70,12 @@ export function startCameraSession(video: HTMLVideoElement, callbacks: Callbacks
         return;
       }
       try {
-        worker!.postMessage({ type: "frame", bitmap, time }, [bitmap]);
+        recognizer!.send(bitmap, time);
       } catch {
         bitmap.close();
-        fail("No pudimos leer la cámara. Intenta otra vez o usa los botones.");
+        fail(READ_ERROR);
       }
-    }).catch(() => fail("No pudimos leer la cámara. Intenta otra vez o usa los botones."));
+    }).catch(() => fail(READ_ERROR));
   }
 
   async function start() {
@@ -79,56 +87,65 @@ export function startCameraSession(video: HTMLVideoElement, callbacks: Callbacks
       fail("Este navegador no permite usar los gestos. Prueba Chrome o Edge, o usa los botones.");
       return;
     }
-    // El modelo se baja mientras el navegador pide el permiso de la cámara: las dos esperas se suman en vez de encadenarse.
+    // El modelo se prepara mientras el navegador pide el permiso: las dos esperas se solapan.
     let modelReady = false;
     let cameraReady = false;
     function begin() {
       if (stopped || !modelReady || !cameraReady) return;
-      void video.play().then(() => {
-        if (stopped) return;
-        window.clearTimeout(timeout);
-        callbacks.onReady();
-        animation = window.requestAnimationFrame(frame);
-      }).catch(() => fail("No pudimos iniciar la cámara. Intenta otra vez o usa los botones."));
+      window.clearTimeout(timeout);
+      callbacks.onReady();
+      animation = window.requestAnimationFrame(frame);
     }
-    worker = new Worker(new URL("./recognizer.worker.ts", import.meta.url), { type: "module" });
-    worker.onerror = () => fail("No pudimos cargar los gestos. Revisa tu conexión e intenta otra vez.");
-    worker.onmessage = (event: MessageEvent<RecognitionMessage>) => {
-      if (stopped) return;
-      const message = event.data;
-      if (message.type === "error") {
-        fail("No pudimos cargar los gestos. Revisa tu conexión e intenta otra vez.");
-      } else if (message.type === "ready") {
+    recognizer = attachRecognizer({
+      onSample: (sample, time) => {
+        if (stopped) return;
+        pending = false;
+        if (!callbacks.isPaused()) callbacks.onSample(sample, time);
+      },
+      onError: () => fail(LOAD_ERROR),
+    });
+    recognizer.ready.then(
+      () => {
         modelReady = true;
         begin();
-      } else {
-        pending = false;
-        if (!callbacks.isPaused()) callbacks.onSample(message.sample, message.time);
-      }
-    };
-    worker.postMessage({ type: "init" });
+      },
+      () => fail(LOAD_ERROR),
+    );
+    let acquired: MediaStream;
     try {
-      const acquired = await navigator.mediaDevices.getUserMedia({
+      acquired = await navigator.mediaDevices.getUserMedia({
         audio: false,
         video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } },
       });
-      if (stopped) {
-        acquired.getTracks().forEach((track) => track.stop());
-        return;
-      }
-      stream = acquired;
-      stream.getTracks().forEach((track) => track.addEventListener("ended", ended));
-      video.srcObject = stream;
-      cameraReady = true;
-      begin();
     } catch (error) {
       const name = error instanceof Error || error instanceof DOMException ? error.name : "";
-      fail(name === "NotAllowedError" || name === "SecurityError"
-        ? "La cámara necesita tu permiso. Permítela en el navegador o usa los botones."
-        : name === "NotFoundError"
-          ? "No encontramos una cámara. Conecta una o usa los botones."
-          : "No pudimos abrir la cámara. Cierra otras apps que la usen e intenta otra vez.");
+      fail(
+        name === "NotAllowedError" || name === "SecurityError"
+          ? "La cámara necesita tu permiso. Permítela en el navegador o usa los botones."
+          : name === "NotFoundError"
+            ? "No encontramos una cámara. Conecta una o usa los botones."
+            : "No pudimos abrir la cámara. Cierra otras apps que la usen e intenta otra vez.",
+        true,
+      );
+      return;
     }
+    if (stopped) {
+      acquired.getTracks().forEach((track) => track.stop());
+      return;
+    }
+    stream = acquired;
+    stream.getTracks().forEach((track) => track.addEventListener("ended", ended));
+    video.srcObject = stream;
+    try {
+      await video.play();
+    } catch {
+      fail("No pudimos iniciar la cámara. Intenta otra vez o usa los botones.");
+      return;
+    }
+    if (stopped) return;
+    cameraReady = true;
+    callbacks.onCamera?.();
+    begin();
   }
   void start();
   return stop;
