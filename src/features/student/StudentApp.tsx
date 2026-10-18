@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from "react-router-dom";
+import { StudentLivePage, StudentLiveRoom } from "../live/StudentLivePage";
 import { ErrorBoundary } from "../../shared/ui/ErrorBoundary";
 import { JoinClass } from "./JoinClass";
 import { StudentHome } from "./StudentHome";
@@ -43,6 +44,8 @@ export function StudentApp() {
       )}
     >
       <Routes>
+        <Route path="en-vivo" element={<StudentLivePage token={token} />} />
+        <Route path="en-vivo/:roomId" element={<StudentLiveRoom token={token} />} />
         <Route index element={<StudentHome token={token} onSignOut={() => setToken(null)} />} />
         <Route path="*" element={<Navigate to="/alumno" replace />} />
       </Routes>

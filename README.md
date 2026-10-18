@@ -265,3 +265,32 @@ Los gráficos del robot y de los bloques vienen del kit Inrobit que el equipo
 hizo en 2025. Wayra se dibuja con [blobatar](https://github.com/Alain00/blobatar)
 (MIT), en el navegador y sin conexión a terceros. Todo el código de esta
 aplicación es nuevo.
+
+## Partidas en vivo
+
+En **Docente → En vivo**, elige una clase, un laberinto y el modo de juego:
+
+- **Carrera:** cada alumno programa su propio tablero. Todos empiezan cuando
+  el docente inicia y Convex confirma el orden de llegada al recibir programas
+  que resuelven el laberinto. Los demás pueden seguir jugando.
+- **En equipo:** los alumnos construyen un programa y resuelven un tablero
+  compartido. Cada edición comprueba la versión para no borrar cambios de otro.
+
+El alumno entra con su código de clase y apodo habituales, abre **Jugar en vivo**
+y se une a la sala antes del inicio. El docente ve las ejecuciones y resultados
+sin recargar. Puede cerrar la partida y conservar sus resultados. Recargar o
+volver a entrar conserva lo confirmado por el servidor. Las listas muestran
+participantes inscritos, no presencia en línea.
+
+Esta primera versión incluye tres laberintos y hasta 60 movimientos por programa.
+La posición del robot se actualiza al recibir una ejecución confirmada; la
+animación de los movimientos de otros alumnos queda para una siguiente versión.
+El programa de los rivales nunca se envía al navegador del alumno.
+
+Para probar entre varios dispositivos, la web debe apuntar al **mismo despliegue
+Convex** y estar accesible por HTTP(S). Para equipos distintos, también debe
+ser accesible el despliegue Convex de desarrollo: `localhost` o `127.0.0.1`
+apuntan al propio equipo de cada alumno. El backend necesita el cambio `liveRooms`
+del PR vinculado antes de utilizar estas pantallas. El paquete del backend queda
+fijado por commit en `package-lock.json`; después de integrar el PR del backend
+puede actualizarse a `orinqq/robolab-backend#main` con el comando habitual.
