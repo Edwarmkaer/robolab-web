@@ -4,7 +4,7 @@ import { EDUCATION_LEVELS, type EducationLevel } from "@robolab/backend/domain/g
 import { missionsFor } from "@robolab/backend/domain/lab/mission";
 import { Icon } from "../../shared/ui/Icon";
 import { MissionThumb } from "../lab/MissionThumb";
-import { openCountFor } from "./catalog";
+import { countLabel, openCountFor } from "./catalog";
 import { Breadcrumbs, ExploreLayout, LEVEL_INFO } from "./ExploreLayout";
 import { useExploreProgress } from "./storage";
 
@@ -39,6 +39,7 @@ export function ChallengeListPage() {
           )}
         </div>
       </div>
+      <p className="small muted">{countLabel(level, openCountFor(topic.id, level))}</p>
       {isMissions ? (
         missions.length === 0 ? (
           <div className="empty">

@@ -1,0 +1,123 @@
+/*
+ * Ambientación del tablero por tópico (Board recibe `topic`). Cada ambiente
+ * cambia el marco, las casillas fuera del camino, el camino, el obstáculo de
+ * agua y la marca de la meta. Tecnología, el jardín, usa los mismos colores de
+ * styles.css: un tablero sin tópico se ve igual que antes.
+ *
+ *   tecnologia  jardín       pasto con florecitas
+ *   ciencia     laboratorio  mesas de menta y piso blanco con baldosas
+ *   ingenieria  taller       naranja con piso punteado
+ *   artes       galería      lavanda con piso claro y trazos
+ *   matematicas números      coral con piso de hoja cuadriculada
+ */
+.board[data-topic] {
+  background: var(--board-frame);
+}
+
+.board[data-topic] .tile {
+  background: var(--board-block);
+}
+
+.board[data-topic] .tile[data-walkable="true"] {
+  background-color: var(--board-path);
+}
+
+.board[data-topic] .tile[data-kind="water"] {
+  background: var(--board-water);
+}
+
+.board[data-topic] .tile[data-picked] {
+  background-color: var(--c-brand-soft);
+}
+
+/* La meta lleva un aro del color del tópico y una marca pequeña en la esquina. */
+.tile[data-goal] {
+  position: relative;
+}
+
+.board[data-topic] .tile[data-goal] {
+  box-shadow: inset 0 0 0 3px var(--board-accent);
+}
+
+.goal-mark {
+  position: absolute;
+  top: 4%;
+  right: 6%;
+  font-size: clamp(0.7rem, 2.2vw, 1.15rem);
+  line-height: 1;
+}
+
+.board[data-topic="tecnologia"] {
+  --board-frame: var(--c-grass-dark);
+  --board-block: var(--c-grass);
+  --board-path: var(--c-path);
+  --board-water: var(--topic-tecnologia-water);
+  --board-accent: var(--topic-tecnologia-accent);
+}
+
+.board[data-topic="tecnologia"] .tile[data-walkable="false"]:not([data-kind="water"]) {
+  background-image:
+    radial-gradient(circle at 24% 30%, var(--topic-tecnologia-deco-1) 0 9%, transparent 10%),
+    radial-gradient(circle at 72% 26%, var(--topic-tecnologia-deco-2) 0 9%, transparent 10%),
+    radial-gradient(circle at 48% 72%, var(--topic-tecnologia-deco-3) 0 9%, transparent 10%);
+}
+
+.board[data-topic="ciencia"] {
+  --board-frame: var(--topic-ciencia-frame);
+  --board-block: var(--topic-ciencia-block);
+  --board-path: var(--topic-ciencia-path);
+  --board-water: var(--topic-ciencia-water);
+  --board-accent: var(--topic-ciencia-accent);
+}
+
+.board[data-topic="ciencia"] .tile[data-walkable="true"] {
+  background-image:
+    linear-gradient(var(--topic-ciencia-deco-1) 1px, transparent 1px),
+    linear-gradient(90deg, var(--topic-ciencia-deco-2) 1px, transparent 1px);
+  background-size: 50% 50%;
+}
+
+.board[data-topic="ingenieria"] {
+  --board-frame: var(--topic-ingenieria-frame);
+  --board-block: var(--topic-ingenieria-block);
+  --board-path: var(--topic-ingenieria-path);
+  --board-water: var(--topic-ingenieria-water);
+  --board-accent: var(--topic-ingenieria-accent);
+}
+
+.board[data-topic="ingenieria"] .tile[data-walkable="true"] {
+  background-image: radial-gradient(var(--topic-ingenieria-deco-1) 1.5px, transparent 2px);
+  background-size: 12px 12px;
+}
+
+.board[data-topic="artes"] {
+  --board-frame: var(--topic-artes-frame);
+  --board-block: var(--topic-artes-block);
+  --board-path: var(--topic-artes-path);
+  --board-water: var(--topic-artes-water);
+  --board-accent: var(--topic-artes-accent);
+}
+
+.board[data-topic="artes"] .tile[data-walkable="true"] {
+  background-image: repeating-linear-gradient(45deg, rgb(142 91 216 / 8%) 0 6px, transparent 6px 12px);
+}
+
+.board[data-topic="matematicas"] {
+  --board-frame: var(--topic-matematicas-frame);
+  --board-block: var(--topic-matematicas-block);
+  --board-path: var(--topic-matematicas-path);
+  --board-water: var(--topic-matematicas-water);
+  --board-accent: var(--topic-matematicas-accent);
+}
+
+.board[data-topic="matematicas"] .tile[data-walkable="true"] {
+  background-image:
+    linear-gradient(var(--topic-matematicas-deco-1) 1px, transparent 1px),
+    linear-gradient(90deg, var(--topic-matematicas-deco-2) 1px, transparent 1px);
+  background-size: 25% 25%;
+}
+
+/* En el taller el aceite es oscuro: la marca clara se sigue leyendo. */
+.board[data-topic="ingenieria"] .tile[data-kind="water"] .tile-mark {
+  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 40%));
+}

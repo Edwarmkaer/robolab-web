@@ -18,8 +18,8 @@ export const TOPIC_COLOR: Record<Topic, string> = {
 };
 
 export const LEVEL_INFO: Record<EducationLevel, { name: string; ages: string; description: string; dots: number }> = {
-  inicial: { name: "Inicial", ages: "3-5 años", description: "Primeros pasos: avanzar y girar.", dots: 1 },
-  primaria: { name: "Primaria", ages: "6-11 años", description: "Retos con más pasos, Repetir y razonamiento.", dots: 2 },
+  inicial: { name: "Inicial", ages: "3-5 años", description: "Primeros pasos con movimiento, formas y colores.", dots: 1 },
+  primaria: { name: "Primaria", ages: "6-11 años", description: "Retos con más pasos y razonamiento.", dots: 2 },
   secundaria: { name: "Secundaria", ages: "12-16 años", description: "Variables, optimización y modelos.", dots: 3 },
 };
 

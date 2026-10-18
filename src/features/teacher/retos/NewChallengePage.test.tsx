@@ -61,7 +61,9 @@ describe("creador de retos (T3 → T4 → T6 → T7)", () => {
     fireEvent.click(button(/Tecnología/));
     fireEvent.click(button(/^Primaria/));
     fireEvent.click(button(/continuar/i));
-    fireEvent.click(screen.getAllByRole("button", { name: new RegExp(MISSIONS[0]!.title) })[0]!);
+    // La primera misión de Tecnología (el creador lista las del tópico elegido, no la primera de todas).
+    const first = MISSIONS.find((m) => m.topic === "tecnologia")!;
+    fireEvent.click(screen.getAllByRole("button", { name: new RegExp(first.title) })[0]!);
     const use = button(/usar este juego/i);
     fireEvent.click(use);
     expect(use.isConnected).toBe(false);

@@ -1,13 +1,16 @@
-import { Link, Navigate, useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import { topicInfo } from "@robolab/backend/domain/explore/challenges";
+import { levelProgress } from "@robolab/backend/domain/explore/progress";
 import { EDUCATION_LEVELS } from "@robolab/backend/domain/game/levels";
-import { countLabel, openCountFor } from "./catalog";
-import { Breadcrumbs, ExploreLayout, LEVEL_INFO, TOPIC_COLOR } from "./ExploreLayout";
+import { Breadcrumbs, ExploreLayout, TOPIC_COLOR } from "./ExploreLayout";
+import { LevelCard } from "./LevelCard";
+import { useExploreProgress } from "./storage";
 
 /** Un tópico: elige tu nivel. */
 export function TopicPage() {
   const { topic: topicId = "" } = useParams();
   const topic = topicInfo(topicId);
+  const { progress } = useExploreProgress();
   if (!topic || !topic.available) return <Navigate to="/" replace />;
 
   return (
@@ -23,34 +26,9 @@ export function TopicPage() {
         </div>
       </div>
       <div className="level-grid">
-        {EDUCATION_LEVELS.map((level) => {
-          const info = LEVEL_INFO[level];
-          const count = openCountFor(topic.id, level);
-          const body = (
-            <>
-              <span className="level-dots" aria-hidden="true">
-                {[1, 2, 3].map((d) => (
-                  <span key={d} data-on={d <= info.dots} />
-                ))}
-              </span>
-              <strong className="level-name">{info.name}</strong>
-              <span className="level-ages">{info.ages}</span>
-              <span className="small muted">{info.description}</span>
-              <span className={count > 0 ? "badge" : "badge badge-muted"}>
-                {count > 0 ? countLabel(level, count) : "Próximamente"}
-              </span>
-            </>
-          );
-          return count > 0 ? (
-            <Link key={level} className="level-card" to={`/explorar/${topic.id}/${level}`}>
-              {body}
-            </Link>
-          ) : (
-            <div key={level} className="level-card" aria-disabled="true">
-              {body}
-            </div>
-          );
-        })}
+        {EDUCATION_LEVELS.map((level) => (
+          <LevelCard key={level} topic={topic.id} level={level} progress={levelProgress(progress, topic.id, level)} />
+        ))}
       </div>
       <p className="small muted">Puedes cambiar de nivel cuando quieras.</p>
     </ExploreLayout>

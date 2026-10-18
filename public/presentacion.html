@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>RoboLab · Presentación</title>
+<meta name="description" content="RoboLab: retos de programación con un robot para Inicial y Primaria, medibles para el docente. Hack the Andes 2026, track Educación Escolar." />
+<link rel="icon" type="image/svg+xml" href="/robot/robot.svg" />
+<style>
+  :root { --bg: #fff8ec; --ink: #1f2430; --muted: #5d6475; --brand: #2459b8; --brand-soft: #e8efff; --ok: #17703d; --ok-soft: #e3f4ea; --line: #e7e1d2; --surface: #fff; --radius: 16px; }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.55 "Nunito", "Segoe UI", system-ui, sans-serif; }
+  main { max-width: 1040px; margin: 0 auto; padding: 24px 16px 64px; }
+  header.hero { display: grid; gap: 14px; padding: 40px 0 24px; }
+  .eyebrow { color: var(--brand); font-weight: 800; letter-spacing: .08em; text-transform: uppercase; font-size: .8rem; }
+  h1 { font-size: clamp(2rem, 5vw, 3.2rem); line-height: 1.1; margin: 0; letter-spacing: -.02em; }
+  h2 { font-size: 1.6rem; margin: 48px 0 12px; letter-spacing: -.01em; }
+  h3 { font-size: 1.1rem; margin: 0 0 6px; }
+  p { margin: 0 0 10px; }
+  .lead { font-size: 1.2rem; color: var(--muted); max-width: 46ch; }
+  .links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 18px; border-radius: 999px; background: var(--brand); color: #fff; text-decoration: none; font-weight: 800; }
+  .btn.ghost { background: var(--surface); color: var(--brand); border: 1px solid var(--line); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
+  .card.ok { background: var(--ok-soft); border-color: transparent; }
+  .num { font-size: 2rem; font-weight: 900; color: var(--brand); line-height: 1; }
+  .shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+  figure { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+  figure img { display: block; width: 100%; height: 320px; object-fit: cover; object-position: top; }
+  figcaption { padding: 12px 16px; font-size: .95rem; color: var(--muted); }
+  ol, ul { padding-left: 22px; } li { margin: 4px 0; }
+  .muted { color: var(--muted); }
+  .quote { border-left: 4px solid var(--brand); padding: 6px 16px; color: var(--muted); font-style: italic; }
+  footer { margin-top: 56px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: .9rem; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #171a22; --ink: #f1efe8; --muted: #b3b1a8; --surface: #222633; --line: #343948; --brand: #8fb0ff; --brand-soft: #243055; --ok: #7bd39b; --ok-soft: #1f3a2c; } }
+</style>
+</head>
+<body>
+<main>
+  <header class="hero">
+    <span class="eyebrow">Hack the Andes 2026 · Educación escolar</span>
+    <h1>RoboLab: retos de programación con un robot, medibles para el docente</h1>
+    <p class="lead">En Inicial se programa con bloques; en Primaria se resuelven misiones con energía y estaciones. Cada niño deja evidencia observable: ejecuciones, pistas, tiempo y competencias del Currículo Nacional.</p>
+    <div class="links">
+      <a class="btn" href="/">Probar la app</a>
+      <a class="btn ghost" href="/impacto">Panel de impacto en vivo</a>
+      <a class="btn ghost" href="https://github.com/orinqq/robolab-web">Código web</a>
+      <a class="btn ghost" href="https://github.com/orinqq/robolab-backend">Código backend</a>
+    </div>
+  </header>
+
+  <h2>El problema</h2>
+  <div class="grid">
+    <div class="card"><h3>El robot llega, pero ¿qué aprendió el niño?</h3><p class="muted">Los kits de robótica de piso se usan en Inicial y Primaria, pero el docente solo ve si el robot llegó. No tiene intentos, pistas, tiempo ni evidencia por competencia.</p></div>
+    <div class="card"><h3>Aulas multigrado</h3><p class="muted">En el Perú rural una misma actividad debe servir a 2.º, 3.º y 4.º a la vez. Preparar tres versiones a mano no es realista.</p></div>
+    <div class="card"><h3>Sin datos personales</h3><p class="muted">Un niño no debería necesitar cuenta ni dar su nombre para aprender a programar.</p></div>
+  </div>
+
+  <h2>Qué hace RoboLab</h2>
+  <div class="grid">
+    <div class="card"><h3>Retos abiertos, sin cuenta</h3><p class="muted">Cinco tópicos STEAM. Inicial: bloques (avanzar, girar, repetir). Primaria: misiones 6×6 con paredes, terreno difícil, estaciones y presupuesto de energía, en tres subniveles validados por un algoritmo que rechaza misiones sin solución.</p></div>
+    <div class="card"><h3>Wayra, la guía</h3><p class="muted">Hasta tres pistas por reto. El servidor registra cuántas se pidieron y si sirvieron.</p></div>
+    <div class="card"><h3>Clases con código y apodo</h3><p class="muted">El alumno entra con el código de su clase y un apodo. El docente crea retos en tres pasos y ve, por reto, quién lo logró, intentos, pistas, tiempo y "qué se observó".</p></div>
+    <div class="card"><h3>Evaluaciones jugadas</h3><p class="muted">Preguntas que se abren al llegar a cada estrella; ranking por puntaje, veces, ejecuciones y tiempo; gráfica de desarrollo por alumno.</p></div>
+    <div class="card"><h3>Robot físico por wifi</h3><p class="muted">Un ESP32 recibe el programa (letras del kit) por un relé con código de emparejamiento, respuestas OK/RUN/DONE y protección contra envíos repetidos. Las flechas de Primaria se convierten a giros.</p></div>
+    <div class="card"><h3>Currículo Nacional</h3><p class="muted">Cada reto declara las competencias y capacidades del MINEDU que evidencia (22, 23, 25, 28, 29). "Mi avance" muestra la cobertura.</p></div>
+  </div>
+
+  <h2>Así se ve</h2>
+  <div class="shots">
+    <figure><img src="/presentacion/inicial-bloques.png" alt="Reto de Inicial en celular: tablero, piezas sin texto y la guía Wayra abajo a la derecha" /><figcaption>Inicial: bloques en el celular, con Wayra.</figcaption></figure>
+    <figure><img src="/presentacion/primaria-mision.png" alt="Misión de Primaria: tablero 6 por 6 con paredes, estaciones, energía y flechas" /><figcaption>Primaria: misión con energía y estaciones, tres subniveles.</figcaption></figure>
+    <figure><img src="/presentacion/reto-logrado.png" alt="Pantalla de reto logrado con intentos, pistas y tiempo" /><figcaption>Al lograrlo: intentos, pistas y tiempo.</figcaption></figure>
+    <figure><img src="/presentacion/docente-clase.png" alt="Clase del docente con el código, el apodo del alumno y su estado" /><figcaption>Docente: clase con código, apodos y estado por alumno.</figcaption></figure>
+    <figure><img src="/presentacion/docente-resultados.png" alt="Resultados de un reto: porcentaje que lo logró, intentos, pistas, tiempo y qué se observó" /><figcaption>Resultados de un reto: solo lo observable, sin diagnosticar.</figcaption></figure>
+    <figure><img src="/presentacion/impacto.png" alt="Panel público de impacto con retos resueltos, personas y cómo les va" /><figcaption>Panel público de impacto, en vivo.</figcaption></figure>
+  </div>
+
+  <h2>Cómo se mide</h2>
+  <div class="grid">
+    <div class="card ok"><div class="num" id="n-solved">—</div><p>retos y misiones resueltos</p></div>
+    <div class="card ok"><div class="num" id="n-devices">—</div><p>personas que jugaron</p></div>
+    <div class="card ok"><div class="num" id="n-rate">—</div><p>de las partidas terminan en logro</p></div>
+  </div>
+  <p class="muted" style="margin-top:10px">Cifras en vivo del panel público (<a href="/impacto">/impacto</a>). El servidor es la autoridad: vuelve a simular cada programa, cuenta ejecuciones, pistas y tiempo con su reloj y califica.</p>
+  <p class="quote">Solo mostramos lo observable. No diagnosticamos aprendizaje: para eso hacen falta instrumentos y validación pedagógica.</p>
+
+  <h2>Tecnología y confianza</h2>
+  <ul>
+    <li>Vite + React 19 + TypeScript; backend Convex en tiempo real; dominio en TypeScript puro compartido por navegador y servidor.</li>
+    <li>Pruebas automáticas de dominio, backend (convex-test) y componentes (jsdom); CI en GitHub Actions; web en Vercel.</li>
+    <li>Apodos en vez de nombres; contraseñas con reglas y recuperación por código; freno a la fuerza bruta; fecha decidida por el servidor; claves del robot solo hasheadas; sin analítica de terceros.</li>
+    <li>Firmware del ESP32 y protocolo del robot en el repositorio del backend.</li>
+  </ul>
+
+  <footer>Equipo ORIN · github.com/orinqq · RoboLab, Hack the Andes 2026.</footer>
+</main>
+<script>
+  // Cifras en vivo del panel de impacto (consulta pública de Convex, sin datos personales).
+  (async () => {
+    try {
+      const r = await fetch("https://deafening-guanaco-978.convex.cloud/api/query", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ path: "impact:summary", args: {}, format: "json" }),
+      });
+      if (!r.ok) return;
+      const d = (await r.json()).value;
+      const n = (v) => (v === null || v === undefined ? "—" : String(v));
+      document.getElementById("n-solved").textContent = n(d.total.solved);
+      document.getElementById("n-devices").textContent = n(d.total.devices);
+      document.getElementById("n-rate").textContent = d.total.successRate === null ? "—" : d.total.successRate + " %";
+    } catch {}
+  })();
+</script>
+</body>
+</html>
