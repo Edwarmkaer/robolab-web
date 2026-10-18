@@ -3,3 +3,25 @@
   margin: 0;
   font-size: 1.5rem;
 }
+
+/* Progreso por retos: tabla de alumnos junto al cuadro «Para mirar de cerca». */
+.progress-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  .progress-grid {
+    grid-template-columns: minmax(0, 1fr) 280px;
+  }
+}
+
+.progress-solved {
+  color: var(--c-ok);
+}
+
+.progress-unsolved {
+  color: var(--c-warn);
+}
