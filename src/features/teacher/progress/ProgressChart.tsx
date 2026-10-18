@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { H, M, PLOT_H, PLOT_W, type Scale, W, directLabels } from "./chartLayout";
+import { MOBILE_QUERY, useMediaQuery } from "../../../shared/useMediaQuery";
+import { COMPACT_LAYOUT, type Scale, WIDE_LAYOUT, directLabels, visibleLabelIndexes, yFor } from "./chartLayout";
 
 export type ChartSeries = {
   readonly id: string;
@@ -40,10 +41,14 @@ function segments(values: readonly (number | null)[], xOf: (i: number) => number
 
 export function ProgressChart({ xLabels, xDetails, series, title, scale, format }: Props) {
   const [hover, setHover] = useState<number | null>(null);
-  const { yOf } = scale;
+  // En el celular la gráfica tiene su propio alto y tamaño de letra: encogida a 360 px, la ancha era ilegible.
+  const compact = useMediaQuery(MOBILE_QUERY);
+  const { W, H, M, PLOT_W, PLOT_H, labelChars, axisFont } = compact ? COMPACT_LAYOUT : WIDE_LAYOUT;
+  const yOf = yFor(scale, compact ? COMPACT_LAYOUT : WIDE_LAYOUT);
   const n = xLabels.length;
   const xOf = (i: number) => (n === 1 ? M.left + PLOT_W / 2 : M.left + (i / (n - 1)) * PLOT_W);
   const step = n > 1 ? PLOT_W / (n - 1) : PLOT_W;
+  const shown = new Set(visibleLabelIndexes(n, step));
 
   return (
     <figure className="stack" style={{ margin: 0 }}>
@@ -62,16 +67,18 @@ export function ProgressChart({ xLabels, xDetails, series, title, scale, format 
           {scale.ticks.map((t) => (
             <g key={t}>
               <line x1={M.left} x2={M.left + PLOT_W} y1={yOf(t)} y2={yOf(t)} stroke="var(--c-line)" strokeWidth="1" />
-              <text x={M.left - 8} y={yOf(t)} textAnchor="end" dominantBaseline="middle" fontSize="11" fill="var(--c-muted)">
+              <text x={M.left - 8} y={yOf(t)} textAnchor="end" dominantBaseline="middle" fontSize={axisFont} fill="var(--c-muted)">
                 {format(t)}
               </text>
             </g>
           ))}
-          {xLabels.map((label, i) => (
-            <text key={i} x={xOf(i)} y={H - M.bottom + 20} textAnchor="middle" fontSize="11" fill="var(--c-muted)">
-              {label}
-            </text>
-          ))}
+          {xLabels.map((label, i) =>
+            shown.has(i) ? (
+              <text key={i} x={xOf(i)} y={H - M.bottom + 20} textAnchor="middle" fontSize={axisFont} fill="var(--c-muted)">
+                {label}
+              </text>
+            ) : null,
+          )}
           {hover !== null && (
             <line x1={xOf(hover)} x2={xOf(hover)} y1={M.top} y2={M.top + PLOT_H} stroke="var(--c-muted)" strokeWidth="1" strokeDasharray="3 3" />
           )}
@@ -88,14 +95,14 @@ export function ProgressChart({ xLabels, xDetails, series, title, scale, format 
               )}
             </g>
           ))}
-          {directLabels(series, xOf, yOf).map((l) => (
+          {directLabels(series, xOf, yOf, labelChars).map((l) => (
             // El borde del color de fondo despega la etiqueta de las líneas de la grilla.
             <text
               key={l.id}
               x={l.x}
               y={l.y}
               dominantBaseline="middle"
-              fontSize="12"
+              fontSize={axisFont + 1}
               fontWeight="700"
               fill="var(--c-ink)"
               stroke="var(--c-surface)"
@@ -117,6 +124,7 @@ export function ProgressChart({ xLabels, xDetails, series, title, scale, format 
               onFocus={() => setHover(i)}
               onBlur={() => setHover(null)}
               tabIndex={0}
+              role="img"
               aria-label={xDetails[i]}
             />
           ))}

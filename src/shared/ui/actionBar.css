@@ -17,7 +17,7 @@
     right: 0;
     bottom: 0;
     z-index: 20;
-    padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+    padding: 10px max(16px, env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
     background: var(--c-surface);
     border-top: 1px solid var(--c-line);
     box-shadow: 0 -4px 16px rgb(31 36 48 / 8%);

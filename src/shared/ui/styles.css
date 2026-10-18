@@ -937,6 +937,7 @@ textarea.input {
 /* ---------- Acceso del docente ---------- */
 .auth {
   min-height: 100vh;
+  min-height: 100dvh;
   display: grid;
   place-items: center;
   padding: 24px 16px;
@@ -955,6 +956,7 @@ textarea.input {
 /* ---------- Portada ---------- */
 .hero {
   min-height: 100vh;
+  min-height: 100dvh;
   display: grid;
   place-items: center;
   padding: 24px 16px;
@@ -1587,6 +1589,7 @@ textarea.input {
 
 .explore {
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .explore-header {

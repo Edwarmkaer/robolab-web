@@ -1,10 +1,26 @@
 /** Geometría de la gráfica de progreso, sin React, para poder probarla. */
 
-export const W = 640;
-export const H = 280;
-export const M = { top: 20, right: 96, bottom: 40, left: 44 };
-export const PLOT_W = W - M.left - M.right;
-export const PLOT_H = H - M.top - M.bottom;
+/** Medidas de la gráfica. Hay dos: ancha (escritorio) y compacta (celular, más alta que ancha para que se lea). */
+export type Layout = {
+  readonly W: number;
+  readonly H: number;
+  readonly M: { readonly top: number; readonly right: number; readonly bottom: number; readonly left: number };
+  readonly PLOT_W: number;
+  readonly PLOT_H: number;
+  /** Letras que caben en la etiqueta junto al último punto. */
+  readonly labelChars: number;
+  /** Tamaño del texto del eje, en unidades del dibujo (en el celular el dibujo se encoge, así que va mayor). */
+  readonly axisFont: number;
+};
+
+function layout(W: number, H: number, M: Layout["M"], labelChars: number, axisFont: number): Layout {
+  return { W, H, M, PLOT_W: W - M.left - M.right, PLOT_H: H - M.top - M.bottom, labelChars, axisFont };
+}
+
+export const WIDE_LAYOUT = layout(640, 280, { top: 20, right: 96, bottom: 40, left: 44 }, 12, 11);
+export const COMPACT_LAYOUT = layout(360, 300, { top: 20, right: 76, bottom: 44, left: 40 }, 9, 12);
+
+export const { W, H, M, PLOT_W, PLOT_H } = WIDE_LAYOUT;
 
 /** Distancia vertical mínima entre dos etiquetas directas (alto de una línea de 12 px). */
 export const LABEL_GAP = 15;
@@ -18,6 +34,18 @@ export type Scale = {
 
 const TICK_COUNT = 4;
 
+/** Altura de un valor del eje en una medida dada de la gráfica. */
+export const yFor = (scale: Pick<Scale, "top">, l: Layout) => (value: number) => l.M.top + l.PLOT_H - (value / scale.top) * l.PLOT_H;
+
+/**
+ * Qué etiquetas del eje horizontal se escriben. Con muchas evaluaciones en poco ancho
+ * se encimarían: se salta de a `n` y siempre queda la última (la más reciente).
+ */
+export function visibleLabelIndexes(count: number, step: number, minGap = 46): number[] {
+  const stride = Math.max(1, Math.ceil(minGap / Math.max(step, 1)));
+  return Array.from({ length: count }, (_, i) => i).filter((i) => (count - 1 - i) % stride === 0);
+}
+
 /** Paso "redondo" (1, 2, 2.5 o 5 por una potencia de 10) que no sea menor que `raw`. */
 function niceStep(raw: number): number {
   const power = 10 ** Math.floor(Math.log10(raw));
@@ -28,13 +56,13 @@ function niceStep(raw: number): number {
  * Escala del eje vertical. Con `fixedTop` (el logro, siempre hasta 100) no
  * depende de los datos; si no, cubre el valor más alto con pasos redondos.
  */
-export function scaleFor(maxValue: number, fixedTop?: number): Scale {
+export function scaleFor(maxValue: number, fixedTop?: number, l: Layout = WIDE_LAYOUT): Scale {
   const max = maxValue > 0 ? maxValue : 1;
   const step = fixedTop !== undefined ? fixedTop / TICK_COUNT : niceStep(max / TICK_COUNT);
   const top = fixedTop ?? Math.ceil(max / step - 1e-9) * step;
   const count = Math.round(top / step);
   const ticks = Array.from({ length: count + 1 }, (_, k) => Number((k * step).toFixed(6)));
-  return { top, ticks, yOf: (value) => M.top + PLOT_H - (value / top) * PLOT_H };
+  return { top, ticks, yOf: yFor({ top }, l) };
 }
 
 export const PERCENT_SCALE = scaleFor(100, 100);
@@ -49,7 +77,7 @@ type LabeledSeries = {
 
 export type DirectLabel = { readonly id: string; readonly text: string; readonly x: number; readonly y: number };
 
-const fit = (text: string) => (text.length > MAX_LABEL_CHARS ? `${text.slice(0, MAX_LABEL_CHARS - 1)}…` : text);
+const fit = (text: string, max: number) => (text.length > max ? `${text.slice(0, max - 1)}…` : text);
 
 /**
  * Etiqueta de cada serie junto a su último punto. Si dos caen a la misma
@@ -59,12 +87,13 @@ export function directLabels(
   series: readonly LabeledSeries[],
   xOf: (i: number) => number,
   y: (value: number) => number = yOf,
+  maxChars: number = MAX_LABEL_CHARS,
 ): DirectLabel[] {
   const labels = series.flatMap((s) => {
     const last = s.values.findLastIndex((v) => v !== null);
     const value = s.values[last];
     if (last < 0 || value === null || value === undefined) return [];
-    return [{ id: s.id, text: fit(s.shortLabel ?? s.label), x: xOf(last) + 10, y: y(value) }];
+    return [{ id: s.id, text: fit(s.shortLabel ?? s.label, maxChars), x: xOf(last) + 10, y: y(value) }];
   });
 
   const placed: DirectLabel[] = [];

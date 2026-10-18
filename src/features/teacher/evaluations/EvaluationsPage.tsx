@@ -3,15 +3,19 @@ import { Link } from "react-router-dom";
 import { api } from "@robolab/backend/convex/_generated/api";
 import { localCalendarDate, shortLabel } from "@robolab/backend/domain/evaluation/calendar";
 import { Icon } from "../../../shared/ui/Icon";
+import { MOBILE_QUERY, useMediaQuery } from "../../../shared/useMediaQuery";
+import "./evaluations.css";
 
 export function EvaluationsPage() {
   const evaluations = useQuery(api.evaluations.listMine);
   const today = localCalendarDate();
+  // En el celular la tabla se recortaba y partía la columna Clase palabra por palabra: van tarjetas.
+  const mobile = useMediaQuery(MOBILE_QUERY);
 
   return (
     <div className="stack">
       <div className="page-head">
-        <h2>Evaluaciones</h2>
+        <h1>Evaluaciones</h1>
         <Link className="btn btn-primary" to="/docente/evaluaciones/nueva">
           <Icon name="plus" /> Nueva evaluación
         </Link>
@@ -26,6 +30,29 @@ export function EvaluationsPage() {
             <Icon name="plus" /> Crear la primera
           </Link>
         </div>
+      ) : mobile ? (
+        <ul className="eval-cards" aria-label="Evaluaciones">
+          {evaluations.map((e) => (
+            <li key={e._id}>
+              <Link className="card card-link eval-card" to={`/docente/evaluaciones/${e._id}`}>
+                <span className="row spread">
+                  <strong>{e.title}</strong>
+                  {e.scheduledDate === today && <span className="badge">Hoy</span>}
+                </span>
+                <span className="muted small">{e.classroomLabel}</span>
+                <span className="eval-meta small">
+                  <span>{shortLabel(e.scheduledDate)}</span>
+                  <span>
+                    {e.questionCount} {e.questionCount === 1 ? "pregunta" : "preguntas"}
+                  </span>
+                  <span>
+                    {e.finishedCount} de {e.studentCount} terminaron
+                  </span>
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
       ) : (
         <div className="card table-wrap">
           <table className="table">

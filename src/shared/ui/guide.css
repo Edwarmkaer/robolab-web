@@ -1,7 +1,7 @@
 /* Wayra, la guía: asistente flotante en la esquina inferior derecha. */
 .guide {
   position: fixed;
-  right: 16px;
+  right: max(16px, env(safe-area-inset-right));
   bottom: 16px;
   z-index: 12;
   display: flex;
@@ -87,7 +87,7 @@ body:has(.guide) .page {
 
 @media (max-width: 640px) {
   .guide {
-    right: 12px;
+    right: max(12px, env(safe-area-inset-right));
     bottom: calc(12px + env(safe-area-inset-bottom));
     max-width: min(300px, calc(100vw - 24px));
   }

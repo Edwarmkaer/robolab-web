@@ -1,9 +1,5 @@
 /* Modo abierto en el celular (≤ 640 px): cabecera "RoboLab ≡", flecha de volver y menú desplegable. */
 
-.explore {
-  min-height: 100dvh;
-}
-
 .explore-back {
   display: inline-grid;
   place-items: center;

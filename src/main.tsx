@@ -6,6 +6,7 @@ import { BrowserRouter } from "react-router-dom";
 import "@fontsource-variable/nunito";
 // Los tokens y la base van primero: así el CSS de cada área puede ajustarlos sin pelear por el orden.
 import "./shared/ui/styles.css";
+import "./shared/ui/safeArea.css";
 import { App } from "./app/App";
 import { ToastProvider } from "./shared/ui/Toast";
 
