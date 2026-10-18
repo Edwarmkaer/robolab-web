@@ -6,6 +6,7 @@ import { Icon } from "../../shared/ui/Icon";
 import { IconButton } from "../../shared/ui/IconButton";
 import { speak } from "../student/speech";
 import { BLOCK_LOOK, MIN_SLOTS, REPEAT_LOOK } from "./blocks";
+import { PieceFrame } from "./PieceFrame";
 import "./palette.css";
 
 type Props = {
@@ -57,32 +58,35 @@ export function BlockEditor({ policy, state, dispatch, disabled: busy, active, r
           </span>
           <div className="palette" role="group" aria-labelledby={paletteLabel}>
             {commands.map((command) => (
-              <button
-                key={command}
-                type="button"
-                className="block-btn"
-                data-piece={command}
-                disabled={disabled}
-                onClick={() => {
-                  dispatch({ type: "add", command });
-                  speak(BLOCK_LOOK[command].label);
-                }}
-              >
-                <img src={BLOCK_LOOK[command].icon} alt="" />
-                <span className="block-label">{BLOCK_LOOK[command].label}</span>
-              </button>
+              <PieceFrame key={command} label={BLOCK_LOOK[command].label}>
+                <button
+                  type="button"
+                  className="block-btn"
+                  data-piece={command}
+                  disabled={disabled}
+                  aria-label={BLOCK_LOOK[command].label}
+                  onClick={() => {
+                    dispatch({ type: "add", command });
+                    speak(BLOCK_LOOK[command].label);
+                  }}
+                >
+                  <img src={BLOCK_LOOK[command].icon} alt="" />
+                </button>
+              </PieceFrame>
             ))}
             {policy.palette.has("repeat") && (
-              <button
-                type="button"
-                className="block-btn"
-                data-piece="repeat"
-                disabled={disabled || state.openRepeat !== null}
-                onClick={() => dispatch({ type: "addRepeat" })}
-              >
-                <img src={REPEAT_LOOK.icon} alt="" />
-                <span className="block-label">{REPEAT_LOOK.label}</span>
-              </button>
+              <PieceFrame label={REPEAT_LOOK.label}>
+                <button
+                  type="button"
+                  className="block-btn"
+                  data-piece="repeat"
+                  disabled={disabled || state.openRepeat !== null}
+                  aria-label={REPEAT_LOOK.label}
+                  onClick={() => dispatch({ type: "addRepeat" })}
+                >
+                  <img src={REPEAT_LOOK.icon} alt="" />
+                </button>
+              </PieceFrame>
             )}
           </div>
         </div>
@@ -100,7 +104,7 @@ export function BlockEditor({ policy, state, dispatch, disabled: busy, active, r
             if (block.kind === "move") {
               const stepNumber = stepNumbers[i];
               return (
-                <li key={i}>
+                <PieceFrame key={i} as="li" label={BLOCK_LOOK[block.command].label}>
                   <button
                     type="button"
                     className="program-block"
@@ -115,13 +119,16 @@ export function BlockEditor({ policy, state, dispatch, disabled: busy, active, r
                     </span>
                     <img src={BLOCK_LOOK[block.command].icon} alt="" />
                   </button>
-                </li>
+                </PieceFrame>
               );
             }
             const open = state.openRepeat === i;
             return (
               <li key={i} className="repeat-block" data-piece="repeat">
-                <strong className="small">Repetir</strong>
+                <PieceFrame label={REPEAT_LOOK.label}>
+                  <img className="repeat-icon" src={REPEAT_LOOK.icon} alt="" />
+                  <span className="sr-only">Repetir</span>
+                </PieceFrame>
                 <select
                   className="select repeat-times"
                   value={block.times}
@@ -138,7 +145,7 @@ export function BlockEditor({ policy, state, dispatch, disabled: busy, active, r
                 <ul className="repeat-body" aria-label="Dentro de repetir">
                   {block.body.map((child, j) =>
                     child.kind === "move" ? (
-                      <li key={j}>
+                      <PieceFrame key={j} as="li" label={BLOCK_LOOK[child.command].label}>
                         <button
                           type="button"
                           className="program-block"
@@ -150,7 +157,7 @@ export function BlockEditor({ policy, state, dispatch, disabled: busy, active, r
                         >
                           <img src={BLOCK_LOOK[child.command].icon} alt="" />
                         </button>
-                      </li>
+                      </PieceFrame>
                     ) : null,
                   )}
                 </ul>

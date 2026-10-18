@@ -1,4 +1,4 @@
-/* Paleta de piezas y secuencia (M4 del Figma): tiles de color, casillas punteadas y barra inferior en el celular. */
+/* Paleta de piezas y secuencia (M4 del Figma): piezas de color solo con su ícono, casillas punteadas y etiqueta de información. */
 
 .editor-label {
   font-weight: 800;
@@ -10,8 +10,108 @@
   min-height: 40px;
 }
 
-.block-btn[data-piece] {
-  color: var(--c-ink);
+/* Las piezas muestran solo su ícono: el nombre va en el aria-label y en la etiqueta del ícono de información. */
+.palette {
+  grid-template-columns: repeat(auto-fill, 76px);
+  gap: 10px;
+}
+
+.block-btn {
+  width: 76px;
+  height: 76px;
+  min-height: 0;
+  padding: 6px;
+}
+
+.block-btn img {
+  width: 58px;
+  height: 50px;
+}
+
+.piece {
+  position: relative;
+}
+
+/* Ícono de información, arriba a la derecha de cada pieza. Solo avisa que hay un nombre. */
+.piece-info {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 88%);
+  color: var(--c-muted);
+}
+
+/*
+ * El nombre de la pieza: al pasar el mouse (donde hay mouse) o al enfocarla con el teclado.
+ * Escondida es `display: none` y no solo transparente: así no ensancha la página en los bordes.
+ */
+.piece-tip {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  z-index: 5;
+  display: none;
+  width: max-content;
+  max-width: 120px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: var(--c-ink);
+  color: var(--c-on-ink);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: center;
+  pointer-events: none;
+  transform: translateX(-50%);
+  animation: fade-in 120ms var(--ease);
+}
+
+/* Las piezas de las puntas no se salen de la pantalla. */
+.piece:first-child > .piece-tip {
+  left: 0;
+  transform: none;
+}
+
+.piece:last-child > .piece-tip {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+
+.piece:has(:focus-visible) > .piece-tip,
+.piece-info:active + .piece-tip {
+  display: block;
+}
+
+@media (hover: hover) {
+  .piece:hover > .piece-tip {
+    display: block;
+  }
+}
+
+/* Escape la esconde sin quitar el foco. */
+.piece[data-tip-dismissed] > .piece-tip {
+  display: none;
+}
+
+/* El ícono de Repetir dentro de la secuencia. */
+.repeat-icon {
+  width: 40px;
+  height: 34px;
+  object-fit: contain;
+}
+
+.repeat-block > .piece {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 44px;
 }
 
 /* La secuencia es una lista: sin viñetas ni sangría. */
@@ -58,28 +158,19 @@ ul.repeat-body {
 
 @media (max-width: 640px) {
   .palette {
-    grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+    grid-template-columns: repeat(auto-fill, 64px);
     gap: 8px;
   }
 
   .block-btn {
-    min-height: 68px;
-    padding: 6px;
+    width: 64px;
+    height: 64px;
+    padding: 5px;
   }
 
   .block-btn img {
-    width: 52px;
-    height: 46px;
-  }
-
-  /* En el celular la pieza habla por sí sola; el nombre queda para el lector de pantalla y la voz. */
-  .block-label {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
+    width: 50px;
+    height: 44px;
   }
 
   .program-block,
@@ -91,6 +182,11 @@ ul.repeat-body {
   .program-block img {
     width: 42px;
     height: 36px;
+  }
+
+  .piece-info {
+    width: 16px;
+    height: 16px;
   }
 }
 
