@@ -1,0 +1,4 @@
+/* Tablero: el camino se distingue del pasto por un borde, no solo por el color (contraste de gráficos, 3:1). */
+.tile[data-walkable="true"] {
+  border: 2px solid var(--c-path-edge);
+}

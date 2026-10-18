@@ -9,6 +9,7 @@ import { userMessage } from "../../../shared/errors";
 import { Icon } from "../../../shared/ui/Icon";
 import { IconButton } from "../../../shared/ui/IconButton";
 import { useToast } from "../../../shared/ui/Toast";
+import { usePageTitle } from "../../../shared/usePageTitle";
 import { MAX_OPTIONS, MAX_QUESTIONS, MIN_OPTIONS, type QuestionDraft, draftsReducer, emptyQuestion, toPayload } from "./questionDraft";
 
 const LETTERS = ["A", "B", "C", "D"];
@@ -16,13 +17,14 @@ const LETTERS = ["A", "B", "C", "D"];
 function FieldError({ issue, id }: { issue: QuestionIssue | undefined; id: string }) {
   if (!issue) return null;
   return (
-    <span id={id} className="field-error">
+    <span id={id} className="field-error" role="alert">
       <Icon name="alert" size={16} /> {issue.message}
     </span>
   );
 }
 
 export function EvaluationForm() {
+  usePageTitle("Nueva evaluación");
   const classes = useQuery(api.classrooms.listMine);
   const create = useMutation(api.evaluations.create);
   const navigate = useNavigate();
@@ -45,12 +47,17 @@ export function EvaluationForm() {
   if (classes === undefined) return <p className="muted">Cargando…</p>;
   if (classes.length === 0) {
     return (
-      <div className="empty">
-        <Icon name="users" size={32} />
-        <p>Para crear una evaluación primero necesitas una clase con tus alumnos.</p>
-        <Link className="btn btn-primary" to="/docente/clases">
-          <Icon name="plus" /> Crear clase
-        </Link>
+      <div className="stack">
+        <div className="page-head">
+          <h1>Nueva evaluación</h1>
+        </div>
+        <div className="empty">
+          <Icon name="users" size={32} />
+          <p>Para crear una evaluación primero necesitas una clase con tus alumnos.</p>
+          <Link className="btn btn-primary" to="/docente/clases">
+            <Icon name="plus" /> Crear clase
+          </Link>
+        </div>
       </div>
     );
   }
@@ -100,7 +107,7 @@ export function EvaluationForm() {
   return (
     <form className="stack" onSubmit={onSubmit} noValidate>
       <div className="page-head">
-        <h2>Nueva evaluación</h2>
+        <h1>Nueva evaluación</h1>
         <Link className="btn btn-ghost" to="/docente/evaluaciones">
           Cancelar
         </Link>
@@ -120,7 +127,7 @@ export function EvaluationForm() {
             aria-describedby={titleTooShort ? "title-error" : undefined}
           />
           {titleTooShort && (
-            <span id="title-error" className="field-error">
+            <span id="title-error" className="field-error" role="alert">
               <Icon name="alert" size={16} /> Escribe un título de al menos {LIMITS.titleMin} letras.
             </span>
           )}

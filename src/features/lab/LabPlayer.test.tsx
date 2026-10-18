@@ -43,7 +43,7 @@ describe("jugador de misiones: flechas → ejecutar → mensaje", () => {
     expect(screen.getByRole("button", { name: /Nivel 1/ }).getAttribute("aria-pressed")).toBe("true");
     expect(screen.getByRole("button", { name: /Nivel 2/ }).getAttribute("aria-pressed")).toBe("false");
     fireEvent.click(screen.getByRole("button", { name: "Derecha" }));
-    expect(screen.getByRole("listitem", { name: "Paso 1: Derecha. Toca para quitar." }).textContent).toBe("→ ×");
+    expect(screen.getByRole("button", { name: "Paso 1: Derecha. Toca para quitar." }).textContent).toBe("→ ×");
     expect(screen.getByText(/Energía 0 \/ 30/)).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: /Ejecutar/ }));
@@ -53,7 +53,7 @@ describe("jugador de misiones: flechas → ejecutar → mensaje", () => {
     expect(screen.getByText(/Energía 1 \/ 30/)).toBeTruthy();
     expect(recordPlay).toHaveBeenCalledTimes(1);
     expect(recordPlay.mock.calls[0]?.[0]).toMatchObject({ missionId: RUTA.id, level: 0, arrows: ["R"], hints: 0, runs: 1 });
-    expect(screen.getByRole("button", { name: /Enviar al robot|Conectar un robot/ })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Sincronizar con robot/ })).toBeTruthy();
   });
 
   it("la solución verificada completa la misión y habilita el siguiente nivel", () => {
@@ -88,7 +88,7 @@ describe("jugador de misiones: flechas → ejecutar → mensaje", () => {
     start();
     fireEvent.click(screen.getByRole("button", { name: "Arriba" }));
     fireEvent.click(screen.getByRole("button", { name: "Izquierda" }));
-    fireEvent.click(screen.getByRole("listitem", { name: "Paso 1: Arriba. Toca para quitar." }));
+    fireEvent.click(screen.getByRole("button", { name: "Paso 1: Arriba. Toca para quitar." }));
     expect(screen.getAllByRole("listitem")).toHaveLength(1);
     fireEvent.click(screen.getByRole("button", { name: /Deshacer/ }));
     expect(screen.queryAllByRole("listitem")).toHaveLength(0);

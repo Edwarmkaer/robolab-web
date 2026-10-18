@@ -5,14 +5,12 @@ import { TOPICS } from "@robolab/backend/domain/explore/challenges";
 import { openChallenges, topicProgress } from "@robolab/backend/domain/explore/progress";
 import { MISSIONS } from "@robolab/backend/domain/lab/mission";
 import { Guide } from "../../shared/ui/Guide";
-import { usePageTitle } from "../../shared/usePageTitle";
 import { ClassTag } from "../student/ClassTag";
 import { ExploreLayout, TOPIC_COLOR } from "./ExploreLayout";
 import { useExploreProgress } from "./storage";
 
 /** Lo resuelto en este dispositivo, por tópico. */
 export function MyProgressPage() {
-  usePageTitle("Mi avance");
   const { progress, clear } = useExploreProgress();
   const [confirming, setConfirming] = useState(false);
   const solvedTotal = Object.values(progress.records).filter((r) => r.solved).length;
@@ -20,7 +18,7 @@ export function MyProgressPage() {
   const competencies = coverage([...openChallenges(), ...MISSIONS], solvedIds);
 
   return (
-    <ExploreLayout>
+    <ExploreLayout title="Mi avance" backTo="/">
       <div className="row" style={{ gap: 12 }}>
         <h1 style={{ margin: 0 }}>Mi avance</h1>
         <ClassTag />

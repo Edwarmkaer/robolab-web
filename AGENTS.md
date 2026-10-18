@@ -54,6 +54,14 @@ el `.env.local` de aquí como `VITE_CONVEX_URL`.
 
 ## Cuidado con
 
+- Colores: solo los tokens de `src/shared/ui/styles.css` (`var(--c-…)`). Una prueba
+  (`tokens.test.ts`) falla si aparece un `#hex` suelto en un CSS o componente, y
+  también revisa el contraste de los pares de texto/fondo. `styles.css` se
+  importa primero en `main.tsx`: el CSS de cada área puede ajustar sin pelear
+  por el orden.
+- Pantallas: el título de la pestaña va con `usePageTitle`, cada página tiene un
+  `<h1>` y el foco pasa al título cuando cambia de fase (`useFocusOnMount`).
+  `aria-label` solo en elementos con rol (`role="img"`, `list`, `group`…).
 - `@robolab/backend` se instala desde git con `git+https://`, nunca `github:` ni
   ssh: en Vercel no hay llaves ssh. Comprueba en el lockfile que `resolved`
   empiece con `git+https`.

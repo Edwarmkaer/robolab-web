@@ -23,6 +23,7 @@ export function StudentHome({ token, onSignOut }: Props) {
   const signOut = useMutation(api.student.signOut);
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
   const evaluation = home?.evaluation ?? null;
   const challenges = home?.classChallenges ?? [];
@@ -34,21 +35,27 @@ export function StudentHome({ token, onSignOut }: Props) {
   async function begin() {
     if (!evaluation) return;
     setError(null);
+    setBusy(true);
     try {
       const attemptId = evaluation.attemptId ?? (await start({ token, evaluationId: evaluation.evaluationId }));
       navigate(`/alumno/juego/${attemptId}`);
     } catch (e) {
       setError(userMessage(e));
+    } finally {
+      setBusy(false);
     }
   }
 
   async function playAgain() {
     if (!evaluation) return;
     setError(null);
+    setBusy(true);
     try {
       navigate(`/alumno/juego/${await retry({ token, evaluationId: evaluation.evaluationId })}`);
     } catch (e) {
       setError(userMessage(e));
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -102,12 +109,12 @@ export function StudentHome({ token, onSignOut }: Props) {
                     {error}
                   </p>
                 )}
-                <button className="btn btn-primary" type="button" onClick={() => void begin()}>
+                <button className="btn btn-primary" type="button" disabled={busy} aria-busy={busy} onClick={() => void begin()}>
                   {!evaluation.finished && <Icon name="play" />}
                   {evaluation.finished ? "Ver mi resultado" : evaluation.attemptId ? "Seguir jugando" : "¡Empezar!"}
                 </button>
                 {evaluation.finished && (
-                  <button className="btn" type="button" onClick={() => void playAgain()}>
+                  <button className="btn" type="button" disabled={busy} aria-busy={busy} onClick={() => void playAgain()}>
                     <Icon name="rotate" /> Intentar de nuevo
                   </button>
                 )}

@@ -1,31 +1,11 @@
-import { useMutation, useQuery } from "convex/react";
-import { type FormEvent, useEffect, useState } from "react";
+import { useQuery } from "convex/react";
+import { type FormEvent, useEffect, useId, useRef, useState } from "react";
 import { api } from "@robolab/backend/convex/_generated/api";
 import type { Program } from "@robolab/backend/domain/game/program";
 import { ROBOT_CODE_LENGTH, isValidRobotCode, normalizeRobotCode } from "@robolab/backend/domain/robot/protocol";
-import { userMessage } from "../../shared/errors";
-import { useToast } from "../../shared/ui/Toast";
-
-const ROBOT_KEY = "robolab.robot";
-/** El robot consulta cada medio segundo; si no aparece en 10 s, está apagado o sin wifi. */
-const ONLINE_MS = 10_000;
-
-function readLinked(): string {
-  try {
-    return window.localStorage.getItem(ROBOT_KEY) ?? "";
-  } catch {
-    return "";
-  }
-}
-
-function writeLinked(code: string) {
-  try {
-    if (code) window.localStorage.setItem(ROBOT_KEY, code);
-    else window.localStorage.removeItem(ROBOT_KEY);
-  } catch {
-    // Sin almacenamiento, el robot queda vinculado solo mientras dure la pestaña.
-  }
-}
+import { Icon } from "../../shared/ui/Icon";
+import type { RobotSync, SyncState } from "./useRobotLink";
+import "./robot.css";
 
 const STEP_TEXT = {
   pending: "Esperando al robot…",
@@ -45,124 +25,212 @@ const ROBOT_ERRORS: Record<string, string> = {
   MOTOR: "falla de motor",
 };
 
-/** Enviar el programa al robot físico (ESP32 por wifi), además de verlo en pantalla. */
-export function RobotSend({ program, disabled }: { program: Program; disabled: boolean }) {
-  const [code, setCode] = useState(readLinked);
-  const [draft, setDraft] = useState("");
-  const [linking, setLinking] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [now, setNow] = useState(() => Date.now());
-  const toast = useToast();
-  const send = useMutation(api.robot.send);
-  const status = useQuery(api.robot.status, code ? { code } : "skip");
-  const checking = useQuery(api.robot.status, linking && isValidRobotCode(draft) ? { code: draft } : "skip");
+/** Texto del chip RobotSync (F1) y del botón BtnRobot (F2) en cada estado. */
+const CHIP: Record<SyncState, string> = { off: "Robot sin conectar", searching: "Buscando robot…", on: "Robot conectado" };
+const BUTTON: Record<SyncState, string> = { off: "Robot", searching: "Buscando…", on: "Robot OK" };
 
-  // Reloj para saber si el robot sigue conectado.
+const STEPS = ["Enciende el robot", "Mira su código en la pantalla o en el monitor", "Escríbelo aquí"];
+
+/** `showModal` atrapa el foco y bloquea el fondo; donde no existe (navegadores viejos) se abre sin modal. */
+function openDialog(dialog: HTMLDialogElement) {
+  if (dialog.open) return;
+  if (typeof dialog.showModal === "function") dialog.showModal();
+  else dialog.setAttribute("open", "");
+}
+
+function closeDialog(dialog: HTMLDialogElement) {
+  if (!dialog.open) return;
+  if (typeof dialog.close === "function") dialog.close();
+  else dialog.removeAttribute("open");
+}
+
+type Props = {
+  readonly robot: RobotSync;
+  readonly program: Program;
+  readonly disabled: boolean;
+};
+
+/**
+ * Botón "Robot" (sin conectar / Buscando… / Robot OK) que abre la hoja
+ * "Sincronizar con robot". El robot va por wifi: se escribe el código que
+ * muestra, no se elige de una lista de dispositivos.
+ */
+export function RobotSend({ robot, program, disabled }: Props) {
+  const [open, setOpen] = useState(false);
+  const dialog = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
+
   useEffect(() => {
-    if (!code) return;
-    const timer = window.setInterval(() => setNow(Date.now()), 2000);
-    return () => window.clearInterval(timer);
-  }, [code]);
+    const el = dialog.current;
+    if (!el) return;
+    if (open) {
+      openDialog(el);
+      (el.querySelector<HTMLElement>("input, [tabindex='-1']") ?? el).focus();
+    } else {
+      closeDialog(el);
+    }
+  }, [open]);
 
-  function link(event: FormEvent) {
+  return (
+    <>
+      <button
+        className="btn robot-btn"
+        type="button"
+        data-state={robot.state}
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        aria-label={`${BUTTON[robot.state]}: ${CHIP[robot.state]}. Sincronizar con robot`}
+        onClick={() => setOpen(true)}
+      >
+        <span className="robot-dot" aria-hidden="true" />
+        {BUTTON[robot.state]}
+      </button>
+      <dialog ref={dialog} className="dialog sheet robot-sheet" aria-labelledby={titleId} onClose={() => setOpen(false)}>
+        <span className="sheet-handle" aria-hidden="true" />
+        <h2 id={titleId} tabIndex={-1} style={{ margin: 0 }}>
+          Sincronizar con robot
+        </h2>
+        <p className="small muted">Opcional. Tu secuencia también se ejecutará en el robot.</p>
+        <ol className="robot-steps">
+          {STEPS.map((step, i) => (
+            <li key={step}>
+              <span className="robot-step-n" aria-hidden="true">
+                {i + 1}
+              </span>
+              {step}
+            </li>
+          ))}
+        </ol>
+        <span className="robot-chip" data-state={robot.state} role="status">
+          <span className="robot-dot" aria-hidden="true" />
+          {CHIP[robot.state]}
+        </span>
+        {open && <SheetBody robot={robot} program={program} disabled={disabled} onDone={() => setOpen(false)} />}
+      </dialog>
+    </>
+  );
+}
+
+function SheetBody({ robot, program, disabled, onDone }: Props & { onDone: () => void }) {
+  const [changing, setChanging] = useState(false);
+  if (!robot.code || changing) {
+    return (
+      <LinkForm
+        robot={robot}
+        onCancel={() => {
+          setChanging(false);
+          if (!robot.code) onDone();
+        }}
+        onLinked={() => setChanging(false)}
+      />
+    );
+  }
+  const last = robot.status?.lastCommand;
+  return (
+    <div className="stack">
+      <div className="row spread">
+        <span>
+          <strong>{robot.status?.name ?? robot.code}</strong>
+          {robot.status?.name && <span className="small muted"> · {robot.code}</span>}
+        </span>
+        <button className="link-btn small" type="button" onClick={() => setChanging(true)}>
+          Cambiar de robot
+        </button>
+      </div>
+      {robot.problem && <p className="hint">{robot.problem}</p>}
+      {last && (
+        <p className="small muted" role="status">
+          <span className="code">{last.letters}</span> · {STEP_TEXT[last.status]}
+          {last.status === "failed" && `: ${ROBOT_ERRORS[last.error ?? ""] ?? last.error ?? "sin detalle"}.`}
+        </p>
+      )}
+      {robot.error && (
+        <p className="alert alert-error" role="alert">
+          {robot.error}
+        </p>
+      )}
+      <div className="row sheet-actions">
+        <button
+          className="btn"
+          type="button"
+          disabled={disabled || robot.busy || program.length === 0 || robot.state !== "on"}
+          aria-busy={robot.busy}
+          onClick={() => void robot.send(program)}
+        >
+          <Icon name="play" /> Enviar al robot
+        </button>
+        <button className="btn btn-primary" type="button" onClick={onDone}>
+          {robot.state === "on" ? "Robot OK" : "Cerrar"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function LinkForm({ robot, onCancel, onLinked }: { robot: RobotSync; onCancel: () => void; onLinked: () => void }) {
+  const [draft, setDraft] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const id = useId();
+  const valid = isValidRobotCode(draft);
+  // Apenas el código está completo, se busca ese robot en el servidor.
+  const found = useQuery(api.robot.status, valid ? { code: draft } : "skip");
+
+  function submit(event: FormEvent) {
     event.preventDefault();
-    if (!checking) {
+    if (!found) {
       setError("No encontramos ese robot. Revisa el código de su etiqueta.");
       return;
     }
-    writeLinked(draft);
-    setCode(draft);
-    setLinking(false);
-    setError(null);
-    toast(`Conectado a ${checking.name}.`);
+    robot.link(draft, found.name);
+    onLinked();
   }
-
-  async function sendProgram() {
-    setBusy(true);
-    setError(null);
-    try {
-      // Un id por envío: si la red reintenta, el robot no lo hace dos veces.
-      const result = await send({ code, program: [...program], requestId: crypto.randomUUID() });
-      toast(`Enviado a ${result.robotName}: ${result.letters}`);
-    } catch (e) {
-      setError(userMessage(e, "No pudimos enviar el programa al robot."));
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  if (!code || linking) {
-    return linking ? (
-      <form className="robot-panel" onSubmit={link}>
-        <label htmlFor="robot-code" className="label">
-          Código del robot
-        </label>
-        <div className="row" style={{ gap: 8, flexWrap: "nowrap" }}>
-          <input
-            id="robot-code"
-            className="input code"
-            value={draft}
-            onChange={(e) => setDraft(normalizeRobotCode(e.target.value).slice(0, ROBOT_CODE_LENGTH))}
-            placeholder="K7Q4MZ"
-            autoComplete="off"
-            spellCheck={false}
-          />
-          <button className="btn btn-sm btn-primary" type="submit" disabled={!isValidRobotCode(draft) || checking === undefined}>
-            Conectar
-          </button>
-          <button className="btn btn-sm btn-ghost" type="button" onClick={() => setLinking(false)}>
-            Cancelar
-          </button>
-        </div>
-        <span className="hint">Es el código de 6 letras que muestra el robot. El robot necesita wifi con internet.</span>
-        {error && <span className="field-error">{error}</span>}
-      </form>
-    ) : (
-      <button className="btn btn-sm" type="button" onClick={() => setLinking(true)}>
-        🤖 Conectar un robot
-      </button>
-    );
-  }
-
-  const online = status?.lastSeenAt != null && now - status.lastSeenAt < ONLINE_MS;
-  const expired = status != null && status.codeExpiresAt <= now;
-  const last = status?.lastCommand;
 
   return (
-    <div className="robot-panel">
-      <div className="row spread" style={{ gap: 8 }}>
-        <span className="robot-state" data-online={online}>
-          <span aria-hidden="true" className="dot" />
-          {status === undefined
-            ? "Buscando robot…"
-            : status === null
-              ? "Robot no encontrado"
-              : expired
-                ? `${status.name} · el código venció`
-                : `${status.name} · ${online ? "conectado" : "sin señal"}`}
+    <form className="stack" onSubmit={submit}>
+      <div className="field">
+        <label htmlFor={`${id}-code`}>Código del robot</label>
+        <input
+          id={`${id}-code`}
+          className="input code"
+          value={draft}
+          onChange={(e) => {
+            setDraft(normalizeRobotCode(e.target.value).slice(0, ROBOT_CODE_LENGTH));
+            setError(null);
+          }}
+          placeholder="K7Q4MZ"
+          autoComplete="off"
+          autoCapitalize="characters"
+          spellCheck={false}
+          aria-invalid={error !== null}
+          aria-describedby={`${id}-hint${error ? ` ${id}-error` : ""}`}
+        />
+        <span id={`${id}-hint`} className="hint">
+          Son {ROBOT_CODE_LENGTH} letras o números. El robot necesita wifi con internet.
         </span>
-        <button className="link-btn small" type="button" onClick={() => setLinking(true)}>
-          Cambiar
+        {valid && found === undefined && (
+          <span className="hint" role="status">
+            Buscando robot…
+          </span>
+        )}
+        {valid && found && (
+          <span className="hint" role="status">
+            Encontramos a <strong>{found.name}</strong>.
+          </span>
+        )}
+        {error && (
+          <span id={`${id}-error`} className="field-error" role="alert">
+            {error}
+          </span>
+        )}
+      </div>
+      <div className="row sheet-actions">
+        <button className="btn" type="button" onClick={onCancel}>
+          Cancelar
+        </button>
+        <button className="btn btn-primary" type="submit" disabled={!valid || found === undefined}>
+          Conectar
         </button>
       </div>
-      {expired && <span className="hint">El robot muestra un código nuevo cada 12 horas. Toca «Cambiar» y escríbelo.</span>}
-      <button
-        className="btn btn-sm"
-        type="button"
-        disabled={disabled || busy || program.length === 0 || !status || expired}
-        onClick={() => void sendProgram()}
-        aria-busy={busy}
-      >
-        🤖 Enviar al robot
-      </button>
-      {last && (
-        <span className="small muted" role="status">
-          <span className="code">{last.letters}</span> · {STEP_TEXT[last.status]}
-          {last.status === "failed" && `: ${ROBOT_ERRORS[last.error ?? ""] ?? last.error ?? "sin detalle"}.`}
-        </span>
-      )}
-      {error && <span className="field-error">{error}</span>}
-    </div>
+    </form>
   );
 }

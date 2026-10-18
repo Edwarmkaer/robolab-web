@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ErrorBoundary } from "../shared/ui/ErrorBoundary";
+import { usePageTitle } from "../shared/usePageTitle";
 
 /**
  * Última red de toda la app. Una consulta que falla al renderizar (sesión
@@ -18,6 +19,7 @@ export function AppErrorBoundary({ children }: { readonly children: ReactNode })
 
 function ErrorScreen({ message, reset }: { readonly message: string; readonly reset: () => void }) {
   const navigate = useNavigate();
+  usePageTitle("Algo salió mal");
   return (
     <main className="hero">
       <div className="card stack" style={{ textAlign: "center", maxWidth: 480 }}>

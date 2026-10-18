@@ -5,12 +5,14 @@ import { api } from "@robolab/backend/convex/_generated/api";
 import { ACCESS_CODE_LENGTH, normalizeAccessCode } from "@robolab/backend/domain/evaluation/accessCode";
 import { userMessage } from "../../shared/errors";
 import { Icon } from "../../shared/ui/Icon";
+import { usePageTitle } from "../../shared/usePageTitle";
 
 export function StudentLogin({ onSignedIn }: { onSignedIn: (token: string) => void }) {
   const signIn = useMutation(api.student.signIn);
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  usePageTitle("Ingresar");
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();

@@ -84,7 +84,7 @@ export function LabBoard({ mission, robot, visited, mood, stepMs }: Props) {
 export function LabLegend() {
   return (
     <div className="lab-legend" aria-label="Leyenda">
-      <span className="chip" style={{ ["--swatch" as string]: "#2b3448" }}>
+      <span className="chip" style={{ ["--swatch" as string]: "var(--c-wall)" }}>
         Pared
       </span>
       <span className="chip" style={{ ["--swatch" as string]: "var(--c-brand-soft)", ["--swatch-ring" as string]: "inset 0 0 0 1px var(--c-brand)" }}>
@@ -93,7 +93,7 @@ export function LabLegend() {
       <span className="chip" style={{ ["--swatch" as string]: "var(--c-ok-soft)", ["--swatch-ring" as string]: "inset 0 0 0 1px var(--c-ok)" }}>
         Meta
       </span>
-      <span className="chip" style={{ ["--swatch" as string]: "var(--c-warn-soft)", ["--swatch-ring" as string]: "inset 0 0 0 1px #f0c48f" }}>
+      <span className="chip" style={{ ["--swatch" as string]: "var(--c-warn-soft)", ["--swatch-ring" as string]: "inset 0 0 0 1px var(--c-warn-edge)" }}>
         ≋ Terreno +{ROUGH_COST}
       </span>
     </div>

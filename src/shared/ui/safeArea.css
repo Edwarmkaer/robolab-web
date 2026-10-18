@@ -1,0 +1,21 @@
+/*
+ * viewport-fit=cover: la página llega hasta el borde físico del celular (por debajo de la muesca y del
+ * indicador de inicio del iPhone). Los márgenes laterales y el pie respetan esas zonas.
+ */
+.page,
+.explore-main {
+  padding-left: max(16px, env(safe-area-inset-left));
+  padding-right: max(16px, env(safe-area-inset-right));
+}
+
+.explore-header-inner {
+  padding-left: max(16px, env(safe-area-inset-left));
+  padding-right: max(16px, env(safe-area-inset-right));
+}
+
+@media (max-width: 640px) {
+  .tabs {
+    padding-left: max(8px, env(safe-area-inset-left));
+    padding-right: max(8px, env(safe-area-inset-right));
+  }
+}

@@ -21,7 +21,7 @@ export function ChallengeListPage() {
   const missions = isMissions ? missionsFor(topic.id) : [];
 
   return (
-    <ExploreLayout>
+    <ExploreLayout title={topic.name} backTo={`/explorar/${topic.id}`}>
       <Breadcrumbs
         items={[{ label: "Explorar", to: "/" }, { label: topic.name, to: `/explorar/${topic.id}` }, { label: LEVEL_INFO[level].name }]}
       />

@@ -14,6 +14,7 @@ import { Icon } from "../../shared/ui/Icon";
 import { deviceId, useExploreProgress } from "../explore/storage";
 import { LEVEL_INFO } from "../explore/ExploreLayout";
 import { RobotSend } from "../robot/RobotSend";
+import { useRobotLink } from "../robot/useRobotLink";
 import { useStudentToken } from "../student/session";
 import { LabBoard, LabLegend } from "./LabBoard";
 import "./lab.css";
@@ -178,6 +179,7 @@ function LevelPlay({ mission, missionId, level, onSolved, onNextLevel }: LevelPr
   const [startedAt] = useState(() => Date.now());
   const timers = useRef<number[]>([]);
   const recordPlay = useMutation(api.lab.recordPlay);
+  const robotLink = useRobotLink();
 
   useEffect(() => () => timers.current.forEach((t) => window.clearTimeout(t)), []);
 
@@ -301,22 +303,25 @@ function LevelPlay({ mission, missionId, level, onSolved, onNextLevel }: LevelPr
             <span className="label" id={`program-label-${level}`}>
               Tus bloques (toca para borrar)
             </span>
-            <div className="lab-program" role="list" aria-labelledby={`program-label-${level}`}>
+            <div className="lab-program">
               {arrows.length === 0 && <span className="muted small">Pulsa una flecha para empezar…</span>}
-              {arrows.map((dir, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  role="listitem"
-                  className="lab-cmd"
-                  data-state={failedIndex !== null && i === failedIndex ? "error" : undefined}
-                  disabled={running}
-                  aria-label={`Paso ${i + 1}: ${DIR_LABEL[dir]}. Toca para quitar.`}
-                  onClick={() => removeAt(i)}
-                >
-                  {ARROW[dir]} ×
-                </button>
-              ))}
+              {/* Lista real: un <button role="listitem"> no le dice al lector de pantalla que el paso se puede quitar. */}
+              <ul className="lab-steps" aria-labelledby={`program-label-${level}`}>
+                {arrows.map((dir, i) => (
+                  <li key={i}>
+                    <button
+                      type="button"
+                      className="lab-cmd"
+                      data-state={failedIndex !== null && i === failedIndex ? "error" : undefined}
+                      disabled={running}
+                      aria-label={`Paso ${i + 1}: ${DIR_LABEL[dir]}. Toca para quitar.`}
+                      onClick={() => removeAt(i)}
+                    >
+                      {ARROW[dir]} ×
+                    </button>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
           <div className="lab-meters" role="status">
@@ -355,7 +360,9 @@ function LevelPlay({ mission, missionId, level, onSolved, onNextLevel }: LevelPr
             </button>
           </div>
         )}
-        <RobotSend program={arrowsToProgram(arrows)} disabled={!completed || running} />
+        <div className="row">
+          <RobotSend robot={robotLink} program={arrowsToProgram(arrows)} disabled={!completed || running} />
+        </div>
         {!completed && <span className="hint">El robot físico recibe la ruta cuando la misión está completada.</span>}
       </div>
     </div>

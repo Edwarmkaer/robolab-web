@@ -103,8 +103,8 @@
 
 .confirm-box {
   max-width: 420px;
-  border-color: #f0b4ad;
-  background: #fffafa;
+  border-color: var(--c-error-line);
+  background: var(--c-error-wash);
 }
 
 /* Pestañas de la clase (Estudiantes / Retos) */

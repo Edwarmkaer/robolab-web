@@ -26,7 +26,9 @@ export function StudentApp() {
       fallback={(message, reset) => (
         <main className="hero kid">
           <div className="card stack" style={{ textAlign: "center", maxWidth: 480 }}>
-            <p className="alert alert-error">{message}</p>
+            <p className="alert alert-error" role="alert">
+              {message}
+            </p>
             <button
               className="btn btn-primary"
               type="button"

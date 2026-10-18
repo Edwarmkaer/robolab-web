@@ -8,15 +8,20 @@ import { type Feedback, feedbackFor } from "@robolab/backend/domain/game/feedbac
 import { type EducationLevel, policyFor } from "@robolab/backend/domain/game/levels";
 import type { Outcome } from "@robolab/backend/domain/game/simulator";
 import { userMessage } from "../../shared/errors";
+import { ActionBar } from "../../shared/ui/ActionBar";
 import { Guide } from "../../shared/ui/Guide";
 import { Icon } from "../../shared/ui/Icon";
+import { useFocusOnMount } from "../../shared/useFocusOnMount";
+import { usePageTitle } from "../../shared/usePageTitle";
 import { BlockEditor } from "../game/BlockEditor";
 import { Board } from "../game/Board";
 import { RobotSend } from "../robot/RobotSend";
+import { useRobotLink } from "../robot/useRobotLink";
 import { STEP_MS, useRunner } from "../game/useRunner";
 import { type PublicQuestion, QuestionDialog } from "./QuestionDialog";
 import { ResultView } from "./ResultView";
 import { speak } from "./speech";
+import "./student.css";
 
 type Stage = { level: EducationLevel; stage: number; questionCount: number };
 
@@ -40,6 +45,8 @@ function StageView({
   const [question, setQuestion] = useState<PublicQuestion | null>(pendingQuestion);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const robot = useRobotLink();
+  const focusTitle = useFocusOnMount<HTMLHeadingElement>();
 
   async function onFinish(outcome: Outcome) {
     const fb = feedbackFor(outcome);
@@ -60,6 +67,8 @@ function StageView({
     setError(null);
     setFeedback(null);
     run(editor.blocks);
+    // Si hay un robot conectado, hace el mismo recorrido.
+    if (robot.state === "on") void robot.send(editor.blocks);
   }
 
   async function onAnswer(option: number) {
@@ -81,8 +90,12 @@ function StageView({
       : null;
 
   return (
-    <div className="game">
+    <div className="game has-action-bar">
       <div className="stack">
+        {/* Cada etapa nueva recibe el foco: el lector de pantalla anuncia en qué estrella va. */}
+        <h1 className="stage-title" tabIndex={-1} ref={focusTitle}>
+          Estrella {stage.stage + 1} de {stage.questionCount}
+        </h1>
         <Board map={map} robot={runner.robot} mood={mood} stepMs={STEP_MS} />
         {/* Wayra acompaña, pero en una evaluación no da pistas: la nota es del alumno. */}
         <Guide
@@ -104,31 +117,23 @@ function StageView({
         )}
       </div>
       <div className="stack">
-        <BlockEditor policy={policy} state={editor} dispatch={dispatch} disabled={runner.running || question !== null} active={highlight} />
-        <div className="row">
-          <button
-            className="btn btn-primary"
-            type="button"
-            style={{ flex: 1 }}
-            disabled={runner.running || editor.blocks.length === 0 || question !== null}
-            onClick={onRun}
-          >
+        <BlockEditor
+          policy={policy}
+          state={editor}
+          dispatch={dispatch}
+          disabled={runner.running || question !== null}
+          active={highlight}
+          onClear={() => {
+            setFeedback(null);
+            reset();
+          }}
+        />
+        <ActionBar>
+          <RobotSend robot={robot} program={editor.blocks} disabled={runner.running || question !== null} />
+          <button className="btn btn-primary" type="button" disabled={runner.running || editor.blocks.length === 0 || question !== null} onClick={onRun}>
             <Icon name="play" /> Ejecutar
           </button>
-          <button
-            className="btn"
-            type="button"
-            disabled={runner.running}
-            onClick={() => {
-              dispatch({ type: "clear" });
-              setFeedback(null);
-              reset();
-            }}
-          >
-            <Icon name="rotate" /> Borrar
-          </button>
-        </div>
-        <RobotSend program={editor.blocks} disabled={runner.running} />
+        </ActionBar>
       </div>
       {question && <QuestionDialog question={question} busy={busy} error={error} onAnswer={(o) => void onAnswer(o)} />}
     </div>
@@ -139,6 +144,7 @@ export function GamePage({ token }: { token: string }) {
   const { attemptId } = useParams();
   const id = attemptId as Id<"attempts">;
   const attempt = useQuery(api.student.attempt, { token, attemptId: id });
+  usePageTitle(attempt?.title);
 
   if (attempt === undefined) return <p className="page muted">Cargando…</p>;
 
@@ -149,7 +155,7 @@ export function GamePage({ token }: { token: string }) {
           <img src="/robot/robot.svg" alt="" />
           {attempt.title}
         </Link>
-        <div className="progress-dots" aria-label={`Estrella ${Math.min(attempt.stage + 1, attempt.questionCount)} de ${attempt.questionCount}`}>
+        <div className="progress-dots" role="img" aria-label={`Estrella ${Math.min(attempt.stage + 1, attempt.questionCount)} de ${attempt.questionCount}`}>
           {Array.from({ length: attempt.questionCount }, (_, i) => (
             <span key={i} data-state={i < attempt.stage ? "done" : i === attempt.stage ? "current" : "next"} />
           ))}

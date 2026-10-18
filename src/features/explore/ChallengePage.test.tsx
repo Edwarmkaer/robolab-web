@@ -15,6 +15,7 @@ vi.mock("convex/react", () => ({
 import { ChallengeRoute } from "./ChallengePage";
 
 beforeEach(() => {
+  window.scrollTo = vi.fn() as unknown as typeof window.scrollTo; // jsdom no hace scroll: cada fase nueva pide empezar arriba
   window.localStorage.clear();
   recordPlay.mockResolvedValue({ solved: true });
   recordChallengePlay.mockResolvedValue({ solved: true });

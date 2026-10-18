@@ -152,7 +152,7 @@ export function ClassesPage({ creating = false }: { creating?: boolean }) {
   return (
     <div className="stack">
       <div className="page-head">
-        <h2>Mis clases</h2>
+        <h1>Mis clases</h1>
         {!showForm && (
           <Link className="btn btn-primary" to="/docente/clases/nueva">
             <Icon name="plus" /> Nueva clase

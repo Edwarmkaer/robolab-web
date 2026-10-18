@@ -21,15 +21,15 @@ export function HomePage() {
   return (
     <div className="stack" style={{ gap: 24 }}>
       <div className="row spread" style={{ alignItems: "center", flexWrap: "wrap" }}>
-        <h2 className="home-greeting" style={{ margin: 0 }}>
+        <h1 className="home-greeting" style={{ margin: 0 }}>
           {home?.firstName ? `Hola, ${home.firstName}` : "Hola"}
-        </h2>
+        </h1>
         <Link className="btn" to="/docente/laboratorio/nueva">
           <Icon name="plus" /> Crear misión multigrado
         </Link>
       </div>
 
-      <div className="stat-grid" aria-label="Resumen">
+      <div className="stat-grid" role="group" aria-label="Resumen">
         <Stat value={home?.activeClasses} label={home?.activeClasses === 1 ? "clase activa" : "clases activas"} />
         <Stat value={home?.students} label={home?.students === 1 ? "estudiante" : "estudiantes"} />
         <Stat value={home?.availableChallenges} label="retos disponibles" />

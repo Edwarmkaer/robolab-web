@@ -6,12 +6,13 @@ import { api } from "@robolab/backend/convex/_generated/api";
 import type { Id } from "@robolab/backend/convex/_generated/dataModel";
 import { shortLabel } from "@robolab/backend/domain/evaluation/calendar";
 import { Icon } from "../../../shared/ui/Icon";
+import { usePageTitle } from "../../../shared/usePageTitle";
 import { type ChartSeries, ProgressChart } from "./ProgressChart";
 import { scaleFor } from "./chartLayout";
 
 // Colores validados para daltonismo (azul y naranja), con línea punteada como segunda codificación.
-const STUDENT_COLOR = "#2a78d6";
-const AVERAGE_COLOR = "#eb6834";
+const STUDENT_COLOR = "var(--c-series-student)";
+const AVERAGE_COLOR = "var(--c-series-average)";
 
 type Progress = FunctionReturnType<typeof api.analytics.classProgress>;
 type Point = Progress["students"][number]["series"][number];
@@ -202,18 +203,24 @@ function ClassProgress({ classroomId }: { classroomId: Id<"classrooms"> }) {
 }
 
 export function ProgressPage() {
+  usePageTitle("Progreso");
   const classes = useQuery(api.classrooms.listMine);
   const [classroomId, setClassroomId] = useState<string>("");
 
   if (classes === undefined) return <p className="muted">Cargando…</p>;
   if (classes.length === 0) {
     return (
-      <div className="empty">
-        <Icon name="users" size={32} />
-        <p>Primero crea una clase: tus alumnos se unen con su código.</p>
-        <Link className="btn btn-primary" to="/docente/clases">
-          <Icon name="plus" /> Crear clase
-        </Link>
+      <div className="stack">
+        <div className="page-head">
+          <h1>Progreso</h1>
+        </div>
+        <div className="empty">
+          <Icon name="users" size={32} />
+          <p>Primero crea una clase: tus alumnos se unen con su código.</p>
+          <Link className="btn btn-primary" to="/docente/clases">
+            <Icon name="plus" /> Crear clase
+          </Link>
+        </div>
       </div>
     );
   }
@@ -222,7 +229,7 @@ export function ProgressPage() {
   return (
     <div className="stack">
       <div className="page-head">
-        <h2>Progreso</h2>
+        <h1>Progreso</h1>
         <select className="select" style={{ maxWidth: 360 }} value={selected} onChange={(e) => setClassroomId(e.target.value)} aria-label="Clase">
           {classes.map((c) => (
             <option key={c._id} value={c._id}>

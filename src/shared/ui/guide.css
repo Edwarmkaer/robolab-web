@@ -1,0 +1,109 @@
+/* Wayra, la guía: asistente flotante en la esquina inferior derecha. */
+.guide {
+  position: fixed;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: 16px;
+  z-index: 12;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  max-width: min(380px, calc(100vw - 32px));
+  /* El contenedor no bloquea clics; solo la cara y el globo. */
+  pointer-events: none;
+}
+
+.guide > * {
+  pointer-events: auto;
+}
+
+.guide-face {
+  flex: none;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+
+.guide-avatar {
+  display: block;
+  filter: drop-shadow(0 4px 6px rgb(31 36 48 / 15%));
+}
+
+.guide-bubble {
+  position: relative;
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  max-height: 40vh;
+  overflow-y: auto;
+  padding: 12px 14px;
+  border-radius: 18px 18px 4px 18px;
+  background: var(--c-surface);
+  border: 1px solid var(--c-line);
+  box-shadow: var(--shadow-lg);
+  font-size: 0.95rem;
+}
+
+.guide-bubble .btn {
+  justify-self: start;
+}
+
+.guide-name {
+  font-size: 0.8rem;
+  color: var(--c-ok);
+}
+
+.guide[data-mood="happy"] .guide-bubble {
+  border-color: var(--c-ok-line);
+  background: var(--c-ok-wash);
+}
+
+.guide[data-mood="surprised"] .guide-bubble,
+.guide[data-mood="sad"] .guide-bubble {
+  border-color: var(--c-warn-line);
+  background: var(--c-warn-wash);
+}
+
+/* Escondido: solo se ve su cara; el mensaje sigue disponible para el lector de pantalla. */
+.guide[data-folded] .guide-bubble {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  border: 0;
+  white-space: nowrap;
+}
+
+/* Que Wayra no tape el final de la página: queda espacio para llegar a todo. */
+body:has(.guide) .explore-main,
+body:has(.guide) .page {
+  padding-bottom: 160px;
+}
+
+@media (max-width: 640px) {
+  .guide {
+    right: max(12px, env(safe-area-inset-right));
+    bottom: calc(12px + env(safe-area-inset-bottom));
+    max-width: min(300px, calc(100vw - 24px));
+  }
+
+  .guide-face svg {
+    width: 56px;
+    height: 56px;
+  }
+
+  .guide-bubble {
+    max-height: 30vh;
+    font-size: 0.9rem;
+  }
+
+  /* En las pantallas con barra inferior (Robot, Ejecutar) Wayra queda por encima de ella. */
+  .has-action-bar .guide {
+    bottom: calc(88px + env(safe-area-inset-bottom));
+  }
+}
