@@ -19,7 +19,7 @@ import { BlockEditor } from "../game/BlockEditor";
 import { InitialProgramEditor } from "../vision/InitialProgramEditor";
 import { Board } from "../game/Board";
 import { RobotSend } from "../robot/RobotSend";
-import { useRobotLink } from "../robot/useRobotLink";
+import { useRobotLink, type RobotSync } from "../robot/useRobotLink";
 import { STEP_MS, useRunner } from "../game/useRunner";
 import { useStudentToken } from "../student/session";
 import { speak } from "../student/speech";
@@ -109,7 +109,7 @@ function Intro({ challenge, onStart }: { challenge: Challenge; onStart: () => vo
   );
 }
 
-function Play({ challenge, onSolved }: { challenge: Challenge; onSolved: (stats: Stats, submission: Submission) => void }) {
+function Play({ challenge, robot, onSolved }: { challenge: Challenge; robot: RobotSync; onSolved: (stats: Stats, submission: Submission) => void }) {
   const policy = policyFor(challenge.level);
   const [startedAt] = useState(() => Date.now());
   const [editor, dispatch] = useReducer(editorReducer, undefined, () => ({
@@ -123,7 +123,6 @@ function Play({ challenge, onSolved }: { challenge: Challenge; onSolved: (stats:
   const [picked, setPicked] = useState<Cell | null>(null);
   const [solved, setSolved] = useState(false);
   const ranProgram = useRef<Program>([]);
-  const robot = useRobotLink();
   // Al empezar (o repetir) el reto el foco va al título: el lector de pantalla anuncia en qué reto está.
   const focusTitle = useFocusOnMount<HTMLHeadingElement>();
 
@@ -156,7 +155,7 @@ function Play({ challenge, onSolved }: { challenge: Challenge; onSolved: (stats:
   });
 
   function execute() {
-    if (runner.running || solved || editor.blocks.length === 0) return;
+    if (runner.running || solved || robot.busy || editor.blocks.length === 0) return;
     ranProgram.current = editor.blocks;
     setRuns((n) => n + 1);
     setBoardMood("idle");
@@ -184,7 +183,7 @@ function Play({ challenge, onSolved }: { challenge: Challenge; onSolved: (stats:
     setHints((n) => n + 1);
   }
 
-  const busy = runner.running || solved;
+  const busy = runner.running || solved || robot.busy;
   const used = countBlocks(editor.blocks);
   const highlight = runner.activePath
     ? { path: runner.activePath, tone: "active" as const }
@@ -273,6 +272,9 @@ function Play({ challenge, onSolved }: { challenge: Challenge; onSolved: (stats:
 }
 
 function ChallengePage({ challenge }: { challenge: Challenge }) {
+  // El resultado virtual puede llegar antes que DONE del robot físico.
+  // Mantener el enlace aquí conserva la parada y los latidos entre fases.
+  const robot = useRobotLink();
   const [phase, setPhase] = useState<"intro" | "play" | "done">("intro");
   const [stats, setStats] = useState<Stats | null>(null);
   const [round, setRound] = useState(0);
@@ -322,7 +324,7 @@ function ChallengePage({ challenge }: { challenge: Challenge }) {
           }}
         />
       )}
-      {phase === "play" && <Play key={round} challenge={challenge} onSolved={solved} />}
+      {phase === "play" && <Play key={round} challenge={challenge} robot={robot} onSolved={solved} />}
       {phase === "done" && stats && (
         <ChallengeDone
           challenge={challenge}
@@ -332,6 +334,12 @@ function ChallengePage({ challenge }: { challenge: Challenge }) {
             setPhase("play");
           }}
         />
+      )}
+      {phase === "done" && robot.transport === "bluetooth" && robot.state === "on" && (
+        <div className="stack robot-result">
+          {robot.busy && <p className="small" role="status">El robot físico sigue ejecutando el programa.</p>}
+          <div className="row"><RobotSend robot={robot} program={[]} disabled /></div>
+        </div>
       )}
     </ExploreLayout>
   );
