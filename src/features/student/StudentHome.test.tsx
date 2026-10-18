@@ -15,9 +15,6 @@ const HOME = {
   level: "inicial",
   classroomLabel: "Inicial · 5 años · Sección A",
   joinCode: "TEC-482",
-  today: "2026-10-17",
-  evaluation: null,
-  pendingCount: 0,
   classChallenges: [],
 };
 
@@ -30,11 +27,13 @@ function renderHome() {
 }
 
 describe("portada del alumno", () => {
-  it("sin evaluación, dice qué día está usando el servidor (no el reloj de la tablet)", () => {
+  it("solo habla de retos: no hay evaluaciones del día ni fecha", () => {
     home.mockReturnValue(HOME);
     renderHome();
-    expect(screen.getByText(/Hoy no tienes evaluaciones/)).toBeTruthy();
-    expect(screen.getByText("Hoy es 17 oct.")).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Retos de tu clase" })).toBeTruthy();
+    expect(screen.queryByText(/evaluaci/i)).toBeNull();
+    expect(screen.queryByText(/Hoy es/)).toBeNull();
+    expect(screen.queryByRole("button", { name: /empezar|intentar de nuevo|seguir jugando/i })).toBeNull();
   });
 
   it("saluda por el apodo, muestra el código de su clase y enlaza cada reto asignado a /reto/<id>", () => {

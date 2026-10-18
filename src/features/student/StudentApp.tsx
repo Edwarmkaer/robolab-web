@@ -1,6 +1,5 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { ErrorBoundary } from "../../shared/ui/ErrorBoundary";
-import { GamePage } from "./GamePage";
 import { JoinClass } from "./JoinClass";
 import { StudentHome } from "./StudentHome";
 import { StudentLogin } from "./StudentLogin";
@@ -45,7 +44,6 @@ export function StudentApp() {
     >
       <Routes>
         <Route index element={<StudentHome token={token} onSignOut={() => setToken(null)} />} />
-        <Route path="juego/:attemptId" element={<GamePage token={token} />} />
         <Route path="*" element={<Navigate to="/alumno" replace />} />
       </Routes>
     </ErrorBoundary>

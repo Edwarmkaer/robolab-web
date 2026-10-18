@@ -9,9 +9,6 @@ const HOME = {
   level: "inicial",
   classroomLabel: "Inicial · 5 años · Sección A",
   joinCode: "TEC-482",
-  today: "2026-10-17",
-  evaluation: null,
-  pendingCount: 0,
   classChallenges: [
     { assignmentId: "a1", challengeId: "inicial-paseo", title: "Primer paseo", level: "inicial", kind: "sequence", solved: false },
   ],
@@ -55,6 +52,12 @@ describe("/alumno", () => {
     expect(window.localStorage.getItem("robolab.alumno.token")).toBe("t-1");
     expect(screen.getByRole("heading", { name: "Retos de tu clase" })).toBeTruthy();
     expect((screen.getByRole("link", { name: /Primer paseo/ }) as HTMLAnchorElement).getAttribute("href")).toBe("/reto/inicial-paseo");
+  });
+
+  it("un enlace viejo a un intento de evaluación lleva a la portada del alumno", () => {
+    window.localStorage.setItem("robolab.alumno.token", "t-1");
+    renderAt("/alumno/juego/un-intento-viejo");
+    expect(screen.getByRole("heading", { name: "¡Hola, Pingüino veloz!" })).toBeTruthy();
   });
 
   it("las tarjetas con código por alumno de la fase 1 siguen entrando por /alumno/codigo", () => {

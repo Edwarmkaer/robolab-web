@@ -90,8 +90,8 @@ describe("etiquetas del eje horizontal", () => {
     expect(visibleLabelIndexes(5, 100)).toEqual([0, 1, 2, 3, 4]);
   });
 
-  it("con muchas evaluaciones en poco ancho se salta de a una pero siempre queda la última", () => {
-    // 9 evaluaciones en 244 px: 30 px entre puntos, una etiqueta "17 oct" mide ~40 px.
+  it("con muchos retos en poco ancho se salta de a una pero siempre queda la última", () => {
+    // 9 retos en 244 px: 30 px entre puntos, una etiqueta "17 oct" mide ~40 px.
     const step = COMPACT_LAYOUT.PLOT_W / 8;
     const shown = visibleLabelIndexes(9, step);
     expect(shown).toEqual([0, 2, 4, 6, 8]);
@@ -100,7 +100,7 @@ describe("etiquetas del eje horizontal", () => {
     expect(step * (shown[1]! - shown[0]!)).toBeGreaterThanOrEqual(46);
   });
 
-  it("una sola evaluación muestra su etiqueta", () => {
+  it("un solo reto muestra su etiqueta", () => {
     expect(visibleLabelIndexes(1, 100)).toEqual([0]);
   });
 });

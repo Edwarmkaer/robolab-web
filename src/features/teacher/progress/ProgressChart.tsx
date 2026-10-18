@@ -9,7 +9,7 @@ export type ChartSeries = {
   readonly shortLabel?: string;
   readonly color: string;
   readonly dashed?: boolean;
-  /** Un valor por punto del eje X; null = no rindió esa evaluación. */
+  /** Un valor por punto del eje X; null = no jugó ese reto. */
   readonly values: readonly (number | null)[];
 };
 
@@ -23,7 +23,7 @@ type Props = {
   readonly format: (value: number) => string;
 };
 
-/** Tramos continuos: una evaluación no rendida corta la línea en vez de inventar un valor. */
+/** Tramos continuos: un reto sin jugar corta la línea en vez de inventar un valor. */
 function segments(values: readonly (number | null)[], xOf: (i: number) => number, yOf: (v: number) => number): string[] {
   const paths: string[] = [];
   let current = "";
