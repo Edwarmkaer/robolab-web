@@ -117,6 +117,15 @@ describe("Retos del docente", () => {
     expect(screen.queryByText(/aún no creaste retos/i)).toBeNull();
   });
 
+  it("una clase sin alumnos no dice «0 de 0 lo lograron»", () => {
+    pretendViewport(true);
+    list.mockReturnValue([{ ...RETOS[2]!, studentCount: 0, studentsSolved: 0, solvedPercent: 0 }]);
+    render(page());
+    const card = within(screen.getByRole("list", { name: "Retos" })).getByRole("link");
+    expect(card.textContent).toContain("Aún sin alumnos");
+    expect(card.textContent).not.toContain("0 de 0");
+  });
+
   it("en el celular son tarjetas con la clase completa, sin tabla recortada", () => {
     pretendViewport(true);
     render(page());

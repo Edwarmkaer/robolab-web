@@ -18,6 +18,12 @@
   }
 }
 
+/* En el celular la tabla se desplaza hacia el lado en vez de partir «Logró · 2» en dos líneas. */
+.progress-grid .table th,
+.progress-grid .table td {
+  white-space: nowrap;
+}
+
 .progress-solved {
   color: var(--c-ok);
 }

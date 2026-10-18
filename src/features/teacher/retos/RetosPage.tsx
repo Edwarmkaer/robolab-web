@@ -169,9 +169,7 @@ export function RetosPage() {
                     {r.topicName} · {LEVEL_INFO[r.level].name}
                   </span>
                   {r.classroomId && (
-                    <span>
-                      {r.studentsSolved} de {r.studentCount} lo lograron
-                    </span>
+                    <span>{r.studentCount === 0 ? "Aún sin alumnos" : `${r.studentsSolved} de ${r.studentCount} lo lograron`}</span>
                   )}
                 </span>
               </Link>
