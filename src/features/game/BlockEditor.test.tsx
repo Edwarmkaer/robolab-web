@@ -35,8 +35,8 @@ describe("editor de bloques", () => {
     const pieces = within(palette).getAllByRole("button");
     expect(pieces.map((b) => b.getAttribute("aria-label"))).toEqual(["Avanzar", "Retroceder", "Girar a la izquierda", "Girar a la derecha"]);
     expect(pieces.map((b) => b.getAttribute("data-piece"))).toEqual(["FORWARD", "BACKWARD", "TURN_LEFT", "TURN_RIGHT"]);
-    // Inicial no tiene Retroceder ni Repetir.
-    expect(within(palette).queryByRole("button", { name: /Repetir|Retroceder/ })).toBeNull();
+    // Inicial no tiene Repetir (sí Retroceder, desde el backend 0.4.0).
+    expect(within(palette).queryByRole("button", { name: /Repetir/ })).toBeNull();
 
     const list = screen.getByRole("list", { name: "Tu secuencia" });
     expect(within(list).queryAllByRole("listitem")).toHaveLength(0);
