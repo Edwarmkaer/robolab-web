@@ -1,11 +1,10 @@
 import { useMutation } from "convex/react";
 import { useReducer, useRef, useState } from "react";
-import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
+import { Link, Navigate, useParams } from "react-router-dom";
 import { api } from "@robolab/backend/convex/_generated/api";
 import { capacityText, evidenceFor } from "@robolab/backend/domain/curriculum/competencias";
-import { type Challenge, KIND_LABEL, challengeById, nextChallenge, topicInfo } from "@robolab/backend/domain/explore/challenges";
+import { type Challenge, KIND_LABEL, challengeById, topicInfo } from "@robolab/backend/domain/explore/challenges";
 import { type CheckResult, checkPrediction, checkProgram } from "@robolab/backend/domain/explore/check";
-import { formatDuration } from "@robolab/backend/domain/evaluation/scoring";
 import { editorReducer } from "@robolab/backend/domain/game/editor";
 import { policyFor } from "@robolab/backend/domain/game/levels";
 import type { Cell } from "@robolab/backend/domain/game/map";
@@ -20,8 +19,10 @@ import { RobotSend } from "../robot/RobotSend";
 import { useRobotLink } from "../robot/useRobotLink";
 import { STEP_MS, useRunner } from "../game/useRunner";
 import { speak } from "../student/speech";
+import { ChallengeDone } from "./ChallengeDone";
 import { Breadcrumbs, ExploreLayout, LEVEL_INFO } from "./ExploreLayout";
 import { deviceId, useExploreProgress } from "./storage";
+import { listPath } from "./paths";
 import "./challenge.css";
 
 type Stats = { readonly runs: number; readonly hints: number; readonly ms: number };
@@ -45,10 +46,6 @@ const MOOD_FOR: Record<Exclude<CheckResult, { ok: true }>["reason"], Mood> = {
   BLOCKS: "sad",
 };
 
-function listPath(c: Challenge) {
-  return `/explorar/${c.topic}/${c.level}`;
-}
-
 function Intro({ challenge, onStart }: { challenge: Challenge; onStart: () => void }) {
   const topic = topicInfo(challenge.topic)!;
   return (
@@ -60,9 +57,15 @@ function Intro({ challenge, onStart }: { challenge: Challenge; onStart: () => vo
         <h1 style={{ margin: 0 }}>{challenge.title}</h1>
         <p>{challenge.story}</p>
         <div className="row" style={{ gap: 8 }}>
-          <span className="chip">⏱ {challenge.minutes}</span>
-          <span className="chip">🧠 {challenge.skill}</span>
-          <span className="chip">💡 3 pistas</span>
+          <span className="chip">
+            <span aria-hidden="true">⏱</span> {challenge.minutes}
+          </span>
+          <span className="chip">
+            <span aria-hidden="true">🧠</span> {challenge.skill}
+          </span>
+          <span className="chip">
+            <span aria-hidden="true">💡</span> 3 pistas
+          </span>
           <span className="chip">{KIND_LABEL[challenge.kind]}</span>
         </div>
         <details className="small">
@@ -203,7 +206,7 @@ function Play({ challenge, onSolved }: { challenge: Challenge; onSolved: (stats:
       <div className="stack">
         <Guide mood={guide.mood} message={guide.message}>
           <button className="btn btn-sm" type="button" onClick={askHint} disabled={busy || hints >= challenge.hints.length}>
-            💡 {hints >= challenge.hints.length ? "Ya usaste las 3 pistas" : `Pedir pista (${hints} de 3)`}
+            <Icon name="lightbulb" size={16} /> {hints >= challenge.hints.length ? "Ya usaste las 3 pistas" : `Pedir pista (${hints} de 3)`}
           </button>
         </Guide>
 
@@ -247,57 +250,6 @@ function Play({ challenge, onSolved }: { challenge: Challenge; onSolved: (stats:
   );
 }
 
-function Done({ challenge, stats, onRepeat }: { challenge: Challenge; stats: Stats; onRepeat: () => void }) {
-  const navigate = useNavigate();
-  const topic = topicInfo(challenge.topic)!;
-  const next = nextChallenge(challenge);
-  return (
-    <section className="card stack done" aria-labelledby="done-title">
-      <span className="done-burst" aria-hidden="true">
-        🎉
-      </span>
-      <h1 id="done-title" style={{ margin: 0 }}>
-        ¡Reto logrado!
-      </h1>
-      <p className="muted">
-        {challenge.title} · {topic.name} · {LEVEL_INFO[challenge.level].name}
-      </p>
-      <div className="stat-row">
-        <div className="stat">
-          <strong>{stats.runs}</strong>
-          <span>{stats.runs === 1 ? "intento" : "intentos"}</span>
-        </div>
-        <div className="stat">
-          <strong>{stats.hints}</strong>
-          <span>{stats.hints === 1 ? "pista" : "pistas"}</span>
-        </div>
-        <div className="stat">
-          <strong>{formatDuration(stats.ms)}</strong>
-          <span>tiempo</span>
-        </div>
-      </div>
-      <Guide
-        mood="happy"
-        message={stats.hints === 0 ? "¡Sin pistas! ¡Qué buen trabajo!" : "¡Bien hecho! La próxima vez intenta con menos pistas."}
-      />
-      <div className="row" style={{ justifyContent: "center" }}>
-        {next && (
-          <button className="btn btn-primary" type="button" onClick={() => navigate(`/reto/${next.id}`)}>
-            Siguiente reto <Icon name="chevronRight" size={18} />
-          </button>
-        )}
-        <button className="btn" type="button" onClick={onRepeat}>
-          <Icon name="rotate" /> Repetir
-        </button>
-        <Link className="link-btn" to={listPath(challenge)}>
-          Volver a la lista
-        </Link>
-      </div>
-      <p className="small muted">Tu avance se guarda en este dispositivo.</p>
-    </section>
-  );
-}
-
 function ChallengePage({ challenge }: { challenge: Challenge }) {
   const [phase, setPhase] = useState<"intro" | "play" | "done">("intro");
   const [stats, setStats] = useState<Stats | null>(null);
@@ -337,7 +289,7 @@ function ChallengePage({ challenge }: { challenge: Challenge }) {
       )}
       {phase === "play" && <Play key={round} challenge={challenge} onSolved={solved} />}
       {phase === "done" && stats && (
-        <Done
+        <ChallengeDone
           challenge={challenge}
           stats={stats}
           onRepeat={() => {

@@ -8,3 +8,105 @@
   font-weight: 800;
   letter-spacing: normal;
 }
+
+/* ---------- ¡Reto logrado! (M6) ---------- */
+.done {
+  max-width: 620px;
+  margin: 0 auto;
+  text-align: center;
+  justify-items: center;
+  gap: 24px;
+}
+
+.done-top {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+}
+
+.done-top h1 {
+  margin: 0;
+  font-size: clamp(1.9rem, 6vw, 2.4rem);
+}
+
+.done-burst {
+  font-size: 3rem;
+  line-height: 1;
+}
+
+.stat-row {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.stat {
+  display: grid;
+  min-width: 96px;
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--c-line);
+  background: var(--c-surface);
+}
+
+.stat strong {
+  font-size: 1.6rem;
+  color: var(--c-brand-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+.stat span {
+  font-size: 0.8rem;
+  color: var(--c-muted);
+}
+
+.done-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.saved-note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-basis: 100%;
+  justify-content: center;
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  background: var(--c-brand-soft);
+  color: var(--c-brand-strong);
+}
+
+/* En el celular el resultado ocupa la pantalla: las cifras arriba, los botones al pie, a todo el ancho. */
+@media (max-width: 640px) {
+  .done {
+    min-height: calc(100dvh - 120px);
+    grid-template-rows: auto 1fr;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .done-actions {
+    flex-direction: column;
+    align-items: stretch;
+    align-self: end;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .done-actions .btn {
+    min-height: 52px;
+  }
+
+  .done-actions .link-btn {
+    justify-content: center;
+    min-height: 44px;
+  }
+}

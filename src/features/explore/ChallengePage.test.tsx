@@ -86,3 +86,36 @@ describe("pantalla del reto: Robot y Ejecutar", () => {
     expect(mutation).not.toHaveBeenCalled();
   });
 });
+
+describe("pantalla del reto: al lograrlo", () => {
+  it("al llegar a la estrella aparece '¡Reto logrado!' con el foco en su título y las cifras de la partida", async () => {
+    renderChallenge();
+    fireEvent.click(screen.getByRole("button", { name: /Empezar el reto/ }));
+    for (let i = 0; i < 3; i++) fireEvent.click(screen.getByRole("button", { name: "Avanzar" }));
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /Ejecutar/ }));
+      // La animación (4 pasos de 450 ms) y el momento de ver a Kusi en la estrella (1,2 s).
+      await vi.advanceTimersByTimeAsync(4000);
+    });
+    const title = screen.getByRole("heading", { level: 1, name: "¡Reto logrado!" });
+    expect(document.activeElement).toBe(title);
+    expect([...document.querySelectorAll(".stat-row .stat")].map((s) => s.querySelector("span")!.textContent)).toEqual(["intento", "pistas", "tiempo"]);
+    expect(screen.getByRole("link", { name: /Siguiente reto/ }).getAttribute("href")).toBe("/reto/inicial-gira");
+    // Solo estadística anónima: se registra la partida del dispositivo.
+    expect(mutation).toHaveBeenCalledWith(expect.objectContaining({ challengeId: "inicial-paseo", runs: 1, hints: 0 }));
+  });
+
+  it("'Repetir' vuelve a jugar el mismo reto y el foco regresa al título del reto", async () => {
+    renderChallenge();
+    fireEvent.click(screen.getByRole("button", { name: /Empezar el reto/ }));
+    for (let i = 0; i < 3; i++) fireEvent.click(screen.getByRole("button", { name: "Avanzar" }));
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /Ejecutar/ }));
+      await vi.advanceTimersByTimeAsync(4000);
+    });
+    fireEvent.click(screen.getByRole("button", { name: /Repetir/ }));
+    const title = screen.getByRole("heading", { level: 1 });
+    expect(title.textContent).toBe("Primer paseo.");
+    expect(document.activeElement).toBe(title);
+  });
+});
