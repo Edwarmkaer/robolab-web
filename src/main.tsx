@@ -3,7 +3,8 @@ import { ConvexReactClient } from "convex/react";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
-import "@fontsource-variable/nunito";
+import "@fontsource-variable/baloo-2";
+import "@fontsource/lilita-one";
 // Los tokens y la base van primero: así el CSS de cada área puede ajustarlos sin pelear por el orden.
 import "./shared/ui/styles.css";
 import "./shared/ui/safeArea.css";

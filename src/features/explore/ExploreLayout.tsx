@@ -79,7 +79,6 @@ export function ExploreLayout({ children, title, backTo }: Props) {
             </>
           ) : (
             <Link className="brand" to="/">
-              <img src="/robot/robot.svg" alt="" />
               {APP_NAME}
             </Link>
           )}

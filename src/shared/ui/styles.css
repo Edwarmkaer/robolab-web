@@ -1,23 +1,26 @@
 /* Tokens: una sola fuente de colores, espacios y radios. */
 :root {
-  --c-bg: #fff8ec;
+  --c-bg: #fff8d6;
   --c-surface: #ffffff;
-  --c-surface-2: #faf8f3;
-  --c-ink: #1f2430;
-  --c-muted: #5d6475;
-  --c-line: #dfdbd0;
-  --c-line-strong: #c9c3b4;
-  --c-brand: #2f6fdc;
-  --c-brand-strong: #2459b8;
+  --c-surface-2: #fff4b5;
+  --c-ink: #1a1a1a;
+  --c-muted: #47433a;
+  --c-line: #d9cf9a;
+  --c-line-strong: #a89d5a;
+  --c-brand: #0d47a1;
+  --c-brand-strong: #0d47a1;
   --c-brand-ink: #ffffff;
-  --c-brand-soft: #e6eefc;
-  --c-brand-wash: #eaf0fd;
-  --c-ok: #17703d;
-  --c-ok-soft: #e3f4ea;
+  --c-brand-soft: #dbe8ff;
+  --c-brand-wash: #eef4ff;
+  --c-action: #ffd400;
+  --c-action-strong: #f2c800;
+  --c-action-ink: #1a1a1a;
+  --c-ok: #0b6b34;
+  --c-ok-soft: #d3f3de;
   --c-ok-line: #9fd9b4;
   --c-ok-wash: #f3fbf6;
-  --c-warn: #9a4f00;
-  --c-warn-soft: #fdf0e1;
+  --c-warn: #7a3f00;
+  --c-warn-soft: #ffe3a3;
   --c-warn-line: #f1c99a;
   --c-warn-edge: #f0c48f;
   --c-warn-wash: #fffaf2;
@@ -43,8 +46,8 @@
   --c-on-ink-error: #ff9d94;
   --c-on-ink-link: #9cc2ff;
   --c-on-ink-muted: #c9cdd6;
-  --c-series-student: #2a78d6;
-  --c-series-average: #eb6834;
+  --c-series-student: #0d47a1;
+  --c-series-average: #d90429;
   --topic-ciencia: #1f8a4c;
   --topic-tecnologia: #2f6fdc;
   --topic-ingenieria: #d9822b;
@@ -52,11 +55,13 @@
   --topic-matematicas: #e0604f;
   --c-grass: #a8d58a;
   --c-grass-dark: #8cc06e;
-  --radius: 14px;
-  --radius-lg: 22px;
-  --shadow: 0 1px 2px rgb(31 36 48 / 6%), 0 6px 20px rgb(31 36 48 / 6%);
-  --shadow-lg: 0 12px 40px rgb(31 36 48 / 16%);
-  --font: "Nunito Variable", "Nunito", "Segoe UI", system-ui, sans-serif;
+  --radius: 12px;
+  --radius-lg: 14px;
+  --shadow: 4px 4px 0 var(--c-ink);
+  --shadow-lg: 6px 6px 0 var(--c-ink);
+  --shadow-sm: 3px 3px 0 var(--c-ink);
+  --font: "Baloo 2 Variable", "Baloo 2", "Segoe UI", system-ui, sans-serif;
+  --font-head: "Lilita One", "Baloo 2 Variable", "Segoe UI", system-ui, sans-serif;
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
   color-scheme: light;
 
@@ -112,9 +117,10 @@ body {
 h1,
 h2,
 h3 {
+  font-family: var(--font-head);
+  font-weight: 400;
   line-height: 1.2;
   margin: 0 0 0.5rem;
-  letter-spacing: -0.01em;
 }
 
 h2 {
@@ -237,7 +243,7 @@ textarea {
 /* ---------- Componentes ---------- */
 .card {
   background: var(--c-surface);
-  border: 1px solid var(--c-line);
+  border: 3px solid var(--c-ink);
   border-radius: var(--radius-lg);
   padding: 20px;
   box-shadow: var(--shadow);
@@ -254,8 +260,9 @@ textarea {
 }
 
 .card-link:hover {
-  border-color: var(--c-brand);
-  transform: translateY(-2px);
+  border-color: var(--c-ink);
+  box-shadow: var(--shadow-lg);
+  transform: translate(-2px, -2px);
 }
 
 .btn {
@@ -266,25 +273,28 @@ textarea {
   gap: 8px;
   min-height: 44px;
   padding: 10px 18px;
-  border-radius: 999px;
-  border: 1px solid var(--c-line-strong);
+  border-radius: var(--radius);
+  border: 3px solid var(--c-ink);
   background: var(--c-surface);
+  box-shadow: var(--shadow-sm);
   cursor: pointer;
-  font-weight: 700;
+  font-weight: 800;
   text-decoration: none;
   color: var(--c-ink);
   transition:
     transform 120ms var(--ease),
-    background-color 120ms var(--ease),
-    border-color 120ms var(--ease);
+    box-shadow 120ms var(--ease),
+    background-color 120ms var(--ease);
 }
 
 .btn:hover:not(:disabled) {
-  border-color: var(--c-brand);
+  background: var(--c-surface-2);
 }
 
+/* El botón se hunde: la sombra dura se pierde y baja hacia ella. */
 .btn:active:not(:disabled) {
-  transform: scale(0.97);
+  transform: translate(3px, 3px);
+  box-shadow: none;
 }
 
 .btn:disabled {
@@ -293,24 +303,27 @@ textarea {
 }
 
 .btn-primary {
-  background: var(--c-brand);
-  border-color: var(--c-brand);
-  color: var(--c-brand-ink);
+  background: var(--c-action);
+  color: var(--c-action-ink);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--c-brand-strong);
-  border-color: var(--c-brand-strong);
+  background: var(--c-action-strong);
 }
 
 .btn-ghost {
   background: transparent;
   border-color: transparent;
+  box-shadow: none;
 }
 
 .btn-ghost:hover:not(:disabled) {
   background: var(--c-surface-2);
-  border-color: var(--c-line);
+  border-color: var(--c-ink);
+}
+
+.btn-ghost:active:not(:disabled) {
+  transform: none;
 }
 
 .btn-danger {
@@ -448,15 +461,15 @@ textarea {
   min-height: 44px;
   padding: 10px 14px;
   border-radius: var(--radius);
-  border: 1px solid var(--c-line-strong);
+  border: 3px solid var(--c-ink);
   background: var(--c-surface);
   width: 100%;
-  transition: border-color 120ms var(--ease);
+  transition: background-color 120ms var(--ease);
 }
 
 .input:hover,
 .select:hover {
-  border-color: var(--c-muted);
+  background: var(--c-surface-2);
 }
 
 .input::placeholder {
@@ -628,6 +641,7 @@ textarea.input {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--c-muted);
+  background: var(--c-surface-2);
 }
 
 .table-wrap {
@@ -663,10 +677,10 @@ textarea.input {
 }
 
 .meter {
-  height: 8px;
+  height: 12px;
   border-radius: 999px;
-  background: var(--c-surface-2);
-  border: 1px solid var(--c-line);
+  background: var(--c-line);
+  border: 2px solid var(--c-ink);
   overflow: hidden;
 }
 
@@ -710,8 +724,8 @@ textarea.input {
   grid-auto-columns: 1fr;
   padding: 4px;
   border-radius: 999px;
-  background: var(--c-surface-2);
-  border: 1px solid var(--c-line);
+  background: var(--c-surface);
+  border: 3px solid var(--c-ink);
 }
 
 .segmented button {
@@ -725,9 +739,8 @@ textarea.input {
 }
 
 .segmented button[aria-pressed="true"] {
-  background: var(--c-surface);
-  color: var(--c-ink);
-  box-shadow: 0 1px 3px rgb(31 36 48 / 15%);
+  background: var(--c-action);
+  color: var(--c-action-ink);
 }
 
 .empty {
@@ -845,20 +858,29 @@ textarea.input {
 }
 
 /* ---------- Docente: marco ---------- */
+/* Barra amarilla a todo el ancho con un filo de tinta; su contenido sigue la columna de la página. */
 .topbar {
+  background: var(--c-action);
+  border-bottom: 4px solid var(--c-ink);
+}
+
+.topbar-inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 12px;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 14px 16px;
 }
 
 .brand {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-weight: 800;
-  font-size: 1.2rem;
+  font-family: var(--font-head);
+  font-weight: 400;
+  font-size: 1.6rem;
   color: var(--c-ink);
   text-decoration: none;
 }
@@ -892,6 +914,18 @@ textarea.input {
   gap: 4px;
 }
 
+/* «Cerrar sesión» queda en el borde derecho: su etiqueta se abre hacia la izquierda para no ensanchar la página. */
+.user-chip [data-tooltip]::after {
+  left: auto;
+  right: 0;
+  transform: translateY(4px);
+}
+
+.user-chip [data-tooltip]:hover:not(:disabled)::after,
+.user-chip [data-tooltip]:focus-visible::after {
+  transform: translateY(0);
+}
+
 .avatar {
   display: grid;
   place-items: center;
@@ -905,34 +939,38 @@ textarea.input {
 
 .tabs {
   display: flex;
-  gap: 4px;
-  border-bottom: 1px solid var(--c-line);
-  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 16px 0;
+  margin-bottom: 8px;
 }
 
+/* Pestañas como bloques: borde de tinta, y la actual en amarillo con sombra dura. */
 .tab {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 14px;
-  color: var(--c-muted);
+  padding: 8px 16px;
+  color: var(--c-ink);
   text-decoration: none;
-  font-weight: 700;
-  border-radius: var(--radius) var(--radius) 0 0;
+  font-weight: 800;
+  background: var(--c-surface);
+  border: 3px solid var(--c-ink);
+  border-radius: var(--radius);
 }
 
 .tab:hover {
-  color: var(--c-ink);
+  background: var(--c-surface-2);
 }
 
 .tab[aria-current="page"] {
-  color: var(--c-brand-strong);
-  box-shadow: inset 0 -3px 0 var(--c-brand);
+  background: var(--c-action);
+  box-shadow: var(--shadow-sm);
 }
 
 /* En el celular las secciones van abajo, al alcance del pulgar. */
 @media (max-width: 640px) {
-  .page.has-bottom-nav {
+  .has-bottom-nav .page {
     padding-bottom: 96px;
   }
 
@@ -945,10 +983,11 @@ textarea.input {
     margin: 0;
     padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
     background: var(--c-surface);
-    border-top: 1px solid var(--c-line);
+    border-top: 3px solid var(--c-ink);
     border-bottom: 0;
+    flex-wrap: nowrap;
+    gap: 4px;
     justify-content: space-around;
-    box-shadow: 0 -4px 16px rgb(31 36 48 / 6%);
   }
 
   .tab {
@@ -957,12 +996,16 @@ textarea.input {
     gap: 2px;
     padding: 6px 4px;
     font-size: 0.75rem;
+    border-width: 2px;
+    border-color: transparent;
     border-radius: 12px;
+    background: transparent;
   }
 
   .tab[aria-current="page"] {
     box-shadow: none;
-    background: var(--c-brand-soft);
+    border-color: var(--c-ink);
+    background: var(--c-action);
   }
 
   .user-name {
@@ -1033,7 +1076,7 @@ textarea.input {
   padding: 24px;
   border-radius: var(--radius-lg);
   background: var(--c-surface);
-  border: 2px solid var(--c-line);
+  border: 3px solid var(--c-ink);
   text-decoration: none;
   color: var(--c-ink);
   box-shadow: var(--shadow);
@@ -1086,7 +1129,7 @@ textarea.input {
   gap: 8px;
   padding: 12px 14px;
   border-radius: var(--radius);
-  border: 1px solid var(--c-line);
+  border: 3px solid var(--c-ink);
   background: var(--c-surface);
   color: var(--c-ink);
   text-decoration: none;
@@ -1310,6 +1353,8 @@ textarea.input {
   gap: 4px;
   padding: 10px;
   border-radius: var(--radius-lg);
+  border: 3px solid var(--c-ink);
+  box-shadow: var(--shadow);
   background: var(--c-grass-dark);
   user-select: none;
   max-width: min(100%, 72vh);
@@ -1360,18 +1405,18 @@ textarea.input {
 }
 
 .vision-modes .btn[aria-pressed="true"] {
-  background: var(--c-brand-soft);
-  color: var(--c-brand-strong);
-  border-color: var(--c-brand);
+  background: var(--c-action);
+  color: var(--c-action-ink);
 }
 
 .vision-controls {
   display: grid;
   gap: 12px;
   padding: 16px;
-  border: 1px solid var(--c-line-strong);
+  border: 3px solid var(--c-ink);
   border-radius: var(--radius);
   background: var(--c-surface);
+  box-shadow: var(--shadow);
 }
 
 .vision-camera {
@@ -1484,19 +1529,21 @@ textarea.input {
   gap: 4px;
   padding: 10px 6px;
   border-radius: var(--radius);
-  border: 2px solid var(--c-line);
+  border: 3px solid var(--c-ink);
   background: var(--c-surface);
+  box-shadow: var(--shadow-sm);
   cursor: pointer;
   font-weight: 800;
   font-size: 0.85rem;
   min-height: 92px;
   transition:
-    border-color 120ms var(--ease),
-    transform 120ms var(--ease);
+    background-color 120ms var(--ease),
+    transform 120ms var(--ease),
+    box-shadow 120ms var(--ease);
 }
 
 .block-btn:hover:not(:disabled) {
-  border-color: var(--c-brand);
+  background: var(--c-surface-2);
 }
 
 .block-btn img {
@@ -1506,7 +1553,8 @@ textarea.input {
 }
 
 .block-btn:active:not(:disabled) {
-  transform: scale(0.95);
+  transform: translate(3px, 3px);
+  box-shadow: none;
 }
 
 .block-btn:disabled {
@@ -1530,7 +1578,7 @@ textarea.input {
   width: 64px;
   height: 64px;
   border-radius: 12px;
-  border: 2px solid var(--c-line);
+  border: 3px solid var(--c-ink);
   background: var(--c-brand-soft);
   display: grid;
   place-items: center;
@@ -1636,7 +1684,8 @@ textarea.input {
   min-height: 72px;
   padding: 16px 20px;
   border-radius: var(--radius-lg);
-  border: 3px solid var(--c-line);
+  border: 3px solid var(--c-ink);
+  box-shadow: var(--shadow-sm);
   background: var(--c-surface);
   font-size: 1.35rem;
   font-weight: 800;
@@ -1757,8 +1806,8 @@ textarea.input {
   position: sticky;
   top: 0;
   z-index: 15;
-  background: var(--c-surface);
-  border-bottom: 1px solid var(--c-line);
+  background: var(--c-action);
+  border-bottom: 4px solid var(--c-ink);
 }
 
 .explore-header-inner {
@@ -1778,22 +1827,26 @@ textarea.input {
 }
 
 .explore-nav a {
-  padding: 8px 12px;
-  border-radius: 999px;
-  color: var(--c-muted);
-  font-weight: 700;
-  font-size: 0.9rem;
+  padding: 6px 14px;
+  border: 3px solid transparent;
+  border-radius: var(--radius);
+  color: var(--c-ink);
+  font-weight: 800;
+  font-size: 0.95rem;
   text-decoration: none;
   white-space: nowrap;
 }
 
 .explore-nav a:hover {
-  color: var(--c-ink);
+  border-color: var(--c-ink);
+  background: var(--c-surface);
 }
 
 .explore-nav a[aria-current="page"] {
-  color: var(--c-brand-strong);
-  background: var(--c-brand-soft);
+  color: var(--c-ink);
+  background: var(--c-surface);
+  border-color: var(--c-ink);
+  box-shadow: var(--shadow-sm);
 }
 
 .explore-main {
@@ -1845,8 +1898,8 @@ textarea.input {
   padding: 18px 18px 22px;
   border-radius: var(--radius-lg);
   background: var(--c-surface);
-  border: 1px solid var(--c-line);
-  box-shadow: inset 0 -5px 0 var(--topic), var(--shadow);
+  border: 3px solid var(--c-ink);
+  box-shadow: inset 0 -6px 0 var(--topic), var(--shadow);
   color: var(--c-ink);
   text-decoration: none;
   transition:
@@ -1861,7 +1914,7 @@ a.topic-card:hover {
 
 .topic-card[aria-disabled="true"] {
   opacity: 0.7;
-  box-shadow: inset 0 -5px 0 var(--c-line), var(--shadow);
+  box-shadow: inset 0 -6px 0 var(--c-line), var(--shadow);
 }
 
 .topic-card .badge {
@@ -1893,7 +1946,7 @@ a.topic-card:hover {
   padding: 18px;
   border-radius: var(--radius-lg);
   background: var(--c-surface);
-  border: 1px solid var(--c-line);
+  border: 3px solid var(--c-ink);
   box-shadow: var(--shadow);
   color: var(--c-ink);
   text-decoration: none;
@@ -1901,7 +1954,8 @@ a.topic-card:hover {
 }
 
 .role-card:hover {
-  border-color: var(--c-brand);
+  border-color: var(--c-ink);
+  box-shadow: var(--shadow-lg);
 }
 
 .role-card img {
@@ -1941,7 +1995,7 @@ a.topic-card:hover {
   padding: 20px;
   border-radius: var(--radius-lg);
   background: var(--c-surface);
-  border: 1px solid var(--c-line);
+  border: 3px solid var(--c-ink);
   box-shadow: var(--shadow);
   color: var(--c-ink);
   text-decoration: none;
@@ -1997,8 +2051,8 @@ a.level-card:hover {
 }
 
 .segmented-link[aria-current="page"] {
-  background: var(--c-brand);
-  color: var(--c-brand-ink);
+  background: var(--c-action);
+  color: var(--c-action-ink);
 }
 
 .challenge-grid {
@@ -2011,22 +2065,23 @@ a.level-card:hover {
   display: grid;
   border-radius: var(--radius-lg);
   background: var(--c-surface);
-  border: 2px solid var(--c-line);
+  border: 3px solid var(--c-ink);
+  box-shadow: var(--shadow);
   overflow: hidden;
   color: var(--c-ink);
   text-decoration: none;
   transition:
     transform 150ms var(--ease),
-    border-color 150ms var(--ease);
+    box-shadow 150ms var(--ease);
 }
 
 .challenge-card:hover {
-  transform: translateY(-2px);
-  border-color: var(--c-brand);
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-lg);
 }
 
 .challenge-card[data-done] {
-  border-color: var(--c-ok);
+  background: var(--c-ok-soft);
 }
 
 .challenge-art {
@@ -2085,7 +2140,8 @@ a.level-card:hover {
   padding: 10px 14px;
   border-radius: var(--radius);
   background: var(--c-surface);
-  border: 1px solid var(--c-line);
+  border: 3px solid var(--c-ink);
+  box-shadow: var(--shadow-sm);
 }
 
 [data-over] {
@@ -2235,5 +2291,38 @@ details > summary {
 
   .progress-row[data-wide] .progress-count {
     grid-row: 2;
+  }
+}
+
+/* ---------- Adornos: panales amarillos al fondo, solo pantallas anchas ---------- */
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--c-action);
+  opacity: 0.4;
+  clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
+}
+
+body::before {
+  top: 110px;
+  right: 6%;
+  width: 150px;
+  height: 130px;
+}
+
+body::after {
+  bottom: 40px;
+  left: 3%;
+  width: 110px;
+  height: 96px;
+}
+
+@media (max-width: 860px) {
+  body::before,
+  body::after {
+    display: none;
   }
 }

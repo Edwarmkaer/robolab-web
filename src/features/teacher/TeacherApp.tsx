@@ -34,61 +34,64 @@ function TeacherShell() {
   const initial = me?.name.trim().charAt(0).toUpperCase() ?? "";
 
   return (
-    <div className="page has-bottom-nav">
+    <div className="has-bottom-nav">
       <header className="topbar">
-        <Link className="brand" to="/docente">
-          <img src="/robot/robot.svg" alt="" />
-          {APP_NAME}
-        </Link>
-        <div className="user-chip">
-          {me && (
-            <>
-              <span className="avatar" aria-hidden="true">
-                {initial}
-              </span>
-              <span className="user-name small" title={me.email}>
-                {me.name}
-              </span>
-            </>
-          )}
-          <IconButton
-            icon="logOut"
-            label="Cerrar sesión"
-            // Al salir vuelve a la portada, donde se elige "Soy alumno" o "Soy docente".
-            onClick={() =>
-              void signOut()
-                .then(() => navigate("/"))
-                .catch(() => toast("No pudimos cerrar la sesión. Intenta de nuevo.", { tone: "error" }))
-            }
-          />
+        <div className="topbar-inner">
+          <Link className="brand" to="/docente">
+            {APP_NAME}
+          </Link>
+          <div className="user-chip">
+            {me && (
+              <>
+                <span className="avatar" aria-hidden="true">
+                  {initial}
+                </span>
+                <span className="user-name small" title={me.email}>
+                  {me.name}
+                </span>
+              </>
+            )}
+            <IconButton
+              icon="logOut"
+              label="Cerrar sesión"
+              // Al salir vuelve a la portada, donde se elige "Soy alumno" o "Soy docente".
+              onClick={() =>
+                void signOut()
+                  .then(() => navigate("/"))
+                  .catch(() => toast("No pudimos cerrar la sesión. Intenta de nuevo.", { tone: "error" }))
+              }
+            />
+          </div>
         </div>
       </header>
-      <nav className="tabs" aria-label="Secciones del docente">
-        {TABS.map((tab) => (
-          <NavLink key={tab.to} to={tab.to} end={tab.end} className="tab">
-            <Icon name={tab.icon} />
-            {tab.label}
-          </NavLink>
-        ))}
-      </nav>
-      <main>
-        <Routes>
-          <Route index element={<HomePage />} />
-          <Route path="clases" element={<ClassesPage />} />
-          <Route path="clases/nueva" element={<ClassesPage creating />} />
-          <Route path="clases/:classroomId" element={<ClassDetailPage tab="students" />} />
-          <Route path="clases/:classroomId/retos" element={<ClassDetailPage tab="challenges" />} />
-          <Route path="clases/:classroomId/retos/:assignmentId" element={<LegacyResultsRedirect />} />
-          <Route path="retos" element={<RetosPage />} />
-          <Route path="retos/nuevo" element={<NewChallengePage />} />
-          <Route path="retos/:assignmentId" element={<RetoDetailPage />} />
-          <Route path="evaluaciones/*" element={<Navigate to="/docente/retos" replace />} />
-          <Route path="progreso" element={<ProgressPage />} />
-          <Route path="laboratorio/nueva" element={<LabCreatePage />} />
-          <Route path="laboratorio/:missionId/resultados" element={<LabResultsPage />} />
-          <Route path="*" element={<Navigate to="/docente" replace />} />
-        </Routes>
-      </main>
+      <div className="page">
+        <nav className="tabs" aria-label="Secciones del docente">
+          {TABS.map((tab) => (
+            <NavLink key={tab.to} to={tab.to} end={tab.end} className="tab">
+              <Icon name={tab.icon} />
+              {tab.label}
+            </NavLink>
+          ))}
+        </nav>
+        <main>
+          <Routes>
+            <Route index element={<HomePage />} />
+            <Route path="clases" element={<ClassesPage />} />
+            <Route path="clases/nueva" element={<ClassesPage creating />} />
+            <Route path="clases/:classroomId" element={<ClassDetailPage tab="students" />} />
+            <Route path="clases/:classroomId/retos" element={<ClassDetailPage tab="challenges" />} />
+            <Route path="clases/:classroomId/retos/:assignmentId" element={<LegacyResultsRedirect />} />
+            <Route path="retos" element={<RetosPage />} />
+            <Route path="retos/nuevo" element={<NewChallengePage />} />
+            <Route path="retos/:assignmentId" element={<RetoDetailPage />} />
+            <Route path="evaluaciones/*" element={<Navigate to="/docente/retos" replace />} />
+            <Route path="progreso" element={<ProgressPage />} />
+            <Route path="laboratorio/nueva" element={<LabCreatePage />} />
+            <Route path="laboratorio/:missionId/resultados" element={<LabResultsPage />} />
+            <Route path="*" element={<Navigate to="/docente" replace />} />
+          </Routes>
+        </main>
+      </div>
     </div>
   );
 }

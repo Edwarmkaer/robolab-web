@@ -49,9 +49,9 @@
 }
 
 .stepper-step[data-state="current"] .stepper-dot {
-  background: var(--c-brand);
-  border-color: var(--c-brand);
-  color: var(--c-brand-ink);
+  background: var(--c-action);
+  border-color: var(--c-ink);
+  color: var(--c-action-ink);
 }
 
 .stepper-step[data-state="done"] .stepper-dot {
@@ -79,21 +79,18 @@
 }
 
 .pick-card:hover:not(:disabled) {
-  border-color: var(--c-brand);
-  transform: translateY(-2px);
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-lg);
 }
 
+/* Lo elegido va en amarillo, como las pestañas y los botones principales. */
 .pick-card[aria-pressed="true"] {
-  border: 2px solid var(--c-brand);
-  box-shadow:
-    0 0 0 3px var(--c-brand-soft),
-    var(--shadow);
+  background: var(--c-action);
 }
 
 .topic-card.pick-card[aria-pressed="true"] {
   box-shadow:
-    inset 0 -5px 0 var(--topic),
-    0 0 0 3px var(--c-brand-soft),
+    inset 0 -6px 0 var(--topic),
     var(--shadow);
 }
 
@@ -115,7 +112,8 @@
   padding: 14px;
   border-radius: var(--radius-lg);
   background: var(--c-surface);
-  border: 2px solid var(--c-line);
+  border: 3px solid var(--c-ink);
+  box-shadow: var(--shadow);
   color: var(--c-ink);
   font: inherit;
   text-align: left;
@@ -127,14 +125,12 @@
 }
 
 .game-card:hover {
-  transform: translateY(-2px);
-  border-color: var(--c-brand);
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-lg);
 }
 
 .game-card[aria-pressed="true"] {
-  border-color: var(--c-brand);
-  background: var(--c-brand-soft);
-  box-shadow: 0 0 0 3px var(--c-brand-soft);
+  background: var(--c-action);
 }
 
 .game-info {
@@ -246,21 +242,18 @@
   gap: 12px;
   padding: 12px 16px;
   border-radius: var(--radius);
-  border: 2px solid var(--c-chip-line);
-  background: var(--c-bg);
+  border: 3px solid var(--c-ink);
+  background: var(--c-surface);
   cursor: pointer;
-  transition:
-    border-color 120ms var(--ease),
-    background-color 120ms var(--ease);
+  transition: background-color 120ms var(--ease);
 }
 
 .visibility-option:hover {
-  border-color: var(--c-brand);
+  background: var(--c-surface-2);
 }
 
 .visibility-option:has(:checked) {
-  border-color: var(--c-brand);
-  background: var(--c-brand-soft);
+  background: var(--c-action);
 }
 
 .visibility-option:has(:focus-visible) {

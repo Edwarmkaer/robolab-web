@@ -56,7 +56,7 @@ describe("paleta única: todo color sale de los tokens de styles.css", () => {
     const css = read(join(SRC, "shared", "ui", "styles.css"));
     const explore = /\n\.explore\s*\{([^}]*)\}/.exec(css)![1]!;
     expect(explore).not.toMatch(/background/);
-    expect(hex("--c-bg")).toBe("#fff8ec");
+    expect(hex("--c-bg")).toBe("#fff8d6");
   });
 });
 
@@ -77,7 +77,13 @@ describe("contraste de los tokens (WCAG 2.2 AA)", () => {
     ["texto atenuado sobre el fondo", "--c-muted", "--c-bg", TEXT],
     ["texto atenuado sobre las tarjetas", "--c-muted", "--c-surface", TEXT],
     ["placeholder de los campos", "--c-placeholder", "--c-surface", TEXT],
-    ["texto de botón principal", "--c-brand-ink", "--c-brand", TEXT],
+    ["texto de botón principal (amarillo con tinta)", "--c-action-ink", "--c-action", TEXT],
+    ["texto de botón principal al pasar el mouse", "--c-action-ink", "--c-action-strong", TEXT],
+    ["texto sobre lo azul (selecciones, insignias de marca)", "--c-brand-ink", "--c-brand", TEXT],
+    ["la tinta sobre el fondo", "--c-ink", "--c-bg", TEXT],
+    ["la tinta sobre el amarillo de la barra superior", "--c-ink", "--c-action", TEXT],
+    ["texto atenuado sobre el encabezado de las tablas", "--c-muted", "--c-surface-2", TEXT],
+    ["el borde de tinta contra el fondo (se ve como contorno)", "--c-ink", "--c-bg", GRAPHIC],
     ["letra de la meta en el mapa de misiones", "--c-goal-ink", "--c-goal", TEXT],
     ["borde del camino contra el pasto del tablero", "--c-path-edge", "--c-grass", GRAPHIC],
     ["borde del camino contra el camino", "--c-path-edge", "--c-path", GRAPHIC],
