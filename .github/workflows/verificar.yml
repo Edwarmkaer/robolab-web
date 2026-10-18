@@ -15,7 +15,9 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      # URL local de prueba: permite incluir toda la app en el build, sin secretos.
+      # Tipos, lint, pruebas (dominio y backend con convex-test) y build. No necesita secretos.
+      # Con una URL de ejemplo el build es el real: sin ella, Vite elimina toda la app
+      # del paquete (main.tsx lanza si falta VITE_CONVEX_URL) y el build pasaría igual.
       - run: npm run verify
         env:
-          VITE_CONVEX_URL: http://127.0.0.1:3210
+          VITE_CONVEX_URL: https://ejemplo.convex.cloud
