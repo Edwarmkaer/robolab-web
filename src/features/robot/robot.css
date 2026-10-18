@@ -1,0 +1,136 @@
+/* Robot por wifi: botón "Robot" (F2), chip RobotSync (F1) y hoja "Sincronizar con robot" (M5). */
+
+.robot-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--c-error);
+  flex: none;
+}
+
+[data-state="searching"] .robot-dot {
+  background: #d99a00;
+  animation: pulse 1.6s var(--ease) infinite;
+}
+
+[data-state="on"] .robot-dot {
+  background: var(--c-ok);
+}
+
+.robot-btn {
+  gap: 10px;
+}
+
+.robot-btn[data-state="on"] {
+  border-color: var(--c-ok);
+  color: var(--c-ok);
+}
+
+.robot-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  justify-self: start;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 0.9rem;
+  background: var(--c-error-soft);
+  color: var(--c-error);
+}
+
+.robot-chip[data-state="searching"] {
+  background: var(--c-warn-soft);
+  color: var(--c-warn);
+}
+
+.robot-chip[data-state="on"] {
+  background: var(--c-ok-soft);
+  color: var(--c-ok);
+}
+
+.robot-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.robot-steps li {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.robot-step-n {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--c-brand);
+  color: var(--c-brand-ink);
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+
+.robot-sheet {
+  display: grid;
+  gap: 16px;
+}
+
+/* Un <dialog> abierto sigue siendo `display: block` por defecto; cerrado no se muestra. */
+.robot-sheet:not([open]) {
+  display: none;
+}
+
+.robot-sheet .input.code {
+  max-width: 180px;
+  text-transform: uppercase;
+}
+
+.sheet-actions {
+  justify-content: flex-end;
+}
+
+.sheet-actions .btn {
+  flex: 1;
+}
+
+.sheet-handle {
+  display: none;
+}
+
+/* En el celular la hoja sube desde abajo, a todo el ancho. */
+@media (max-width: 640px) {
+  .sheet {
+    width: 100%;
+    max-width: none;
+    margin: auto 0 0;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    padding: 12px 20px calc(24px + env(safe-area-inset-bottom));
+    animation: sheet-in 240ms var(--ease);
+  }
+
+  .sheet-handle {
+    display: block;
+    width: 44px;
+    height: 5px;
+    margin: 0 auto;
+    border-radius: 999px;
+    background: var(--c-line-strong);
+  }
+
+  .robot-sheet .input.code {
+    max-width: none;
+  }
+}
+
+@keyframes sheet-in {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+}

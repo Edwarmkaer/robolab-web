@@ -1,0 +1,39 @@
+/* Barra de acciones del juego: Robot y Ejecutar. En pantalla ancha es una fila normal. */
+.action-bar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.action-bar > .btn-primary {
+  flex: 1;
+}
+
+@media (max-width: 640px) {
+  /* Fija al pie, por encima del indicador de inicio del iPhone (`viewport-fit=cover`). */
+  .action-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 20;
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+    background: var(--c-surface);
+    border-top: 1px solid var(--c-line);
+    box-shadow: 0 -4px 16px rgb(31 36 48 / 8%);
+  }
+
+  .action-bar .btn {
+    min-height: 52px;
+  }
+
+  /* Espacio para que el final del contenido no quede bajo la barra. */
+  .has-action-bar {
+    padding-bottom: calc(88px + env(safe-area-inset-bottom));
+  }
+
+  /* Los avisos no tapan la barra. */
+  body:has(.action-bar) .toasts {
+    bottom: calc(88px + env(safe-area-inset-bottom));
+  }
+}

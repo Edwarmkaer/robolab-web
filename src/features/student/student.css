@@ -1,0 +1,7 @@
+/* Evaluación jugada por el alumno. */
+
+/* "Estrella 2 de 3": recibe el foco al cambiar de etapa. */
+.stage-title {
+  margin: 0;
+  font-size: 1.25rem;
+}

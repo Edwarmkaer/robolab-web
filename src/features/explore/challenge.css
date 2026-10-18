@@ -1,0 +1,10 @@
+/* Pantalla del reto: consigna, juego y "¡Reto logrado!". */
+
+/* El título de la consigna es un <h1> (recibe el foco al empezar), pero se lee como una sola frase. */
+.play-goal h1 {
+  display: inline;
+  margin: 0;
+  font-size: inherit;
+  font-weight: 800;
+  letter-spacing: normal;
+}

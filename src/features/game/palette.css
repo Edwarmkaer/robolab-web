@@ -56,17 +56,6 @@ ul.repeat-body {
   border: 2px dashed var(--c-line-strong);
 }
 
-/* Barra de acciones: Robot y Ejecutar. En pantalla ancha es una fila normal. */
-.action-bar {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
-
-.action-bar > .btn-primary {
-  flex: 1;
-}
-
 @media (max-width: 640px) {
   .palette {
     grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
@@ -102,31 +91,5 @@ ul.repeat-body {
   .program-block img {
     width: 42px;
     height: 36px;
-  }
-
-  /* Robot y Ejecutar siempre a mano, al pie de la pantalla. */
-  .action-bar {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 20;
-    padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
-    background: var(--c-surface);
-    border-top: 1px solid var(--c-line);
-    box-shadow: 0 -4px 16px rgb(31 36 48 / 8%);
-  }
-
-  .action-bar .btn {
-    min-height: 52px;
-  }
-
-  .game.has-action-bar {
-    padding-bottom: 88px;
-  }
-
-  /* Los avisos no tapan la barra. */
-  body:has(.action-bar) .toasts {
-    bottom: calc(88px + env(safe-area-inset-bottom));
   }
 }

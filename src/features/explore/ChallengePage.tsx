@@ -10,15 +10,19 @@ import { editorReducer } from "@robolab/backend/domain/game/editor";
 import { policyFor } from "@robolab/backend/domain/game/levels";
 import type { Cell } from "@robolab/backend/domain/game/map";
 import { type Program, countBlocks } from "@robolab/backend/domain/game/program";
+import { ActionBar } from "../../shared/ui/ActionBar";
 import { Guide, type Mood } from "../../shared/ui/Guide";
 import { Icon } from "../../shared/ui/Icon";
+import { useFocusOnMount } from "../../shared/useFocusOnMount";
 import { BlockEditor } from "../game/BlockEditor";
 import { Board } from "../game/Board";
 import { RobotSend } from "../robot/RobotSend";
+import { useRobotLink } from "../robot/useRobotLink";
 import { STEP_MS, useRunner } from "../game/useRunner";
 import { speak } from "../student/speech";
 import { Breadcrumbs, ExploreLayout, LEVEL_INFO } from "./ExploreLayout";
 import { deviceId, useExploreProgress } from "./storage";
+import "./challenge.css";
 
 type Stats = { readonly runs: number; readonly hints: number; readonly ms: number };
 type Submission = { readonly program?: Program; readonly pick?: Cell };
@@ -111,6 +115,9 @@ function Play({ challenge, onSolved }: { challenge: Challenge; onSolved: (stats:
   const [picked, setPicked] = useState<Cell | null>(null);
   const [solved, setSolved] = useState(false);
   const ranProgram = useRef<Program>([]);
+  const robot = useRobotLink();
+  // Al empezar (o repetir) el reto el foco va al título: el lector de pantalla anuncia en qué reto está.
+  const focusTitle = useFocusOnMount<HTMLHeadingElement>();
 
   const say = (mood: Mood, message: string) => {
     setGuide({ mood, message });
@@ -146,6 +153,8 @@ function Play({ challenge, onSolved }: { challenge: Challenge; onSolved: (stats:
     setBoardMood("idle");
     setGuide({ mood: "thinking", message: "Mira cómo se mueve Kusi…" });
     run(editor.blocks);
+    // Si hay un robot conectado, hace el mismo recorrido.
+    if (robot.state === "on") void robot.send(editor.blocks);
   }
 
   function checkPick() {
@@ -175,11 +184,14 @@ function Play({ challenge, onSolved }: { challenge: Challenge; onSolved: (stats:
       : null;
 
   return (
-    <div className="game">
+    <div className="game has-action-bar">
       <div className="stack">
-        <p className="play-goal">
-          <strong>{/[.?!]$/.test(challenge.title) ? challenge.title : `${challenge.title}.`}</strong> {INSTRUCTION[challenge.kind]}
-        </p>
+        <div className="play-goal">
+          <h1 tabIndex={-1} ref={focusTitle}>
+            {/[.?!]$/.test(challenge.title) ? challenge.title : `${challenge.title}.`}
+          </h1>{" "}
+          {INSTRUCTION[challenge.kind]}
+        </div>
         <Board
           map={challenge.map}
           robot={runner.robot}
@@ -198,9 +210,11 @@ function Play({ challenge, onSolved }: { challenge: Challenge; onSolved: (stats:
         {challenge.kind === "predict" ? (
           <>
             <BlockEditor policy={policy} state={{ blocks: challenge.given, openRepeat: null }} dispatch={() => undefined} disabled readOnly active={highlight} />
-            <button className="btn btn-primary" type="button" disabled={busy || !picked} onClick={checkPick}>
-              <Icon name="check" /> {picked ? "Comprobar" : "Toca una casilla"}
-            </button>
+            <ActionBar>
+              <button className="btn btn-primary" type="button" disabled={busy || !picked} onClick={checkPick}>
+                <Icon name="check" /> {picked ? "Comprobar" : "Toca una casilla"}
+              </button>
+            </ActionBar>
           </>
         ) : (
           <>
@@ -220,12 +234,12 @@ function Play({ challenge, onSolved }: { challenge: Challenge; onSolved: (stats:
                 Bloques: <strong>{used}</strong> de {challenge.maxBlocks} como máximo
               </p>
             )}
-            <div className="row">
-              <button className="btn btn-primary" type="button" style={{ flex: 1 }} disabled={busy || editor.blocks.length === 0} onClick={execute}>
+            <ActionBar>
+              <RobotSend robot={robot} program={editor.blocks} disabled={busy} />
+              <button className="btn btn-primary" type="button" disabled={busy || editor.blocks.length === 0} onClick={execute}>
                 <Icon name="play" /> Ejecutar
               </button>
-            </div>
-            <RobotSend program={editor.blocks} disabled={busy} />
+            </ActionBar>
           </>
         )}
       </div>
