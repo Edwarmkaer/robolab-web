@@ -16,6 +16,7 @@ import { BlockEditor } from "../game/BlockEditor";
 import { Board } from "../game/Board";
 import { RobotSend } from "../robot/RobotSend";
 import { STEP_MS, useRunner } from "../game/useRunner";
+import { useStudentToken } from "../student/session";
 import { speak } from "../student/speech";
 import { Breadcrumbs, ExploreLayout, LEVEL_INFO } from "./ExploreLayout";
 import { deviceId, useExploreProgress } from "./storage";
@@ -292,6 +293,8 @@ function ChallengePage({ challenge }: { challenge: Challenge }) {
   const [round, setRound] = useState(0);
   const { record } = useExploreProgress();
   const recordPlay = useMutation(api.explore.recordPlay);
+  const recordClassPlay = useMutation(api.student.recordChallengePlay);
+  const [token] = useStudentToken();
   const topic = topicInfo(challenge.topic)!;
 
   function solved(result: Stats, submission: Submission) {
@@ -302,6 +305,12 @@ function ChallengePage({ challenge }: { challenge: Challenge }) {
     recordPlay({ deviceId: deviceId(), challengeId: challenge.id, ...submission, ...result }).catch((error: unknown) =>
       console.warn("No se pudo registrar la partida", error),
     );
+    // Con sesión de alumno, la partida también cuenta para su clase (el servidor la vuelve a revisar).
+    if (token) {
+      recordClassPlay({ token, challengeId: challenge.id, ...submission, ...result }).catch((error: unknown) =>
+        console.warn("No se pudo registrar la partida en la clase", error),
+      );
+    }
   }
 
   return (
