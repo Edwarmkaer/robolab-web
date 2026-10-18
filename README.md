@@ -104,14 +104,14 @@ Mantén el gesto hasta llenar la barra (0,8 segundos para bloques; 1,2 para
 confirmar); la pieza del gesto que la cámara ve se resalta en la bandeja. Retira la mano durante al menos 0,4 segundos entre gestos, también
 para repetir el mismo bloque. Puedes quitar un bloque tocándolo, borrar el
 programa o cambiar a Botones sin perder la secuencia. Un programa vacío no
-se ejecuta y la entrada queda en pausa mientras Kusi se mueve.
+se ejecuta y la entrada queda en pausa mientras Wayra se mueve.
 
 Usa el índice extendido con los otros dedos recogidos. Las cuatro direcciones
 se calculan con los puntos de la mano de MediaPipe y coinciden con la vista en
 espejo; no dependen de los gestos «Victoria» o «Te quiero». Una dirección
 diagonal o un dedo apuntando hacia la cámara no agrega bloques. Las órdenes
 siguen siendo relativas al robot: arriba agrega Avanzar, abajo Retroceder y
-los lados agregan un giro, cualquiera sea la orientación actual de Kusi.
+los lados agregan un giro, cualquiera sea la orientación actual de Wayra.
 
 Retroceder en Inicial requiere el cambio compartido del
 [PR del backend #6](https://github.com/orinqq/robolab-backend/pull/6).

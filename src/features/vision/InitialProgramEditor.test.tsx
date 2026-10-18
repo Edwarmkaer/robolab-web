@@ -12,17 +12,24 @@ const session = vi.hoisted(() => ({
   stop: vi.fn(),
   start: vi.fn(),
   failWith: null as string | null,
+  /** Solo la cámara: hay imagen, pero el modelo de gestos aún se prepara. */
+  cameraOnly: false,
 }));
+const voice = vi.hoisted(() => ({ speak: vi.fn() }));
+vi.mock("../student/speech", () => ({ speak: voice.speak, stopSpeaking: vi.fn(), canSpeak: () => true }));
 vi.mock("./cameraSession", () => ({
-  startCameraSession: (_video: HTMLVideoElement, callbacks: { onSample: typeof session.onSample; onReady: () => void; onError: (message: string) => void }) => {
+  startCameraSession: (_video: HTMLVideoElement, callbacks: { onSample: typeof session.onSample; onCamera?: () => void; onReady: () => void; onError: (message: string) => void }) => {
     session.start();
     session.onSample = callbacks.onSample;
     if (session.failWith) callbacks.onError(session.failWith);
-    else callbacks.onReady();
+    else {
+      callbacks.onCamera?.();
+      if (!session.cameraOnly) callbacks.onReady();
+    }
     return session.stop;
   },
 }));
-afterEach(() => { cleanup(); vi.clearAllMocks(); session.onSample = null; session.failWith = null; });
+afterEach(() => { cleanup(); vi.clearAllMocks(); session.onSample = null; session.failWith = null; session.cameraOnly = false; });
 
 function Harness({ disabled = false, onExecute = vi.fn(), cameraHost }: { disabled?: boolean; onExecute?: () => void; cameraHost?: HTMLElement | null }) {
   const [state, dispatch] = useReducer(editorReducer, emptyEditor);
@@ -194,5 +201,35 @@ describe("programar Inicial: Gestos por defecto, Botones como alternativa", () =
     expect(copies.filter((n) => n.closest(".piece-tip"))).toHaveLength(1);
     const describedBy = screen.getByLabelText("Vista de tu cámara").getAttribute("aria-describedby")!;
     expect(document.getElementById(describedBy)?.textContent).toMatch(/recoge los otros dedos/);
+  });
+
+  it("en Gestos los comandos no se dicen en voz alta: ni los que pide la mano ni las manos que se tocan", () => {
+    render(<Harness />);
+    release(0);
+    sample("Pointing_Up", 500);
+    fireEvent.click(screen.getByRole("button", { name: "Girar a la derecha" }));
+    expect(sequence().getAllByRole("button")).toHaveLength(2);
+    expect(voice.speak).not.toHaveBeenCalled();
+  });
+
+  it("en Botones tocar una pieza la sigue diciendo en voz alta", () => {
+    render(<Harness />);
+    choose("Botones");
+    fireEvent.click(screen.getByRole("button", { name: "Avanzar" }));
+    expect(voice.speak).toHaveBeenCalledWith("Avanzar");
+  });
+
+  it("al elegir Gestos la imagen de la cámara se ve apenas hay permiso, mientras se preparan los gestos", () => {
+    session.cameraOnly = true;
+    render(<Harness />);
+    choose("Botones");
+    choose("Gestos");
+    const video = screen.getByLabelText("Vista de tu cámara") as HTMLVideoElement;
+    expect(video.hidden).toBe(false);
+    expect(screen.getByText("Preparando los gestos…")).toBeTruthy();
+    // Hasta que el modelo esté listo, la cámara no agrega piezas.
+    release(0);
+    sample("Pointing_Up", 500);
+    expect(sequence().queryAllByRole("button")).toHaveLength(0);
   });
 });

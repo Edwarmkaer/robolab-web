@@ -2,7 +2,6 @@ import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import type { Command } from "@robolab/backend/domain/game/program";
 import { Icon } from "../../shared/ui/Icon";
 import { PieceFrame } from "../game/PieceFrame";
-import { speak } from "../student/speech";
 import { startCameraSession } from "./cameraSession";
 import { GESTURES, GestureGate, type GestureFeedback } from "./gestureGate";
 
@@ -22,6 +21,8 @@ const CAMERA_HOW = "Apunta con el índice y recoge los otros dedos.";
 const CAMERA_PRIVACY = "La imagen se procesa en tu equipo. No se graba ni se envía.";
 /** La primera vez baja el modelo (~12 MB): se avisa que puede tardar, y que la cámara no se usa hasta que esté lista. */
 const LOADING = "Permite la cámara. La primera vez puede tardar un poco: se baja el modelo de gestos.";
+/** Ya se ve la cámara, pero los gestos todavía no responden. */
+const PREPARING = "Ya se ve tu cámara. Los gestos estarán listos en un momento.";
 const idle: GestureFeedback = { action: null, candidate: null, progress: 0, releaseRequired: true };
 
 /**
@@ -30,7 +31,8 @@ const idle: GestureFeedback = { action: null, candidate: null, progress: 0, rele
  */
 export function VisionControls(props: Props) {
   const [enabled, setEnabled] = useState(true);
-  const [status, setStatus] = useState<"off" | "loading" | "ready" | "error">("loading");
+  // loading: pidiendo la cámara · camera: ya hay imagen, los gestos se preparan · ready: los gestos responden.
+  const [status, setStatus] = useState<"off" | "loading" | "camera" | "ready" | "error">("loading");
   const [message, setMessage] = useState(LOADING);
   const [feedback, setFeedback] = useState(idle);
   const helpId = useId();
@@ -38,6 +40,8 @@ export function VisionControls(props: Props) {
   const gate = useRef(new GestureGate());
   const latest = useRef(props);
   const failed = useRef(false);
+  /** Las muestras solo cuentan cuando los gestos están listos (no mientras se prepara el modelo). */
+  const listening = useRef(false);
 
   useLayoutEffect(() => {
     latest.current = props;
@@ -47,12 +51,14 @@ export function VisionControls(props: Props) {
   useEffect(() => {
     if (!enabled || !video.current) return;
     gate.current.reset();
+    listening.current = false;
     const stop = startCameraSession(video.current, {
       isPaused: () => latest.current.disabled,
-      onReady: () => { setStatus("ready"); setMessage("Retira la mano y luego elige un gesto."); },
-      onError: (error) => { failed.current = true; setStatus("error"); setMessage(error); setEnabled(false); latest.current.onUnavailable?.(error); },
+      onCamera: () => { setStatus((now) => (now === "ready" ? now : "camera")); setMessage(PREPARING); },
+      onReady: () => { listening.current = true; setStatus("ready"); setMessage("Retira la mano y luego elige un gesto."); },
+      onError: (error) => { listening.current = false; failed.current = true; setStatus("error"); setMessage(error); setEnabled(false); latest.current.onUnavailable?.(error); },
       onSample: (sample, time) => {
-        if (latest.current.disabled) return;
+        if (!listening.current || latest.current.disabled) return;
         const next = gate.current.update(sample, time);
         setFeedback(next);
         if (!next.action) return;
@@ -60,7 +66,7 @@ export function VisionControls(props: Props) {
           if (latest.current.canConfirm) {
             // Cierra la entrada antes de que React pinte el estado de ejecución.
             latest.current = { ...latest.current, disabled: true };
-            setMessage("Programa confirmado. Mira cómo se mueve Kusi.");
+            setMessage("Programa confirmado. Mira cómo se mueve Wayra.");
             latest.current.onConfirm();
           } else {
             setMessage("Primero agrega un bloque a tu programa.");
@@ -70,12 +76,12 @@ export function VisionControls(props: Props) {
         } else {
           latest.current.onCommand(next.action);
           const label = GESTURES.find((gesture) => gesture.action === next.action)!.label;
+          // Sin voz: con la mano el niño ve la pieza aparecer; decirla en voz alta distrae.
           setMessage(`${label}. ¡Bloque agregado!`);
-          speak(label);
         }
       },
     });
-    return stop;
+    return () => { listening.current = false; stop(); };
   }, [enabled]);
 
   // Al salir de la pestaña la cámara se apaga; al volver se enciende otra vez (salvo que haya fallado).
@@ -101,7 +107,7 @@ export function VisionControls(props: Props) {
   useEffect(() => onCandidate?.(seen), [seen, onCandidate]);
 
   const currentGesture = GESTURES.find((gesture) => gesture.action === feedback.candidate);
-  const instruction = props.disabled ? "Espera a que Kusi termine."
+  const instruction = props.disabled ? "Espera a que Wayra termine."
     : feedback.releaseRequired ? "Retira la mano entre cada gesto."
       : currentGesture ? `${currentGesture.prompt} y espera a llenar la barra.`
         : "Apunta con el índice en una dirección.";
@@ -114,8 +120,9 @@ export function VisionControls(props: Props) {
           {status === "ready" && props.disabled && <span className="vision-state">En pausa</span>}
         </div>
         <div className="vision-camera" data-ready={status === "ready" || undefined}>
-          <video ref={video} className="vision-video" muted playsInline aria-label="Vista de tu cámara" aria-describedby={helpId} hidden={status !== "ready"} />
-          {status !== "ready" && <div className="vision-placeholder"><Icon name="camera" size={32} /><span>{status === "loading" ? "Preparando los gestos…" : "Programa con tus manos"}</span></div>}
+          <video ref={video} className="vision-video" muted playsInline aria-label="Vista de tu cámara" aria-describedby={helpId} hidden={status !== "camera" && status !== "ready"} />
+          {status === "camera" && <span className="vision-preparing">Preparando los gestos…</span>}
+          {status !== "camera" && status !== "ready" && <div className="vision-placeholder"><Icon name="camera" size={32} /><span>{status === "loading" ? "Encendiendo la cámara…" : "Programa con tus manos"}</span></div>}
         </div>
         <p className="small" role={status === "error" ? "alert" : "status"}>{message}</p>
         {status === "ready" && (

@@ -1650,6 +1650,22 @@ textarea.input {
   transform: scaleX(-1);
 }
 
+/* Sobre la imagen de la cámara mientras el modelo de gestos se termina de preparar. */
+.vision-preparing {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+  padding: 4px 12px;
+  border: 2px solid var(--c-ink);
+  border-radius: 999px;
+  background: var(--c-surface);
+  color: var(--c-ink);
+  font-size: 0.85rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
 .vision-placeholder {
   display: grid;
   height: 100%;
