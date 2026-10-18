@@ -210,7 +210,7 @@ export function ProgressPage() {
     return (
       <div className="empty">
         <Icon name="users" size={32} />
-        <p>Primero crea una clase y agrega a tus alumnos.</p>
+        <p>Primero crea una clase: tus alumnos se unen con su código.</p>
         <Link className="btn btn-primary" to="/docente/clases">
           <Icon name="plus" /> Crear clase
         </Link>

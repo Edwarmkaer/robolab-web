@@ -8,10 +8,12 @@ Retos de programación con un robot, para Inicial y Primaria, en dos modos:
   con error, pasar por paradas y resolver con pocos bloques. Wayra, la guía,
   reacciona a cada intento y da hasta 3 pistas. El avance se guarda en el
   dispositivo.
-- **Clases.** El docente arma evaluaciones (preguntas, alternativas, respuesta
-  correcta y puntaje); el alumno entra con un código, programa el robot y cada
-  vez que llega a una estrella se desbloquea una pregunta. El docente ve los
-  resultados en vivo, un ranking y el desarrollo del aprendizaje.
+- **Clases.** Cada clase tiene un código (como `TEC-482`): el alumno se une con
+  ese código y un apodo, sin cuenta. El docente asigna retos a la clase y ve
+  quién los logró; también arma evaluaciones (preguntas, alternativas,
+  respuesta correcta y puntaje) donde cada vez que el alumno llega a una
+  estrella se desbloquea una pregunta. El docente ve los resultados en vivo, un
+  ranking y el desarrollo del aprendizaje.
 
 Como extra, el mismo programa se puede enviar a un robot físico (ESP32) por
 wifi con el botón "Enviar al robot". El relé, el protocolo y el firmware están
@@ -46,8 +48,15 @@ aquí como el paquete npm `@robolab/backend`.
   cada regla mientras se escribe.
 - Si la olvida, recibe un código de 6 dígitos en su correo registrado (vence
   en 15 minutos).
-- Crea clases (nivel, grado y sección) y agrega alumnos: cada uno recibe un
-  código de 6 caracteres que se puede copiar o imprimir en tarjetas.
+- Crea clases (nivel, grado y sección): cada una recibe un código para copiar y
+  compartir; los alumnos se unen solos con su apodo. Puede eliminar una clase
+  con todo lo que cuelga de ella.
+- Crea retos: tópico y nivel, un juego ya hecho (bloques en Inicial, misiones en
+  Primaria) y quién lo verá (público, solo su clase o borrador). Obtiene un
+  enlace para compartir y lo asigna a una clase.
+- Ve los retos de cada clase con el porcentaje que lo logró y, por reto, la
+  tabla por apodo (intentos, pistas y tiempo) con lo que se observó. Solo se
+  muestra lo observable; no se diagnostica.
 - Crea evaluaciones: título, clase, fecha y de 1 a 10 preguntas con 2 a 4
   alternativas, respuesta correcta y puntaje.
 - Ve los resultados en vivo, un ranking que solo ve el docente y el desarrollo
@@ -56,7 +65,9 @@ aquí como el paquete npm `@robolab/backend`.
 
 **Alumno**
 
-- Entra con su código, sin cuenta ni contraseña, y ve su evaluación del día.
+- Se une a su clase con el código de la clase y un apodo, sin cuenta ni
+  contraseña, y ve su evaluación del día y los retos de su clase. En "Mi avance"
+  aparece su apodo y su clase.
 - Arma un programa tocando bloques (avanzar, girar; en Primaria también
   retroceder y repetir) y lo ejecuta. Si el robot se sale del camino, se le
   dice en qué paso y se marca ese bloque.

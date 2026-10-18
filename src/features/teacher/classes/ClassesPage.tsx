@@ -1,15 +1,16 @@
 import { useMutation, useQuery } from "convex/react";
 import { type FormEvent, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { api } from "@robolab/backend/convex/_generated/api";
-import type { Id } from "@robolab/backend/convex/_generated/dataModel";
-import { parseStudentList } from "@robolab/backend/domain/classroom/studentName";
 import { LIMITS } from "@robolab/backend/domain/evaluation/rules";
 import { EDUCATION_LEVELS, type EducationLevel, LEVEL_LABEL } from "@robolab/backend/domain/game/levels";
 import { userMessage } from "../../../shared/errors";
 import { Icon } from "../../../shared/ui/Icon";
 import { IconButton } from "../../../shared/ui/IconButton";
-import { useToast } from "../../../shared/ui/Toast";
+import { usePageTitle } from "../../../shared/usePageTitle";
+import { CodeChip, useCopyCode } from "./CodeChip";
+import { useEnsureJoinCodes } from "./useEnsureJoinCodes";
+import "./classes.css";
 
 const GRADE_SUGGESTIONS: Record<EducationLevel, readonly string[]> = {
   inicial: ["3 años", "4 años", "5 años"],
@@ -17,10 +18,8 @@ const GRADE_SUGGESTIONS: Record<EducationLevel, readonly string[]> = {
   secundaria: ["1.er año", "2.º año", "3.er año", "4.º año", "5.º año"],
 };
 
-function CreateClassForm({ onCancel }: { onCancel?: () => void }) {
+function CreateClassForm({ onCreated, onCancel }: { onCreated: (classroomId: string) => void; onCancel?: () => void }) {
   const create = useMutation(api.classrooms.create);
-  const navigate = useNavigate();
-  const toast = useToast();
   const [level, setLevel] = useState<EducationLevel>("inicial");
   const [grade, setGrade] = useState("");
   const [section, setSection] = useState("");
@@ -32,10 +31,8 @@ function CreateClassForm({ onCancel }: { onCancel?: () => void }) {
     setBusy(true);
     setError(null);
     try {
-      const id = await create({ level, grade, section });
-      toast("Clase creada. Ahora agrega a tus alumnos.");
-      onCancel?.();
-      navigate(`/docente/clases/${id}`);
+      // El servidor devuelve el Id; el código llega por la lista en vivo y se muestra en `CreatedClass`.
+      onCreated(await create({ level, grade, section }));
     } catch (e) {
       setError(userMessage(e));
     } finally {
@@ -44,9 +41,11 @@ function CreateClassForm({ onCancel }: { onCancel?: () => void }) {
   }
 
   return (
-    <form className="card stack" onSubmit={onSubmit}>
+    <form className="card stack" onSubmit={onSubmit} aria-labelledby="new-class-title">
       <div className="row spread">
-        <h3 style={{ margin: 0 }}>Nueva clase</h3>
+        <h3 id="new-class-title" style={{ margin: 0 }}>
+          Nueva clase
+        </h3>
         {onCancel && <IconButton icon="x" label="Cerrar" onClick={onCancel} />}
       </div>
       <div className="field">
@@ -91,6 +90,7 @@ function CreateClassForm({ onCancel }: { onCancel?: () => void }) {
           />
         </div>
       </div>
+      <p className="hint">Al crearla recibe un código como ABC-123: con él tus alumnos se unen con su apodo, sin cuenta.</p>
       {error && (
         <p className="alert alert-error" role="alert">
           {error}
@@ -103,231 +103,100 @@ function CreateClassForm({ onCancel }: { onCancel?: () => void }) {
   );
 }
 
-function AddStudentsForm({ classroomId, existing }: { classroomId: Id<"classrooms">; existing: readonly string[] }) {
-  const addStudents = useMutation(api.classrooms.addStudents);
-  const toast = useToast();
-  const [text, setText] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+type ClassRow = { readonly _id: string; readonly label: string; readonly joinCode: string | null };
 
-  const parsed = parseStudentList(text, existing);
-  const count = parsed.names.length;
-  const tooMany = count > LIMITS.studentsPerBatch;
-  const ready = count > 0 && parsed.problemCount === 0 && !tooMany;
-
-  async function onSubmit(event: FormEvent) {
-    event.preventDefault();
-    if (!ready) return;
-    setBusy(true);
-    setError(null);
-    try {
-      const created = await addStudents({ classroomId, names: [...parsed.names] });
-      setText("");
-      toast(
-        created.length === 1
-          ? `Agregaste a ${created[0]!.displayName}. Ya tiene su código.`
-          : `Agregaste ${created.length} alumnos. Ya tienen sus códigos.`,
-      );
-    } catch (e) {
-      setError(userMessage(e));
-    } finally {
-      setBusy(false);
-    }
-  }
-
+/** La clase recién creada: su código bien grande para dictarlo o copiarlo. */
+function CreatedClass({ classroom, onAnother }: { classroom: ClassRow | undefined; onAnother: () => void }) {
+  const copy = useCopyCode();
+  const code = classroom?.joinCode ?? null;
+  const joinUrl = `${window.location.host}/alumno`;
   return (
-    <form className="stack" onSubmit={onSubmit}>
-      <div className="field">
-        <label htmlFor="names">Agregar alumnos</label>
-        <textarea
-          id="names"
-          className="input"
-          rows={4}
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder={"Ana\nBenjamín\nCamila"}
-          aria-describedby="names-hint"
-          spellCheck={false}
-        />
-        <span id="names-hint" className="hint">
-          Un nombre por línea (o separados por comas). Solo letras: se aceptan tildes, ñ, guion y apóstrofo. Puedes
-          pegar la lista desde Excel.
-        </span>
-      </div>
-
-      {parsed.entries.length > 0 && (
-        <ul className="name-preview" aria-label="Así se agregarán">
-          {parsed.entries.map((entry, i) => (
-            <li key={i} data-status={entry.status}>
-              <Icon name={entry.status === "ok" ? "checkCircle" : "alert"} size={18} />
-              <span>{entry.status === "ok" ? entry.name : entry.input}</span>
-              {entry.status !== "ok" && <span className="reason">{entry.reason}</span>}
-            </li>
-          ))}
-        </ul>
-      )}
-      {parsed.problemCount > 0 && (
-        <div className="row spread">
-          <p className="hint" role="status">
-            Corrige o borra {parsed.problemCount === 1 ? "la línea marcada" : `las ${parsed.problemCount} líneas marcadas`}{" "}
-            para continuar.
-          </p>
-          <button type="button" className="link-btn small" onClick={() => setText(parsed.names.join("\n"))}>
-            <Icon name="trash" size={16} /> Quitar las líneas marcadas
-          </button>
-        </div>
-      )}
-      {tooMany && (
-        <p className="hint" role="status">
-          Agrega hasta {LIMITS.studentsPerBatch} alumnos a la vez.
-        </p>
-      )}
-      {error && (
-        <p className="alert alert-error" role="alert">
-          {error}
-        </p>
-      )}
-      <button className="btn btn-primary" type="submit" disabled={busy || !ready} aria-busy={busy}>
-        {busy ? "Generando códigos…" : count > 0 ? `Agregar ${count} ${count === 1 ? "alumno" : "alumnos"}` : "Agregar alumnos"}
-      </button>
-    </form>
-  );
-}
-
-function ClassDetail({ classroomId }: { classroomId: Id<"classrooms"> }) {
-  const classroom = useQuery(api.classrooms.get, { classroomId });
-  const toast = useToast();
-
-  if (classroom === undefined) return <p className="muted">Cargando…</p>;
-
-  async function copy(name: string, code: string) {
-    try {
-      await navigator.clipboard.writeText(code);
-      toast(`Copiaste el código de ${name}.`);
-    } catch {
-      toast("No se pudo copiar. Selecciona el código y cópialo a mano.", { tone: "error" });
-    }
-  }
-
-  const studentUrl = `${window.location.origin}/alumno`;
-
-  return (
-    <section className="card stack">
-      <div className="page-head">
-        <div>
-          <h3 style={{ margin: 0 }}>{classroom.label}</h3>
-          <p className="muted small">
-            {classroom.students.length} {classroom.students.length === 1 ? "alumno" : "alumnos"} · entran en{" "}
-            <strong>{studentUrl.replace(/^https?:\/\//, "")}</strong>
-          </p>
-        </div>
-        <button className="btn" type="button" disabled={classroom.students.length === 0} onClick={() => window.print()}>
-          <Icon name="printer" /> Imprimir tarjetas
+    <section className="card stack created-class" aria-labelledby="created-title" aria-live="polite">
+      <h3 id="created-title" style={{ margin: 0 }}>
+        ¡Clase creada!
+      </h3>
+      {classroom && <span className="small muted">{classroom.label}</span>}
+      <span className="created-code" aria-label={code ? `Código de la clase: ${code}` : "Generando el código de la clase"}>
+        {code ?? "…"}
+      </span>
+      <p className="hint">
+        Tus alumnos abren <strong>{joinUrl}</strong>, escriben este código y eligen un apodo. No necesitan cuenta.
+      </p>
+      <div className="row" style={{ justifyContent: "center" }}>
+        <button type="button" className="btn btn-primary" disabled={code === null} onClick={() => code && void copy(code)}>
+          <Icon name="copy" /> Copiar código
         </button>
-      </div>
-
-      {classroom.students.length === 0 ? (
-        <div className="empty">
-          <Icon name="users" size={32} />
-          <p>Agrega a tus alumnos: cada uno recibe un código para entrar sin contraseña.</p>
-        </div>
-      ) : (
-        <div className="table-wrap">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Alumno</th>
-                <th>Código de acceso</th>
-              </tr>
-            </thead>
-            <tbody>
-              {classroom.students.map((s) => (
-                <tr key={s._id}>
-                  <td>{s.displayName}</td>
-                  <td>
-                    <span className="code-cell">
-                      <span className="code">{s.accessCode}</span>
-                      <IconButton icon="copy" label={`Copiar código de ${s.displayName}`} onClick={() => void copy(s.displayName, s.accessCode)} />
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      <AddStudentsForm classroomId={classroomId} existing={classroom.students.map((s) => s.displayName)} />
-
-      <div className="print-only" aria-hidden="true">
-        <h2>{classroom.label}</h2>
-        <p>Entra en {studentUrl} y escribe tu código.</p>
-        <div className="print-cards">
-          {classroom.students.map((s) => (
-            <div key={s._id} className="print-card">
-              <strong>{s.displayName}</strong>
-              <div className="code">{s.accessCode}</div>
-            </div>
-          ))}
-        </div>
+        {classroom && (
+          <Link className="btn" to={`/docente/clases/${classroom._id}`}>
+            Ir a la clase
+          </Link>
+        )}
+        <button type="button" className="link-btn" onClick={onAnother}>
+          <Icon name="plus" size={18} /> Crear otra clase
+        </button>
       </div>
     </section>
   );
 }
 
-export function ClassesPage() {
-  const { classroomId } = useParams();
+/** Mis clases (T10): cada clase con su código; crear una nueva muestra el código al instante. */
+export function ClassesPage({ creating = false }: { creating?: boolean }) {
+  usePageTitle("Mis clases");
+  const navigate = useNavigate();
   const classes = useQuery(api.classrooms.listMine);
-  const [creating, setCreating] = useState(false);
+  const [createdId, setCreatedId] = useState<string | null>(null);
+  useEnsureJoinCodes(classes?.some((c) => c.joinCode === null) ?? false);
   const noClasses = classes !== undefined && classes.length === 0;
+  const showForm = creating || noClasses;
 
   return (
     <div className="stack">
       <div className="page-head">
         <h2>Mis clases</h2>
-        {!creating && !noClasses && (
-          <button className="btn btn-primary" type="button" onClick={() => setCreating(true)}>
+        {!showForm && (
+          <Link className="btn btn-primary" to="/docente/clases/nueva">
             <Icon name="plus" /> Nueva clase
-          </button>
+          </Link>
         )}
       </div>
       <div className="two-col">
         <div className="stack">
-          {classroomId ? (
-            <ClassDetail key={classroomId} classroomId={classroomId as Id<"classrooms">} />
+          {classes === undefined ? (
+            <p className="muted">Cargando…</p>
           ) : noClasses ? (
             <div className="empty">
               <Icon name="users" size={32} />
-              <p>Crea tu primera clase con su nivel, grado y sección. Después agregas a tus alumnos.</p>
+              <p>Crea tu primera clase con su nivel, grado y sección. Tus alumnos entran con el código que te damos.</p>
             </div>
           ) : (
-            <div className="empty">
-              <Icon name="users" size={32} />
-              <p>Elige una clase para ver a sus alumnos y sus códigos.</p>
-            </div>
+            <ul className="class-cards" aria-label="Tus clases">
+              {classes.map((c) => (
+                <li key={c._id} className="card class-card">
+                  <div className="class-card-text">
+                    <Link className="class-card-title" to={`/docente/clases/${c._id}`}>
+                      {c.label}
+                    </Link>
+                    <span className="small muted">
+                      {c.studentCount} {c.studentCount === 1 ? "estudiante" : "estudiantes"}
+                    </span>
+                  </div>
+                  <CodeChip code={c.joinCode} />
+                </li>
+              ))}
+            </ul>
           )}
         </div>
         <div className="stack">
-          {(creating || noClasses) && <CreateClassForm {...(noClasses ? {} : { onCancel: () => setCreating(false) })} />}
-          {classes && classes.length > 0 && (
-            <nav className="card stack" aria-label="Tus clases">
-              <h3 style={{ margin: 0 }}>Tus clases</h3>
-              <div className="class-list">
-                {classes.map((c) => (
-                  <Link
-                    key={c._id}
-                    className="class-item"
-                    to={`/docente/clases/${c._id}`}
-                    aria-current={c._id === classroomId ? "page" : undefined}
-                  >
-                    <span>{c.label}</span>
-                    <span className="badge badge-muted">
-                      <Icon name="users" size={14} /> {c.studentCount}
-                    </span>
-                  </Link>
-                ))}
-              </div>
-            </nav>
+          {createdId !== null ? (
+            <CreatedClass
+              classroom={classes?.find((c) => c._id === createdId)}
+              onAnother={() => {
+                setCreatedId(null);
+                if (!showForm) navigate("/docente/clases/nueva");
+              }}
+            />
+          ) : (
+            showForm && <CreateClassForm onCreated={setCreatedId} {...(noClasses ? {} : { onCancel: () => navigate("/docente/clases") })} />
           )}
         </div>
       </div>

@@ -1,0 +1,88 @@
+/* Inicio del docente (T2): cifras, retos disponibles y clases con su código. */
+.home-greeting {
+  font-size: 1.9rem;
+  margin: 0;
+}
+
+.stat-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.stat-card {
+  display: grid;
+  gap: 2px;
+  padding: 18px 22px;
+}
+
+.stat-card strong {
+  font-size: 2rem;
+  line-height: 1.1;
+  color: var(--c-brand);
+  font-variant-numeric: tabular-nums;
+}
+
+.home-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+  align-items: start;
+}
+
+.home-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.home-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 4px;
+  border-bottom: 1px solid var(--c-line);
+}
+
+.home-item:last-child {
+  border-bottom: 0;
+}
+
+.home-item-art {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--c-surface-2);
+  font-size: 1.2rem;
+}
+
+.home-item-text {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 1px;
+}
+
+.home-item-text a {
+  color: var(--c-ink);
+  font-weight: 700;
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-item-text a:hover {
+  color: var(--c-brand);
+  text-decoration: underline;
+}
+
+.code-badge {
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  letter-spacing: 0.06em;
+}
