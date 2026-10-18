@@ -50,6 +50,8 @@ export function StudentHome({ token, onSignOut }: Props) {
             </button>
           </div>
 
+          <Link className="btn btn-primary" to="/alumno/en-vivo"><Icon name="play" /> Jugar en vivo</Link>
+
           <section className="card stack" aria-labelledby="class-challenges-title">
             <h2 id="class-challenges-title" style={{ margin: 0 }}>
               Retos de tu clase

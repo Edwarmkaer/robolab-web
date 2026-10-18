@@ -1,0 +1,23 @@
+.live-student { width: 100%; max-width: 1100px; margin: 0 auto; }
+.live-room h1, .live-room h2 { margin: 0; }
+.live-room h1 { overflow-wrap: anywhere; }
+.live-room h1:focus { outline: none; }
+.live-game { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+.live-game .board, .live-preview .board { width: 100%; margin: 0 auto; }
+.live-preview { width: min(100%, 420px); margin: 0 auto; text-align: center; }
+.live-palette { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.live-palette .btn { padding: 10px; justify-content: flex-start; text-align: left; }
+.live-controls { border: 0; padding: 0; margin: 0; min-width: 0; }
+.live-program { list-style: none; padding: 8px 0; margin: 0; display: flex; flex-wrap: wrap; gap: 8px; max-height: 240px; overflow-y: auto; }
+.live-program li { display: flex; align-items: center; gap: 6px; padding: 6px 10px; background: var(--c-surface-2); border-radius: 8px; font-size: 0.9rem; }
+.live-feedback { padding: 12px; background: var(--c-brand-soft); color: var(--c-ink); border-radius: var(--radius); margin: 0; }
+.live-form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); gap: 16px; }
+.live-rooms { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; }
+.live-room-link { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; color: var(--c-ink); text-decoration: none; }
+.live-room-link:hover { background: var(--c-surface-2); }
+.live-room .table th[scope="row"] { font-weight: 700; text-transform: none; letter-spacing: normal; }
+@media (max-width: 720px) {
+  .live-game { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .live-room .page-head { align-items: flex-start; }
+  .live-palette .btn { font-size: 0.9rem; }
+}

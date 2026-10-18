@@ -3,7 +3,7 @@ import { cleanup, fireEvent, render, screen, within } from "@testing-library/rea
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { move } from "@robolab/backend/domain/game/program";
 import { policyFor } from "@robolab/backend/domain/game/levels";
-import { BlockEditor } from "./BlockEditor";
+import { BlockEditor, PieceTray } from "./BlockEditor";
 
 afterEach(cleanup);
 
@@ -31,7 +31,7 @@ describe("editor de bloques", () => {
 
   it("la paleta muestra las piezas del nivel y la secuencia vacía deja casillas punteadas para llenar", () => {
     render(<BlockEditor policy={policyFor("inicial")} state={{ blocks: [], openRepeat: null }} dispatch={() => undefined} disabled={false} />);
-    const palette = screen.getByRole("group", { name: "Pasos" });
+    const palette = screen.getByRole("group", { name: "Piezas" });
     const pieces = within(palette).getAllByRole("button");
     expect(pieces.map((b) => b.getAttribute("aria-label"))).toEqual(["Avanzar", "Retroceder", "Girar a la izquierda", "Girar a la derecha"]);
     expect(pieces.map((b) => b.getAttribute("data-piece"))).toEqual(["FORWARD", "BACKWARD", "TURN_LEFT", "TURN_RIGHT"]);
@@ -53,7 +53,7 @@ describe("editor de bloques", () => {
         disabled={false}
       />,
     );
-    const palette = screen.getByRole("group", { name: "Pasos" });
+    const palette = screen.getByRole("group", { name: "Piezas" });
     expect(within(palette).getByRole("button", { name: "Retroceder" }).getAttribute("data-piece")).toBe("BACKWARD");
     expect(within(palette).getByRole("button", { name: "Repetir" }).getAttribute("data-piece")).toBe("repeat");
     // El primer elemento es el bloque Repetir; adentro lleva su propia lista.
@@ -64,26 +64,58 @@ describe("editor de bloques", () => {
   });
 });
 
-describe("piezas sin texto: solo ícono, con su nombre en un ícono de información", () => {
-  it("las piezas de la paleta no tienen texto visible; el nombre va en el aria-label y en la etiqueta del ícono (i)", () => {
+describe("espacio de trabajo: «Tu programa», papelera y acciones dentro del cuadro", () => {
+  const editable = (extra: Partial<React.ComponentProps<typeof BlockEditor>> = {}) =>
+    render(<BlockEditor policy={policyFor("primaria")} state={{ blocks: [move("FORWARD")], openRepeat: null }} dispatch={() => undefined} disabled={false} {...extra} />);
+
+  it("el título es «Tu programa» y lo que pase la pantalla (Robot) va a su derecha", () => {
+    editable({ headerActions: <button type="button">Robot</button> });
+    const head = screen.getByRole("heading", { level: 2, name: "Tu programa" }).closest(".program-head")!;
+    expect(within(head as HTMLElement).getByRole("button", { name: "Robot" })).toBeTruthy();
+  });
+
+  it("la papelera y las acciones («Ejecutar») viven dentro del mismo cuadro que la secuencia", () => {
+    editable({ actions: <button type="button">Ejecutar</button> });
+    const box = screen.getByRole("list", { name: "Tu secuencia" }).closest(".sequence")!;
+    const actions = within(box.querySelector(".program-actions") as HTMLElement).getAllByRole("button");
+    expect(actions.map((b) => b.getAttribute("aria-label") ?? b.textContent)).toEqual(["Borrar la secuencia", "Ejecutar"]);
+  });
+
+  it("las piezas van debajo del cuadro del programa", () => {
+    editable();
+    const box = screen.getByRole("list", { name: "Tu secuencia" }).closest(".sequence")!;
+    const tray = screen.getByRole("group", { name: "Piezas" }).closest(".piece-tray")!;
+    expect(box.compareDocumentPosition(tray) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it("solo lectura (predecir): sin título, sin papelera y sin piezas", () => {
+    editable({ readOnly: true });
+    expect(screen.queryByRole("heading", { name: "Tu programa" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Borrar la secuencia" })).toBeNull();
+    expect(screen.queryByRole("group", { name: "Piezas" })).toBeNull();
+  });
+});
+
+describe("piezas sin texto: solo ícono, con su nombre al pasar el mouse o enfocarlas", () => {
+  it("las piezas de la paleta no tienen texto visible; el nombre va en el aria-label y en su etiqueta, sin ícono ⓘ", () => {
     render(<BlockEditor policy={policyFor("primaria")} state={{ blocks: [], openRepeat: null }} dispatch={() => undefined} disabled={false} />);
-    const palette = screen.getByRole("group", { name: "Pasos" });
+    const palette = screen.getByRole("group", { name: "Piezas" });
     const buttons = within(palette).getAllByRole("button");
     expect(buttons.map((b) => b.getAttribute("aria-label"))).toEqual(["Avanzar", "Retroceder", "Girar a la izquierda", "Girar a la derecha", "Repetir"]);
     for (const button of buttons) {
       // Sin texto visible: solo la imagen decorativa.
       expect(button.textContent).toBe("");
       expect(button.querySelector("img")!.getAttribute("alt")).toBe("");
-      // Arriba a la derecha de la pieza hay un ícono de información con el nombre.
+      // Sin ícono ⓘ: el nombre sale en la etiqueta al pasar el mouse o enfocar la pieza.
       const frame = button.closest(".piece")!;
-      expect(frame.querySelector(".piece-info svg")).not.toBeNull();
+      expect(frame.querySelector(".piece-info")).toBeNull();
       expect(frame.querySelector(".piece-tip")!.textContent).toBe(button.getAttribute("aria-label"));
     }
   });
 
-  it("el ícono y su etiqueta son solo visuales: no repiten el nombre al lector ni suman paradas de Tab", () => {
+  it("la etiqueta es solo visual: no repiten el nombre al lector ni suman paradas de Tab", () => {
     render(<BlockEditor policy={policyFor("inicial")} state={{ blocks: [move("FORWARD")], openRepeat: null }} dispatch={() => undefined} disabled={false} />);
-    for (const hidden of document.querySelectorAll(".piece-info, .piece-tip")) {
+    for (const hidden of document.querySelectorAll(".piece-tip")) {
       expect(hidden.getAttribute("aria-hidden")).toBe("true");
       expect(hidden.matches("button, a, [tabindex]")).toBe(false);
     }
@@ -91,7 +123,7 @@ describe("piezas sin texto: solo ícono, con su nombre en un ícono de informaci
     expect(screen.getAllByRole("button")).toHaveLength(4 + 1 + 1);
   });
 
-  it("los pasos de la secuencia también muestran su nombre en el ícono de información", () => {
+  it("los pasos de la secuencia también muestran su nombre en su etiqueta", () => {
     render(
       <BlockEditor policy={policyFor("inicial")} state={{ blocks: [move("TURN_RIGHT")], openRepeat: null }} dispatch={() => undefined} disabled={false} />,
     );
@@ -101,7 +133,7 @@ describe("piezas sin texto: solo ícono, con su nombre en un ícono de informaci
     expect(step.textContent).toBe("1");
   });
 
-  it("en Repetir el nombre queda para el lector de pantalla y el ícono lleva su etiqueta", () => {
+  it("en Repetir el nombre queda para el lector de pantalla y la pieza lleva su etiqueta", () => {
     render(
       <BlockEditor
         policy={policyFor("primaria")}
@@ -126,5 +158,52 @@ describe("piezas sin texto: solo ícono, con su nombre en un ícono de informaci
 
     fireEvent.blur(button);
     expect(frame.getAttribute("data-tip-dismissed")).toBeNull();
+  });
+
+  describe("bandeja de piezas con gestos", () => {
+    const GESTURES = {
+      FORWARD: { emoji: "☝️", prompt: "Apunta arriba" },
+      BACKWARD: { emoji: "👇", prompt: "Apunta abajo" },
+      TURN_LEFT: { emoji: "👈", prompt: "Apunta a la izquierda" },
+      TURN_RIGHT: { emoji: "👉", prompt: "Apunta a la derecha" },
+    } as const;
+    const tray = (extra: { currentCommand?: "FORWARD" | null } = {}) =>
+      render(<PieceTray policy={policyFor("inicial")} state={{ blocks: [], openRepeat: null }} dispatch={() => undefined} disabled={false} gestures={GESTURES} {...extra} />);
+
+    it("cada pieza es la mano que la pide (sin flechas ni texto) y su etiqueta dice el nombre y el gesto", () => {
+      tray();
+      const group = screen.getByRole("group", { name: "Piezas" });
+      const frames = [...group.querySelectorAll(".piece")];
+      expect(frames.map((f) => f.querySelector(".piece-hand")?.textContent)).toEqual(["☝️", "👇", "👈", "👉"]);
+      expect(frames.every((f) => f.querySelector(".piece-hand")?.getAttribute("aria-hidden") === "true")).toBe(true);
+      expect(frames.some((f) => f.querySelector("img"))).toBe(false);
+      expect(frames.some((f) => f.querySelector(".piece-info"))).toBe(false);
+      const tip = frames[3]!.querySelector(".piece-tip")!;
+      expect(tip.textContent).toContain("Girar a la derecha");
+      expect(tip.querySelector(".piece-tip-detail")?.textContent).toBe("Apunta a la derecha");
+    });
+
+    it("el nombre accesible de la pieza no cambia por la mano", () => {
+      tray();
+      expect(screen.getAllByRole("button").map((b) => b.getAttribute("aria-label"))).toEqual(["Avanzar", "Retroceder", "Girar a la izquierda", "Girar a la derecha"]);
+    });
+
+    it("resalta la pieza del gesto que la cámara está viendo", () => {
+      tray({ currentCommand: "FORWARD" });
+      const flags = screen.getAllByRole("button").map((b) => b.hasAttribute("data-current"));
+      expect(flags).toEqual([true, false, false, false]);
+    });
+
+    it("sin gestos (Botones, Primaria) las piezas llevan su flecha, no una mano", () => {
+      render(<PieceTray policy={policyFor("primaria")} state={{ blocks: [], openRepeat: null }} dispatch={() => undefined} disabled={false} />);
+      expect(document.querySelector(".piece-hand")).toBeNull();
+      expect(document.querySelectorAll(".block-btn img").length).toBeGreaterThan(0);
+    });
+
+    it("lo que va al final (el pulgar) queda tras un separador", () => {
+      render(<PieceTray policy={policyFor("inicial")} state={{ blocks: [], openRepeat: null }} dispatch={() => undefined} disabled={false} gestures={GESTURES} trailing={<span>👍</span>} />);
+      const group = screen.getByRole("group", { name: "Piezas" });
+      expect(group.querySelector(".palette-sep + span")?.textContent).toBe("👍");
+    });
   });
 });

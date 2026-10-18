@@ -11,11 +11,12 @@ import type { Cell } from "@robolab/backend/domain/game/map";
 import { type Program, countBlocks } from "@robolab/backend/domain/game/program";
 import { missionById } from "@robolab/backend/domain/lab/mission";
 import { ActionBar } from "../../shared/ui/ActionBar";
-import { Guide, type Mood } from "../../shared/ui/Guide";
+import { Guide, GuideAvatar, type Mood } from "../../shared/ui/Guide";
 import { Icon } from "../../shared/ui/Icon";
 import { useFocusOnMount } from "../../shared/useFocusOnMount";
 import { MissionRoute } from "../lab/MissionRoute";
 import { BlockEditor } from "../game/BlockEditor";
+import { prefetchGestureAssets } from "../vision/gestureAssets";
 import { InitialProgramEditor } from "../vision/InitialProgramEditor";
 import { Board } from "../game/Board";
 import { RobotSend } from "../robot/RobotSend";
@@ -52,6 +53,10 @@ const MOOD_FOR: Record<Exclude<CheckResult, { ok: true }>["reason"], Mood> = {
 
 function Intro({ challenge, onStart }: { challenge: Challenge; onStart: () => void }) {
   const topic = topicInfo(challenge.topic)!;
+  // Los retos de Inicial arrancan con Gestos: mientras lee la ficha se va bajando el modelo de la cámara.
+  useEffect(() => {
+    if (challenge.level === "inicial" && challenge.kind !== "predict") prefetchGestureAssets();
+  }, [challenge]);
   return (
     <div className="intro-grid">
       <section className="card stack">
@@ -122,6 +127,7 @@ function Play({ challenge, robot, onSolved }: { challenge: Challenge; robot: Rob
   const [boardMood, setBoardMood] = useState<"idle" | "error" | "success">("idle");
   const [picked, setPicked] = useState<Cell | null>(null);
   const [solved, setSolved] = useState(false);
+  const [cameraHost, setCameraHost] = useState<HTMLElement | null>(null);
   const ranProgram = useRef<Program>([]);
   // Al empezar (o repetir) el reto el foco va al título: el lector de pantalla anuncia en qué reto está.
   const focusTitle = useFocusOnMount<HTMLHeadingElement>();
@@ -191,82 +197,108 @@ function Play({ challenge, robot, onSolved }: { challenge: Challenge; robot: Rob
       ? { path: runner.errorPath, tone: "error" as const }
       : null;
 
-  return (
-    <div className="game has-action-bar">
-      <div className="stack">
-        <div className="play-goal">
-          <h1 tabIndex={-1} ref={focusTitle}>
-            {/[.?!]$/.test(challenge.title) ? challenge.title : `${challenge.title}.`}
-          </h1>{" "}
-          {INSTRUCTION[challenge.kind]}
-        </div>
-        <Board
-          map={challenge.map}
-          robot={runner.robot}
-          mood={boardMood}
-          stepMs={STEP_MS}
-          topic={challenge.topic}
-          {...(challenge.kind === "predict" && !busy ? { onPick: setPicked, picked } : { picked })}
-        />
-      </div>
-      <div className="stack">
-        <Guide mood={guide.mood} message={guide.message}>
-          <button className="btn btn-sm" type="button" onClick={askHint} disabled={busy || hints >= challenge.hints.length}>
-            <Icon name="lightbulb" size={16} /> {hints >= challenge.hints.length ? "Ya usaste las 3 pistas" : `Pedir pista (${hints} de 3)`}
-          </button>
-        </Guide>
+  const topic = topicInfo(challenge.topic)!;
+  const readOnlyProgram = { blocks: challenge.kind === "predict" ? challenge.given : [], openRepeat: null };
+  const clearAndReset = () => {
+    setBoardMood("idle");
+    reset();
+  };
+  const robotButton = <RobotSend robot={robot} program={editor.blocks} disabled={busy} />;
+  const executeButton = (
+    <button className="btn btn-primary" type="button" disabled={busy || editor.blocks.length === 0} onClick={execute}>
+      <Icon name="play" /> Ejecutar
+    </button>
+  );
+  const hintsLeft = hints < challenge.hints.length;
+  const withCamera = challenge.level === "inicial" && challenge.kind !== "predict";
+  const efficientCount = challenge.kind === "efficient" && (
+    <p className="small" data-over={used > challenge.maxBlocks || undefined}>
+      Bloques: <strong>{used}</strong> de {challenge.maxBlocks} como máximo
+    </p>
+  );
 
+  return (
+    <div className={challenge.kind === "predict" ? "game has-action-bar" : "game"}>
+      <div className="board-column">
+        <div className="goal-row">
+          <section className="goal-card card" aria-label="Reto">
+            <span className="badge">
+              {topic.emoji} {topic.name} · {LEVEL_INFO[challenge.level].name}
+            </span>
+            <div className="play-goal">
+              <h1 tabIndex={-1} ref={focusTitle}>
+                {/[.?!]$/.test(challenge.title) ? challenge.title : `${challenge.title}.`}
+              </h1>{" "}
+              <span role="status" aria-live="polite">
+                {guide.message}
+              </span>
+            </div>
+          </section>
+          <aside className="wayra-card card" aria-label="Wayra, tu guía">
+            <GuideAvatar mood={guide.mood} size={56} />
+            <button
+              className="btn btn-sm"
+              type="button"
+              onClick={askHint}
+              disabled={busy || !hintsLeft}
+              aria-label={`Pista ${hints}/${challenge.hints.length}: ${hintsLeft ? "pedir una pista" : "ya usaste todas las pistas"}`}
+            >
+              <Icon name="lightbulb" size={16} /> Pista {hints}/{challenge.hints.length}
+            </button>
+          </aside>
+        </div>
+
+        <aside className="board-panel card" aria-label="Tablero">
+          <h2>{topic.place}</h2>
+          <Board
+            map={challenge.map}
+            robot={runner.robot}
+            mood={boardMood}
+            stepMs={STEP_MS}
+            topic={challenge.topic}
+            {...(challenge.kind === "predict" && !busy ? { onPick: setPicked, picked } : { picked })}
+          />
+          <p className="small muted">
+            Nivel {LEVEL_INFO[challenge.level].name} · {challenge.map.rows * challenge.map.cols} casillas
+          </p>
+        </aside>
+
+        {withCamera && <div className="camera-slot" ref={setCameraHost} />}
+      </div>
+
+      <section className="workspace card" aria-label="Espacio de trabajo">
         {challenge.kind === "predict" ? (
           <>
-            <BlockEditor policy={policy} state={{ blocks: challenge.given, openRepeat: null }} dispatch={() => undefined} disabled readOnly active={highlight} />
+            <BlockEditor policy={policy} state={readOnlyProgram} dispatch={() => undefined} disabled readOnly active={highlight} />
             <ActionBar>
               <button className="btn btn-primary" type="button" disabled={busy || !picked} onClick={checkPick}>
                 <Icon name="check" /> {picked ? "Comprobar" : "Toca una casilla"}
               </button>
             </ActionBar>
           </>
+        ) : withCamera ? (
+          <>
+            <InitialProgramEditor
+              policy={policy}
+              state={editor}
+              dispatch={dispatch}
+              disabled={busy}
+              active={highlight}
+              onExecute={execute}
+              onClear={clearAndReset}
+              headerActions={robotButton}
+              actions={executeButton}
+              cameraHost={cameraHost}
+            />
+            {efficientCount}
+          </>
         ) : (
           <>
-            {challenge.level === "inicial" ? (
-              <InitialProgramEditor
-                  policy={policy}
-                  state={editor}
-                  dispatch={dispatch}
-                  disabled={busy}
-                  active={highlight}
-                  onExecute={execute}
-                  onClear={() => {
-                    setBoardMood("idle");
-                    reset();
-                  }}
-                />
-            ) : (
-              <BlockEditor
-                policy={policy}
-                state={editor}
-                dispatch={dispatch}
-                disabled={busy}
-                active={highlight}
-                onClear={() => {
-                  setBoardMood("idle");
-                  reset();
-                }}
-              />
-            )}
-            {challenge.kind === "efficient" && (
-              <p className="small" data-over={used > challenge.maxBlocks || undefined}>
-                Bloques: <strong>{used}</strong> de {challenge.maxBlocks} como máximo
-              </p>
-            )}
-            <ActionBar>
-              <RobotSend robot={robot} program={editor.blocks} disabled={busy} />
-              <button className="btn btn-primary" type="button" disabled={busy || editor.blocks.length === 0} onClick={execute}>
-                <Icon name="play" /> Ejecutar
-              </button>
-            </ActionBar>
+            <BlockEditor policy={policy} state={editor} dispatch={dispatch} disabled={busy} active={highlight} onClear={clearAndReset} headerActions={robotButton} actions={executeButton} />
+            {efficientCount}
           </>
         )}
-      </div>
+      </section>
     </div>
   );
 }

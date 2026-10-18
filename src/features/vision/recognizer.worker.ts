@@ -1,5 +1,6 @@
 import { FilesetResolver, GestureRecognizer } from "@mediapipe/tasks-vision";
 import type { RecognitionMessage } from "./cameraSession";
+import { MODEL_URL, WASM_BASE } from "./gestureAssets";
 import { gestureSample } from "./pointingGesture";
 
 type Request = { type: "init" } | { type: "frame"; bitmap: ImageBitmap; time: number };
@@ -10,10 +11,10 @@ self.onmessage = async (event: MessageEvent<Request>) => {
   const request = event.data;
   try {
     if (request.type === "init") {
-      const files = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.1.1/wasm", true);
+      const files = await FilesetResolver.forVisionTasks(WASM_BASE, true);
       recognizer = await GestureRecognizer.createFromOptions(files, {
         baseOptions: {
-          modelAssetPath: "https://storage.googleapis.com/mediapipe-models/gesture_recognizer/gesture_recognizer/float16/1/gesture_recognizer.task",
+          modelAssetPath: MODEL_URL,
           delegate: "CPU",
         },
         runningMode: "VIDEO",
