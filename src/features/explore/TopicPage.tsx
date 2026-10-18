@@ -1,7 +1,7 @@
 import { Navigate, useParams } from "react-router-dom";
 import { topicInfo } from "@robolab/backend/domain/explore/challenges";
 import { levelProgress } from "@robolab/backend/domain/explore/progress";
-import { EDUCATION_LEVELS } from "@robolab/backend/domain/game/levels";
+import { ACTIVE_LEVELS } from "@robolab/backend/domain/game/levels";
 import { Breadcrumbs, ExploreLayout, TOPIC_COLOR } from "./ExploreLayout";
 import { LevelCard } from "./LevelCard";
 import { useExploreProgress } from "./storage";
@@ -26,7 +26,7 @@ export function TopicPage() {
         </div>
       </div>
       <div className="level-grid">
-        {EDUCATION_LEVELS.map((level) => (
+        {ACTIVE_LEVELS.map((level) => (
           <LevelCard key={level} topic={topic.id} level={level} progress={levelProgress(progress, topic.id, level)} />
         ))}
       </div>

@@ -28,8 +28,6 @@ export function ImpactPage() {
             <Stat label="Retos resueltos" total={data.total.solved} today={data.todayStats.solved} />
             <Stat label="Personas que jugaron" total={data.total.devices} today={data.todayStats.devices} note="dispositivos distintos" />
             <Stat label="Partidas" total={data.total.plays} today={data.todayStats.plays} />
-            <Stat label="Evaluaciones terminadas en clase" total={data.total.attemptsFinished} today={data.todayStats.attemptsFinished} />
-            <Stat label="Alumnos que terminaron" total={data.total.students} today={data.todayStats.students} />
           </section>
 
           <section className="card stack" aria-labelledby="how-title">

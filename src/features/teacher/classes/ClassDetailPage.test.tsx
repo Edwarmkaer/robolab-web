@@ -82,7 +82,7 @@ describe("una clase (T8)", () => {
     const mesa = within(screen.getByRole("row", { name: /La mesa del laboratorio/ }));
     expect(mesa.getByText("80%")).toBeTruthy();
     expect((mesa.getByRole("link", { name: "Ver resultados" }) as HTMLAnchorElement).getAttribute("href")).toBe(
-      "/docente/clases/c1/retos/a1",
+      "/docente/retos/a1",
     );
     expect(within(screen.getByRole("row", { name: /La viga/ })).getByText("40%")).toBeTruthy();
   });

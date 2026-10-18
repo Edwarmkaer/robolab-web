@@ -29,7 +29,7 @@ function useSecondsUntil(until: number): number {
 }
 
 const HEADINGS: Record<View, { title: string; subtitle: string }> = {
-  signIn: { title: "Hola de nuevo", subtitle: "Ingresa para ver tus clases y las evaluaciones de hoy." },
+  signIn: { title: "Hola de nuevo", subtitle: "Ingresa para ver tus clases y cómo les va con los retos." },
   signUp: { title: "Crea tu cuenta de docente", subtitle: "Toma menos de un minuto." },
   forgot: {
     title: "¿Olvidaste tu contraseña?",

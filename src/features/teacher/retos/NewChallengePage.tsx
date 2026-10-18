@@ -223,7 +223,7 @@ function PublishedView({ published, classes, onAnother }: PublishedProps) {
       )}
       <div className="row" style={{ justifyContent: "center" }}>
         {assignedTo ? (
-          <Link className="btn btn-primary" to={`/docente/clases/${assignedTo}/retos`}>
+          <Link className="btn btn-primary" to={`/docente/retos/${published.assignmentId}`}>
             <Icon name="users" /> Ver en {assignedLabel}
           </Link>
         ) : (

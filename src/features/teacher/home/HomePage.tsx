@@ -117,43 +117,44 @@ export function HomePage() {
         </section>
       </div>
 
-      <section className="stack" aria-labelledby="today-title">
+      <section className="stack" aria-labelledby="active-title">
         <div className="row spread">
-          <h3 id="today-title" style={{ margin: 0 }}>
-            Evaluaciones de hoy
+          <h3 id="active-title" style={{ margin: 0 }}>
+            Retos activos
           </h3>
-          <Link className="link-btn small" to="/docente/evaluaciones/nueva">
-            <Icon name="plus" size={16} /> Nueva evaluación
-          </Link>
+          <span className="row">
+            <Link className="link-btn small" to="/docente/retos">
+              Ver todos
+            </Link>
+            <Link className="link-btn small" to="/docente/retos/nuevo">
+              <Icon name="plus" size={16} /> Nuevo reto
+            </Link>
+          </span>
         </div>
-        {home === undefined ? (
+        {home?.activeRetos === undefined ? (
           <p className="muted">Cargando…</p>
-        ) : home.todays.length === 0 ? (
+        ) : home.activeRetos.length === 0 ? (
           <div className="empty">
-            <Icon name="calendar" size={32} />
-            <p>No tienes evaluaciones programadas para hoy.</p>
+            <Icon name="clipboard" size={32} />
+            <p>Todavía no tienes retos activos.</p>
           </div>
         ) : (
           <div className="grid-cards">
-            {home.todays.map((e) => {
-              const share = e.studentCount === 0 ? 0 : Math.round((e.finishedCount / e.studentCount) * 100);
-              return (
-                <Link key={e._id} className="card card-link" to={`/docente/evaluaciones/${e._id}`}>
-                  <div className="row spread">
-                    <strong>{e.title}</strong>
-                    {e.playingCount > 0 && <span className="live">En vivo</span>}
-                  </div>
-                  <span className="muted small">{e.classroomLabel}</span>
-                  <div className="meter" role="img" aria-label={`${share} % de la clase terminó`}>
-                    <span style={{ ["--value" as string]: share / 100 }} />
-                  </div>
-                  <span className="small">
-                    <strong>{e.finishedCount}</strong> de {e.studentCount} terminaron
-                    {e.playingCount > 0 && ` · ${e.playingCount} jugando`}
-                  </span>
-                </Link>
-              );
-            })}
+            {home.activeRetos.map((r) => (
+              <Link key={r.assignmentId} className="card card-link" to={`/docente/retos/${r.assignmentId}`}>
+                <strong>{r.title}</strong>
+                <span className="muted small">{r.classroomLabel}</span>
+                <div className="meter" role="img" aria-label={`${r.solvedPercent} % de la clase lo logró`}>
+                  <span style={{ ["--value" as string]: r.solvedPercent / 100 }} />
+                </div>
+                <span className="small">
+                  <strong>
+                    {r.studentsSolved} de {r.studentCount}
+                  </strong>{" "}
+                  lo lograron
+                </span>
+              </Link>
+            ))}
           </div>
         )}
       </section>

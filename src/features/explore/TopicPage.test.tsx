@@ -49,15 +49,17 @@ describe("tópico: tarjetas de nivel con su avance", () => {
     expect(within(levelCard("Primaria")).getByText("0/4 ✓")).toBeTruthy();
   });
 
-  it("lo resuelto en otro tópico no suma, y Secundaria sigue como próximamente", () => {
+  it("lo resuelto en otro tópico no suma", () => {
     saveSolved("inicial-paseo", "primaria-artes-mural");
     at("/explorar/artes");
     expect(within(levelCard("Inicial")).getByText("0/5 ✓")).toBeTruthy();
     expect(within(levelCard("Primaria")).getByText("1/4 ✓")).toBeTruthy();
-    const secundaria = levelCard("Secundaria");
-    expect(within(secundaria).getByText("Próximamente")).toBeTruthy();
-    expect(secundaria.getAttribute("aria-disabled")).toBe("true");
-    expect(secundaria.getAttribute("href")).toBeNull();
+  });
+
+  it("solo ofrece Inicial y Primaria: Secundaria ya no aparece", () => {
+    at("/explorar/artes");
+    expect(screen.queryByText("Secundaria")).toBeNull();
+    expect(screen.getAllByText(/años$/).map((n) => n.textContent)).toEqual(["3-5 años", "6-11 años"]);
   });
 
   it("un tópico que no existe vuelve a la portada", () => {

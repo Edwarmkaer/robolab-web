@@ -38,7 +38,7 @@ const TICK_COUNT = 4;
 export const yFor = (scale: Pick<Scale, "top">, l: Layout) => (value: number) => l.M.top + l.PLOT_H - (value / scale.top) * l.PLOT_H;
 
 /**
- * Qué etiquetas del eje horizontal se escriben. Con muchas evaluaciones en poco ancho
+ * Qué etiquetas del eje horizontal se escriben. Con muchos retos en poco ancho
  * se encimarían: se salta de a `n` y siempre queda la última (la más reciente).
  */
 export function visibleLabelIndexes(count: number, step: number, minGap = 46): number[] {

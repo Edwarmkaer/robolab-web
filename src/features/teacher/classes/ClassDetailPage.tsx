@@ -137,7 +137,7 @@ function ChallengesTab({ classroomId }: { classroomId: Id<"classrooms"> }) {
                   </span>
                 </td>
                 <td>
-                  <Link className="link-btn" to={`/docente/clases/${classroomId}/retos/${a.assignmentId}`}>
+                  <Link className="link-btn" to={`/docente/retos/${a.assignmentId}`}>
                     Ver resultados
                   </Link>
                 </td>

@@ -316,3 +316,47 @@
   width: 100%;
   text-align: left;
 }
+
+/* Lista de retos del docente (pestaña Retos): filtros, progreso por fila y tarjetas en el celular. */
+.retos-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px 16px;
+}
+
+.retos-filters .field {
+  min-width: 180px;
+}
+
+.reto-progress {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+}
+
+.reto-progress .meter {
+  width: 90px;
+}
+
+.reto-cards {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.reto-card {
+  gap: 4px;
+  min-height: 44px;
+}
+
+.reto-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-top: 4px;
+  color: var(--c-muted);
+}

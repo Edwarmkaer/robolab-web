@@ -30,7 +30,7 @@ export function App() {
         <Route path="/impacto" element={<ImpactPage />} />
         <Route path="/laboratorio" element={<LabListPage />} />
         <Route path="/laboratorio/:id" element={<LabMissionPage />} />
-        {/* Clases: evaluaciones del docente y alumnos con código. */}
+        {/* Clases: retos del docente y alumnos con código. */}
         <Route path="/docente/*" element={<TeacherApp />} />
         <Route path="/alumno/*" element={<StudentApp />} />
         <Route path="*" element={<NotFoundPage />} />

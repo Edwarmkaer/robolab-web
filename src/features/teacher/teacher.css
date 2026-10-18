@@ -3,3 +3,31 @@
   margin: 0;
   font-size: 1.5rem;
 }
+
+/* Progreso por retos: tabla de alumnos junto al cuadro «Para mirar de cerca». */
+.progress-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  .progress-grid {
+    grid-template-columns: minmax(0, 1fr) 280px;
+  }
+}
+
+/* En el celular la tabla se desplaza hacia el lado en vez de partir «Logró · 2» en dos líneas. */
+.progress-grid .table th,
+.progress-grid .table td {
+  white-space: nowrap;
+}
+
+.progress-solved {
+  color: var(--c-ok);
+}
+
+.progress-unsolved {
+  color: var(--c-warn);
+}
