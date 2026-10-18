@@ -95,6 +95,22 @@
   }
 }
 
+/* Abierta con un toque (tablet y celular) o con el mouse; la segunda línea dice qué hace. */
+.piece[data-tip-open] > .piece-tip {
+  display: block;
+}
+
+.piece-tip-detail {
+  display: block;
+  color: var(--c-on-ink-muted);
+  font-weight: 600;
+}
+
+.piece[data-wide] > .piece-tip {
+  max-width: 220px;
+  text-align: left;
+}
+
 /* Escape la esconde sin quitar el foco. */
 .piece[data-tip-dismissed] > .piece-tip {
   display: none;
