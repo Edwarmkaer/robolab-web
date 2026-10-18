@@ -1,10 +1,14 @@
 import { Link } from "react-router-dom";
 import { TOPICS } from "@robolab/backend/domain/explore/challenges";
+import { topicProgress } from "@robolab/backend/domain/explore/progress";
 import { Icon } from "../../shared/ui/Icon";
-import { ExploreLayout, TOPIC_COLOR } from "../explore/ExploreLayout";
+import { ExploreLayout } from "../explore/ExploreLayout";
+import { TopicCard } from "../explore/TopicCard";
+import { useExploreProgress } from "../explore/storage";
 
 /** Portada: retos sin registrarse, y la entrada de alumnos con código y de docentes. */
 export function Landing() {
+  const { progress } = useExploreProgress();
   return (
     <ExploreLayout>
       <section className="stack" aria-labelledby="hero-title">
@@ -15,36 +19,9 @@ export function Landing() {
           <p className="muted">Ciencia, tecnología, ingeniería, artes y matemáticas. Sin registrarte: elige un tópico y empieza.</p>
         </div>
         <div className="topic-grid">
-          {TOPICS.map((t) =>
-            t.available ? (
-              <Link
-                key={t.id}
-                className="topic-card"
-                to={`/explorar/${t.id}`}
-                style={{ ["--topic" as string]: TOPIC_COLOR[t.id] }}
-              >
-                <span className="topic-emoji" aria-hidden="true">
-                  {t.emoji}
-                </span>
-                <strong>{t.name}</strong>
-                <span className="small muted">{t.tagline}</span>
-              </Link>
-            ) : (
-              <div
-                key={t.id}
-                className="topic-card"
-                aria-disabled="true"
-                style={{ ["--topic" as string]: TOPIC_COLOR[t.id] }}
-              >
-                <span className="topic-emoji" aria-hidden="true">
-                  {t.emoji}
-                </span>
-                <strong>{t.name}</strong>
-                <span className="small muted">{t.tagline}</span>
-                <span className="badge badge-muted">Próximamente</span>
-              </div>
-            ),
-          )}
+          {TOPICS.map((t) => (
+            <TopicCard key={t.id} topic={t} progress={topicProgress(progress, t.id)} />
+          ))}
         </div>
       </section>
 
