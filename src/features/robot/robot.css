@@ -9,7 +9,7 @@
 }
 
 [data-state="searching"] .robot-dot {
-  background: #d99a00;
+  background: var(--c-signal);
   animation: pulse 1.6s var(--ease) infinite;
 }
 

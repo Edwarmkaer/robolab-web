@@ -8,13 +8,13 @@ import { MOBILE_QUERY, useMediaQuery } from "../../shared/useMediaQuery";
 import { usePageTitle } from "../../shared/usePageTitle";
 import "./mobile.css";
 
-/** Color de cada tópico (la línea bajo la tarjeta y su barra de avance). */
+/** Color de cada tópico (la línea bajo la tarjeta y su barra de avance): viene de los tokens de `styles.css`. */
 export const TOPIC_COLOR: Record<Topic, string> = {
-  ciencia: "#1f8a4c",
-  tecnologia: "#2f6fdc",
-  ingenieria: "#d9822b",
-  artes: "#8e5bd8",
-  matematicas: "#e0604f",
+  ciencia: "var(--topic-ciencia)",
+  tecnologia: "var(--topic-tecnologia)",
+  ingenieria: "var(--topic-ingenieria)",
+  artes: "var(--topic-artes)",
+  matematicas: "var(--topic-matematicas)",
 };
 
 export const LEVEL_INFO: Record<EducationLevel, { name: string; ages: string; description: string; dots: number }> = {

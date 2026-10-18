@@ -40,8 +40,8 @@ ul.repeat-body {
 }
 
 .repeat-block[data-piece="repeat"] {
-  border-color: #f0c23a;
-  background: #fff8dc;
+  border-color: var(--c-sun);
+  background: var(--c-sun-wash);
 }
 
 .program-block .step-n {
@@ -92,4 +92,16 @@ ul.repeat-body {
     width: 42px;
     height: 36px;
   }
+}
+
+/* La papelera queda en el borde derecho: su etiqueta se abre hacia la izquierda para no ensanchar la página. */
+.editor-head [data-tooltip]::after {
+  left: auto;
+  right: 0;
+  transform: translateY(4px);
+}
+
+.editor-head [data-tooltip]:hover:not(:disabled)::after,
+.editor-head [data-tooltip]:focus-visible::after {
+  transform: translateY(0);
 }

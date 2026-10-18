@@ -1,5 +1,6 @@
 import { type Cell, type GameMap, cellKey } from "@robolab/backend/domain/game/map";
 import type { RobotState } from "@robolab/backend/domain/game/simulator";
+import "./board.css";
 
 type Props = {
   readonly map: GameMap;

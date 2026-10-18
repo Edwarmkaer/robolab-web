@@ -10,8 +10,8 @@ import { type ChartSeries, ProgressChart } from "./ProgressChart";
 import { scaleFor } from "./chartLayout";
 
 // Colores validados para daltonismo (azul y naranja), con línea punteada como segunda codificación.
-const STUDENT_COLOR = "#2a78d6";
-const AVERAGE_COLOR = "#eb6834";
+const STUDENT_COLOR = "var(--c-series-student)";
+const AVERAGE_COLOR = "var(--c-series-average)";
 
 type Progress = FunctionReturnType<typeof api.analytics.classProgress>;
 type Point = Progress["students"][number]["series"][number];
