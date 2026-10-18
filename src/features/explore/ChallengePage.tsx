@@ -16,7 +16,7 @@ import { Icon } from "../../shared/ui/Icon";
 import { useFocusOnMount } from "../../shared/useFocusOnMount";
 import { MissionRoute } from "../lab/MissionRoute";
 import { BlockEditor } from "../game/BlockEditor";
-import { prefetchGestureAssets } from "../vision/gestureAssets";
+import { warmUpRecognizer } from "../vision/recognizer";
 import { InitialProgramEditor } from "../vision/InitialProgramEditor";
 import { Board } from "../game/Board";
 import { RobotSend } from "../robot/RobotSend";
@@ -34,8 +34,8 @@ type Stats = { readonly runs: number; readonly hints: number; readonly ms: numbe
 type Submission = { readonly program?: Program; readonly pick?: Cell };
 
 const INSTRUCTION: Record<Challenge["kind"], string> = {
-  sequence: "Arma el programa para que Kusi llegue a la estrella.",
-  predict: "Lee el programa y toca la casilla donde terminará Kusi.",
+  sequence: "Arma el programa para que Wayra llegue a la estrella.",
+  predict: "Lee el programa y toca la casilla donde terminará Wayra.",
   fix: "Este programa tiene un error. Quita o cambia bloques para arreglarlo.",
   stops: "Pasa por todas las banderas 🚩 y después llega a la estrella.",
   efficient: "Llega a la estrella usando pocos bloques.",
@@ -53,9 +53,9 @@ const MOOD_FOR: Record<Exclude<CheckResult, { ok: true }>["reason"], Mood> = {
 
 function Intro({ challenge, onStart }: { challenge: Challenge; onStart: () => void }) {
   const topic = topicInfo(challenge.topic)!;
-  // Los retos de Inicial arrancan con Gestos: mientras lee la ficha se va bajando el modelo de la cámara.
+  // Los retos de Inicial arrancan con Gestos: mientras lee la ficha se baja y se prepara el modelo de la cámara.
   useEffect(() => {
-    if (challenge.level === "inicial" && challenge.kind !== "predict") prefetchGestureAssets();
+    if (challenge.level === "inicial" && challenge.kind !== "predict") warmUpRecognizer();
   }, [challenge]);
   return (
     <div className="intro-grid">
@@ -140,7 +140,7 @@ function Play({ challenge, onSolved }: { challenge: Challenge; onSolved: (stats:
 
   const finish = (submission: Submission) => {
     setSolved(true);
-    // Un momento para ver a Kusi en la estrella antes de pasar al resultado.
+    // Un momento para ver a Wayra en la estrella antes de pasar al resultado.
     window.setTimeout(() => onSolved({ runs: Math.max(runs, 1), hints, ms: Date.now() - startedAt }, submission), 1200);
   };
 
@@ -166,7 +166,7 @@ function Play({ challenge, onSolved }: { challenge: Challenge; onSolved: (stats:
     ranProgram.current = editor.blocks;
     setRuns((n) => n + 1);
     setBoardMood("idle");
-    setGuide({ mood: "thinking", message: "Mira cómo se mueve Kusi…" });
+    setGuide({ mood: "thinking", message: "Mira cómo se mueve Wayra…" });
     run(editor.blocks);
     // Si hay un robot conectado, hace el mismo recorrido.
     if (robot.state === "on") void robot.send(editor.blocks);
