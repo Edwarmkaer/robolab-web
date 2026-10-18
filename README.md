@@ -219,7 +219,8 @@ La hoja **Robot → Bluetooth** conecta directamente con el ESP32 clásico usand
 Web Serial. Convex mantiene las clases y los resultados; el robot no necesita
 wifi para recibir los movimientos. El modo **Wifi** conserva la conexión por código.
 
-1. Cargar el sketch `firmware/robolab_bluetooth/robolab_bluetooth.ino` del backend.
+1. Cargar el sketch completo `firmware/robi/robi.ino` del backend. Incluye los
+   motores, ojos, luces y sonidos en un solo archivo; no necesita copiar `.h`.
 2. Emparejar **RoboLab** en los ajustes Bluetooth de la laptop.
 3. Abrir la web por HTTPS o localhost en Chrome de escritorio (117 o superior).
 4. En el reto, tocar **Robot → Elegir robot** y seleccionar su puerto Bluetooth.
