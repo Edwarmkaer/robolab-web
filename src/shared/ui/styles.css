@@ -1398,26 +1398,25 @@ textarea.input {
   color: var(--c-warn);
 }
 
-.dialog-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgb(31 36 48 / 45%);
-  display: grid;
-  place-items: center;
-  padding: 16px;
-  z-index: 10;
-  animation: fade-in 160ms var(--ease);
-}
-
+/* <dialog> nativo abierto con showModal: el navegador atrapa el foco y bloquea el fondo. */
 .dialog {
-  width: min(640px, 100%);
+  width: min(640px, calc(100% - 32px));
   max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px);
+  margin: auto;
+  border: 0;
   overflow-y: auto;
   background: var(--c-surface);
+  color: inherit;
   border-radius: var(--radius-lg);
   padding: 24px;
   box-shadow: 0 20px 60px rgb(0 0 0 / 25%);
   animation: pop-in 220ms var(--ease);
+}
+
+.dialog::backdrop {
+  background: rgb(31 36 48 / 45%);
+  animation: fade-in 160ms var(--ease);
 }
 
 @keyframes fade-in {

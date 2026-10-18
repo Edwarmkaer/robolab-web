@@ -7,10 +7,11 @@ import { Landing } from "../features/landing/Landing";
 import { StudentApp } from "../features/student/StudentApp";
 import { TeacherApp } from "../features/teacher/TeacherApp";
 import { ConnectionBanner } from "../shared/ui/ConnectionBanner";
+import { AppErrorBoundary } from "./AppErrorBoundary";
 
 export function App() {
   return (
-    <>
+    <AppErrorBoundary>
       <ConnectionBanner />
       <Routes>
         {/* Modo abierto: retos sin cuenta. */}
@@ -25,6 +26,6 @@ export function App() {
         <Route path="/alumno/*" element={<StudentApp />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </>
+    </AppErrorBoundary>
   );
 }
