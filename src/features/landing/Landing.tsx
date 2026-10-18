@@ -53,7 +53,7 @@ export function Landing() {
           <img src="/roles/alumno.svg" alt="" />
           <span className="stack-sm">
             <strong>¿Tu docente te dio un código?</strong>
-            <span className="small muted">Entra a tu clase con tu código. No necesitas cuenta.</span>
+            <span className="small muted">Entra a tu clase con su código y un apodo. No necesitas cuenta.</span>
             <span className="btn btn-primary btn-sm">
               Unirme a una clase <Icon name="chevronRight" size={18} />
             </span>

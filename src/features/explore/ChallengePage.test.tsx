@@ -1,55 +1,79 @@
 // @vitest-environment jsdom
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { getFunctionName } from "convex/server";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import { afterEach, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ToastProvider } from "../../shared/ui/Toast";
-import type { GestureSample } from "../vision/gestureGate";
+
+const recordPlay = vi.fn();
+const recordChallengePlay = vi.fn();
+vi.mock("convex/react", () => ({
+  useQuery: () => undefined, // el envío al robot (RobotSend) consulta su estado; aquí no importa
+  useMutation: (ref: unknown) => (getFunctionName(ref as never) === "student:recordChallengePlay" ? recordChallengePlay : recordPlay),
+}));
+
 import { ChallengeRoute } from "./ChallengePage";
 
-const boundary = vi.hoisted(() => ({
-  onSample: null as ((sample: GestureSample, time: number) => void) | null,
-  record: vi.fn().mockResolvedValue(undefined),
-}));
-vi.mock("convex/react", () => ({ useMutation: () => boundary.record, useQuery: () => undefined }));
-vi.mock("../vision/cameraSession", () => ({
-  startCameraSession: (_video: HTMLVideoElement, callbacks: { onSample: typeof boundary.onSample; onReady: () => void }) => {
-    boundary.onSample = callbacks.onSample;
-    callbacks.onReady();
-    return () => { boundary.onSample = null; };
-  },
-}));
-afterEach(() => { cleanup(); vi.useRealTimers(); vi.clearAllMocks(); localStorage.clear(); });
+beforeEach(() => {
+  window.localStorage.clear();
+  recordPlay.mockResolvedValue({ solved: true });
+  recordChallengePlay.mockResolvedValue({ solved: true });
+});
+afterEach(() => {
+  cleanup();
+  vi.useRealTimers();
+  recordPlay.mockReset();
+  recordChallengePlay.mockReset();
+});
 
-it("los cuatro movimientos, incluido retroceder, generan el programa que ejecuta el reto y registra el servidor", async () => {
-  render(<MemoryRouter initialEntries={["/reto/inicial-paseo"]}><ToastProvider><Routes><Route path="/reto/:id" element={<ChallengeRoute />} /></Routes></ToastProvider></MemoryRouter>);
-  fireEvent.click(screen.getByRole("button", { name: "Empezar el reto" }));
-  fireEvent.click(await screen.findByRole("button", { name: "Activar cámara" }));
-  vi.useFakeTimers();
-  let time = 0;
-  function gesture(name: string, duration: number) {
-    act(() => {
-      for (let elapsed = 0; elapsed <= 400; elapsed += 100) boundary.onSample?.({ name: "", score: 0, hands: 0 }, time + elapsed);
-    });
-    time += 500;
-    act(() => {
-      for (let elapsed = 0; elapsed <= duration; elapsed += 100) boundary.onSample?.({ name, score: 0.95, hands: 1 }, time + elapsed);
-    });
-    time += duration + 100;
-  }
-  gesture("Pointing_Up", 800);
-  gesture("Pointing_Down", 800);
-  gesture("Pointing_Up", 800);
-  gesture("Pointing_Up", 800);
-  gesture("Pointing_Up", 800);
-  expect(screen.getAllByRole("listitem")).toHaveLength(5);
-  expect(boundary.record).not.toHaveBeenCalled();
-  gesture("Thumb_Up", 1200);
-  expect((screen.getByRole("button", { name: "Confirmar y ejecutar" }) as HTMLButtonElement).disabled).toBe(true);
-  act(() => { vi.advanceTimersByTime(2700); });
-  act(() => { vi.advanceTimersByTime(1200); });
-  expect(screen.getByRole("heading", { name: "¡Reto logrado!" })).toBeTruthy();
-  expect(boundary.record).toHaveBeenCalledWith(expect.objectContaining({
-    challengeId: "inicial-paseo", runs: 1,
-    program: [{ kind: "move", command: "FORWARD" }, { kind: "move", command: "BACKWARD" }, { kind: "move", command: "FORWARD" }, { kind: "move", command: "FORWARD" }, { kind: "move", command: "FORWARD" }],
-  }));
+/** "Primer paseo" (S..G): tres bloques de Avanzar y Ejecutar. */
+async function solvePaseo() {
+  render(
+    <MemoryRouter initialEntries={["/reto/inicial-paseo"]}>
+      <ToastProvider>
+        <Routes>
+          <Route path="/reto/:id" element={<ChallengeRoute />} />
+        </Routes>
+      </ToastProvider>
+    </MemoryRouter>,
+  );
+  fireEvent.click(screen.getByRole("button", { name: /empezar el reto/i }));
+  fireEvent.click(await screen.findByRole("button", { name: "Botones" }));
+  vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "Date"] });
+  for (let i = 0; i < 3; i++) fireEvent.click(screen.getByRole("button", { name: /^Avanzar$/ }));
+  fireEvent.click(screen.getByRole("button", { name: /ejecutar/i }));
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(10_000);
+  });
+}
+
+describe("partida de un reto resuelto", () => {
+  it("sin sesión de alumno solo se registra la partida anónima del dispositivo", async () => {
+    await solvePaseo();
+    expect(screen.getByRole("heading", { name: /reto logrado/i })).toBeTruthy();
+    expect(recordPlay).toHaveBeenCalledTimes(1);
+    expect(recordChallengePlay).not.toHaveBeenCalled();
+  });
+
+  it("con sesión de alumno, además se manda a su clase con el token y el mismo programa", async () => {
+    window.localStorage.setItem("robolab.alumno.token", "t-1");
+    await solvePaseo();
+    expect(recordPlay).toHaveBeenCalledTimes(1);
+    expect(recordChallengePlay).toHaveBeenCalledTimes(1);
+    const sent = recordChallengePlay.mock.calls[0]![0];
+    expect(sent).toMatchObject({ token: "t-1", challengeId: "inicial-paseo", runs: 1, hints: 0 });
+    expect(sent.program).toEqual(recordPlay.mock.calls[0]![0].program);
+    expect(sent.program).toHaveLength(3);
+    expect(sent).not.toHaveProperty("deviceId");
+  });
+
+  it("si el servidor rechaza la partida de la clase, el niño igual ve su resultado", async () => {
+    window.localStorage.setItem("robolab.alumno.token", "t-1");
+    recordChallengePlay.mockRejectedValue(new Error("sin red"));
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    await solvePaseo();
+    expect(screen.getByRole("heading", { name: /reto logrado/i })).toBeTruthy();
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
+  });
 });
