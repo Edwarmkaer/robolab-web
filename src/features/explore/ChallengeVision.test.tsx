@@ -23,7 +23,6 @@ afterEach(() => { cleanup(); vi.useRealTimers(); vi.clearAllMocks(); localStorag
 it("los cuatro movimientos, incluido retroceder, generan el programa que ejecuta el reto y registra el servidor", async () => {
   render(<MemoryRouter initialEntries={["/reto/inicial-paseo"]}><ToastProvider><Routes><Route path="/reto/:id" element={<ChallengeRoute />} /></Routes></ToastProvider></MemoryRouter>);
   fireEvent.click(screen.getByRole("button", { name: "Empezar el reto" }));
-  fireEvent.click(await screen.findByRole("button", { name: "Gestos" }));
   fireEvent.click(await screen.findByRole("button", { name: "Activar cámara" }));
   vi.useFakeTimers();
   let time = 0;

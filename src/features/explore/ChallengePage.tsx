@@ -192,15 +192,64 @@ function Play({ challenge, onSolved }: { challenge: Challenge; onSolved: (stats:
       ? { path: runner.errorPath, tone: "error" as const }
       : null;
 
+  const topic = topicInfo(challenge.topic)!;
+  const readOnlyProgram = { blocks: challenge.kind === "predict" ? challenge.given : [], openRepeat: null };
+  const clearAndReset = () => {
+    setBoardMood("idle");
+    reset();
+  };
+  const actions = (
+    <ActionBar>
+      <RobotSend robot={robot} program={editor.blocks} disabled={busy} />
+      <button className="btn btn-primary" type="button" disabled={busy || editor.blocks.length === 0} onClick={execute}>
+        <Icon name="play" /> Ejecutar
+      </button>
+    </ActionBar>
+  );
+
   return (
     <div className="game has-action-bar">
-      <div className="stack">
+      <section className="workspace card" aria-label="Espacio de trabajo">
         <div className="play-goal">
           <h1 tabIndex={-1} ref={focusTitle}>
             {/[.?!]$/.test(challenge.title) ? challenge.title : `${challenge.title}.`}
           </h1>{" "}
           {INSTRUCTION[challenge.kind]}
         </div>
+
+        {challenge.kind === "predict" ? (
+          <>
+            <BlockEditor policy={policy} state={readOnlyProgram} dispatch={() => undefined} disabled readOnly active={highlight} />
+            <ActionBar>
+              <button className="btn btn-primary" type="button" disabled={busy || !picked} onClick={checkPick}>
+                <Icon name="check" /> {picked ? "Comprobar" : "Toca una casilla"}
+              </button>
+            </ActionBar>
+          </>
+        ) : challenge.level === "inicial" ? (
+          <InitialProgramEditor policy={policy} state={editor} dispatch={dispatch} disabled={busy} active={highlight} onExecute={execute} onClear={clearAndReset}>
+            {actions}
+          </InitialProgramEditor>
+        ) : (
+          <>
+            <BlockEditor policy={policy} state={editor} dispatch={dispatch} disabled={busy} active={highlight} onClear={clearAndReset} />
+            {challenge.kind === "efficient" && (
+              <p className="small" data-over={used > challenge.maxBlocks || undefined}>
+                Bloques: <strong>{used}</strong> de {challenge.maxBlocks} como máximo
+              </p>
+            )}
+            {actions}
+          </>
+        )}
+        {challenge.kind === "efficient" && challenge.level === "inicial" && (
+          <p className="small" data-over={used > challenge.maxBlocks || undefined}>
+            Bloques: <strong>{used}</strong> de {challenge.maxBlocks} como máximo
+          </p>
+        )}
+      </section>
+
+      <aside className="board-panel card" aria-label="Tablero">
+        <h2>{topic.place}</h2>
         <Board
           map={challenge.map}
           robot={runner.robot}
@@ -209,65 +258,16 @@ function Play({ challenge, onSolved }: { challenge: Challenge; onSolved: (stats:
           topic={challenge.topic}
           {...(challenge.kind === "predict" && !busy ? { onPick: setPicked, picked } : { picked })}
         />
-      </div>
-      <div className="stack">
-        <Guide mood={guide.mood} message={guide.message}>
-          <button className="btn btn-sm" type="button" onClick={askHint} disabled={busy || hints >= challenge.hints.length}>
-            <Icon name="lightbulb" size={16} /> {hints >= challenge.hints.length ? "Ya usaste las 3 pistas" : `Pedir pista (${hints} de 3)`}
-          </button>
-        </Guide>
+        <p className="small muted">
+          Nivel {LEVEL_INFO[challenge.level].name} · {challenge.map.rows * challenge.map.cols} casillas
+        </p>
+      </aside>
 
-        {challenge.kind === "predict" ? (
-          <>
-            <BlockEditor policy={policy} state={{ blocks: challenge.given, openRepeat: null }} dispatch={() => undefined} disabled readOnly active={highlight} />
-            <ActionBar>
-              <button className="btn btn-primary" type="button" disabled={busy || !picked} onClick={checkPick}>
-                <Icon name="check" /> {picked ? "Comprobar" : "Toca una casilla"}
-              </button>
-            </ActionBar>
-          </>
-        ) : (
-          <>
-            {challenge.level === "inicial" ? (
-              <InitialProgramEditor
-                  policy={policy}
-                  state={editor}
-                  dispatch={dispatch}
-                  disabled={busy}
-                  active={highlight}
-                  onExecute={execute}
-                  onClear={() => {
-                    setBoardMood("idle");
-                    reset();
-                  }}
-                />
-            ) : (
-              <BlockEditor
-                policy={policy}
-                state={editor}
-                dispatch={dispatch}
-                disabled={busy}
-                active={highlight}
-                onClear={() => {
-                  setBoardMood("idle");
-                  reset();
-                }}
-              />
-            )}
-            {challenge.kind === "efficient" && (
-              <p className="small" data-over={used > challenge.maxBlocks || undefined}>
-                Bloques: <strong>{used}</strong> de {challenge.maxBlocks} como máximo
-              </p>
-            )}
-            <ActionBar>
-              <RobotSend robot={robot} program={editor.blocks} disabled={busy} />
-              <button className="btn btn-primary" type="button" disabled={busy || editor.blocks.length === 0} onClick={execute}>
-                <Icon name="play" /> Ejecutar
-              </button>
-            </ActionBar>
-          </>
-        )}
-      </div>
+      <Guide mood={guide.mood} message={guide.message}>
+        <button className="btn btn-sm" type="button" onClick={askHint} disabled={busy || hints >= challenge.hints.length}>
+          <Icon name="lightbulb" size={16} /> {hints >= challenge.hints.length ? "Ya usaste las 3 pistas" : `Pedir pista (${hints} de 3)`}
+        </button>
+      </Guide>
     </div>
   );
 }

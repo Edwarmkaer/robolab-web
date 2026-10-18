@@ -1313,17 +1313,134 @@ textarea.input {
   min-height: 72px;
 }
 
+/* El juego: a la izquierda el espacio de trabajo (consigna, secuencia, cámara, Ejecutar y piezas); a la derecha el tablero. */
 .game {
   display: grid;
-  gap: 16px;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 380px);
+  gap: 20px;
+  grid-template-columns: minmax(0, 1fr) 340px;
   align-items: start;
+}
+
+.workspace {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+}
+
+.board-panel {
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+  padding: 18px;
+}
+
+.board-panel h2 {
+  justify-self: start;
+  margin: 0;
+  font-size: 1.4rem;
+  text-transform: uppercase;
+}
+
+.board-panel .board {
+  width: 100%;
 }
 
 @media (max-width: 860px) {
   .game {
     grid-template-columns: 1fr;
   }
+
+  /* En el celular lo primero que se ve es el tablero: ahí está el robot y la estrella. */
+  .board-panel {
+    order: -1;
+  }
+}
+
+/* Programar en Inicial: la secuencia y la cámara van en un lienzo; «Ejecutar» y las piezas, debajo. */
+.program-workspace {
+  display: grid;
+  gap: 14px;
+}
+
+.workspace-canvas {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(0, 1fr) 250px;
+  align-items: start;
+  padding: 16px;
+  border: 2px solid var(--c-ink);
+  border-radius: var(--radius);
+  background: var(--c-surface);
+}
+
+.workspace-canvas .program {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.workspace-canvas .vision-controls {
+  gap: 8px;
+  padding: 12px;
+  box-shadow: var(--shadow-sm);
+}
+
+@media (max-width: 860px) {
+  .workspace-canvas {
+    grid-template-columns: 1fr;
+  }
+
+  /* La cámara es opcional: en el celular ocupa poco para que las piezas queden cerca. */
+  .workspace-canvas .vision-camera {
+    aspect-ratio: 16 / 7;
+  }
+}
+
+/* La bandeja de piezas: un panel amarillo claro, como en el diseño. */
+.program-workspace > .stack-sm:last-child {
+  padding: 14px;
+  border: 3px solid var(--c-ink);
+  border-radius: var(--radius-lg);
+  background: var(--c-surface-2);
+}
+
+/* El gesto de la pieza: solo el emoji, abajo a la izquierda. El nombre va en el ⓘ. */
+.piece-gesture {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 2px solid var(--c-ink);
+  border-radius: 50%;
+  background: var(--c-surface);
+  font-size: 0.8rem;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* La pieza del gesto que la cámara está viendo. */
+.block-btn[data-current] {
+  background: var(--c-action);
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow);
+}
+
+/* «Ejecutar» también tiene su gesto (el pulgar), junto al botón de la cámara. */
+.vision-thumb {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--c-ink);
+  border-radius: 50%;
+  background: var(--c-surface);
+  font-size: 1.2rem;
+  line-height: 1;
 }
 
 .progress-dots {
@@ -1399,16 +1516,6 @@ textarea.input {
 }
 
 /* Cámara de Inicial: conserva los tokens y el editor común. */
-.vision-modes {
-  display: flex;
-  gap: 4px;
-}
-
-.vision-modes .btn[aria-pressed="true"] {
-  background: var(--c-action);
-  color: var(--c-action-ink);
-}
-
 .vision-controls {
   display: grid;
   gap: 12px;
@@ -1467,60 +1574,6 @@ textarea.input {
   width: 100%;
   height: 10px;
   accent-color: var(--c-brand);
-}
-
-/* Guía de gestos: solo el gesto y la pieza que agrega. El nombre va en el ⓘ (PieceFrame). */
-.vision-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.gesture-tile {
-  display: grid;
-  place-items: center;
-  align-content: center;
-  gap: 2px;
-  width: 62px;
-  height: 74px;
-  border-radius: var(--radius);
-  border: 2px solid var(--c-line);
-  background: var(--c-surface);
-}
-
-.gesture-tile[data-current] {
-  border-color: var(--c-brand);
-  background: var(--c-brand-soft);
-}
-
-.gesture-emoji {
-  font-size: 1.9rem;
-  line-height: 1;
-}
-
-.gesture-piece {
-  width: 26px;
-  height: 22px;
-  object-fit: contain;
-}
-
-@media (max-width: 640px) {
-  .vision-legend {
-    gap: 6px;
-  }
-
-  .gesture-tile {
-    width: 58px;
-    height: 70px;
-  }
-}
-
-/* El ⓘ de la cámara queda a la derecha del botón sin pisar su texto. */
-.piece[data-wide] > .btn {
-  padding-right: 28px;
 }
 
 .block-btn {

@@ -3,7 +3,7 @@ import { cleanup, fireEvent, render, screen, within } from "@testing-library/rea
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { move } from "@robolab/backend/domain/game/program";
 import { policyFor } from "@robolab/backend/domain/game/levels";
-import { BlockEditor } from "./BlockEditor";
+import { BlockEditor, PieceTray } from "./BlockEditor";
 
 afterEach(cleanup);
 
@@ -31,7 +31,7 @@ describe("editor de bloques", () => {
 
   it("la paleta muestra las piezas del nivel y la secuencia vacía deja casillas punteadas para llenar", () => {
     render(<BlockEditor policy={policyFor("inicial")} state={{ blocks: [], openRepeat: null }} dispatch={() => undefined} disabled={false} />);
-    const palette = screen.getByRole("group", { name: "Pasos" });
+    const palette = screen.getByRole("group", { name: "Piezas" });
     const pieces = within(palette).getAllByRole("button");
     expect(pieces.map((b) => b.getAttribute("aria-label"))).toEqual(["Avanzar", "Retroceder", "Girar a la izquierda", "Girar a la derecha"]);
     expect(pieces.map((b) => b.getAttribute("data-piece"))).toEqual(["FORWARD", "BACKWARD", "TURN_LEFT", "TURN_RIGHT"]);
@@ -53,7 +53,7 @@ describe("editor de bloques", () => {
         disabled={false}
       />,
     );
-    const palette = screen.getByRole("group", { name: "Pasos" });
+    const palette = screen.getByRole("group", { name: "Piezas" });
     expect(within(palette).getByRole("button", { name: "Retroceder" }).getAttribute("data-piece")).toBe("BACKWARD");
     expect(within(palette).getByRole("button", { name: "Repetir" }).getAttribute("data-piece")).toBe("repeat");
     // El primer elemento es el bloque Repetir; adentro lleva su propia lista.
@@ -67,7 +67,7 @@ describe("editor de bloques", () => {
 describe("piezas sin texto: solo ícono, con su nombre en un ícono de información", () => {
   it("las piezas de la paleta no tienen texto visible; el nombre va en el aria-label y en la etiqueta del ícono (i)", () => {
     render(<BlockEditor policy={policyFor("primaria")} state={{ blocks: [], openRepeat: null }} dispatch={() => undefined} disabled={false} />);
-    const palette = screen.getByRole("group", { name: "Pasos" });
+    const palette = screen.getByRole("group", { name: "Piezas" });
     const buttons = within(palette).getAllByRole("button");
     expect(buttons.map((b) => b.getAttribute("aria-label"))).toEqual(["Avanzar", "Retroceder", "Girar a la izquierda", "Girar a la derecha", "Repetir"]);
     for (const button of buttons) {
@@ -126,5 +126,43 @@ describe("piezas sin texto: solo ícono, con su nombre en un ícono de informaci
 
     fireEvent.blur(button);
     expect(frame.getAttribute("data-tip-dismissed")).toBeNull();
+  });
+
+  describe("bandeja de piezas con gestos", () => {
+    const GESTURES = {
+      FORWARD: { emoji: "☝️", prompt: "Apunta arriba" },
+      BACKWARD: { emoji: "👇", prompt: "Apunta abajo" },
+      TURN_LEFT: { emoji: "👈", prompt: "Apunta a la izquierda" },
+      TURN_RIGHT: { emoji: "👉", prompt: "Apunta a la derecha" },
+    } as const;
+    const tray = (extra: { currentCommand?: "FORWARD" | null } = {}) =>
+      render(<PieceTray policy={policyFor("inicial")} state={{ blocks: [], openRepeat: null }} dispatch={() => undefined} disabled={false} gestures={GESTURES} {...extra} />);
+
+    it("cada pieza lleva su gesto como insignia (solo el emoji) y el ⓘ dice el nombre y el gesto", () => {
+      tray();
+      const group = screen.getByRole("group", { name: "Piezas" });
+      const frames = [...group.querySelectorAll(".piece")];
+      expect(frames.map((f) => f.querySelector(".piece-gesture")?.textContent)).toEqual(["☝️", "👇", "👈", "👉"]);
+      expect(frames.every((f) => f.querySelector(".piece-gesture")?.getAttribute("aria-hidden") === "true")).toBe(true);
+      const tip = frames[3]!.querySelector(".piece-tip")!;
+      expect(tip.textContent).toContain("Girar a la derecha");
+      expect(tip.querySelector(".piece-tip-detail")?.textContent).toBe("Apunta a la derecha");
+    });
+
+    it("el nombre accesible de la pieza no cambia por la insignia", () => {
+      tray();
+      expect(screen.getAllByRole("button").map((b) => b.getAttribute("aria-label"))).toEqual(["Avanzar", "Retroceder", "Girar a la izquierda", "Girar a la derecha"]);
+    });
+
+    it("resalta la pieza del gesto que la cámara está viendo", () => {
+      tray({ currentCommand: "FORWARD" });
+      const flags = screen.getAllByRole("button").map((b) => b.hasAttribute("data-current"));
+      expect(flags).toEqual([true, false, false, false]);
+    });
+
+    it("sin gestos (Primaria, retos viejos) no hay insignias", () => {
+      render(<PieceTray policy={policyFor("primaria")} state={{ blocks: [], openRepeat: null }} dispatch={() => undefined} disabled={false} />);
+      expect(document.querySelector(".piece-gesture")).toBeNull();
+    });
   });
 });

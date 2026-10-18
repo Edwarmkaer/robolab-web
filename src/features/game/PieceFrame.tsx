@@ -6,11 +6,8 @@ type Props = {
   readonly label: string;
   /** Segunda línea de la etiqueta (por ejemplo, qué hace el gesto). */
   readonly detail?: string;
-  /** Muestra la etiqueta aunque no haya mouse: en tablet y celular se abre al tocar. */
-  readonly open?: boolean;
   /** Etiqueta más ancha, para explicaciones de una frase. */
   readonly wide?: boolean;
-  readonly onClick?: () => void;
   readonly children: ReactNode;
   /** `li` para las piezas de la secuencia (viven dentro de una lista). */
   readonly as?: "div" | "li";
@@ -24,15 +21,13 @@ type Props = {
  * repetirle el nombre al lector de pantalla ni sumar paradas de Tab. Escape
  * esconde la etiqueta sin mover el foco.
  */
-export function PieceFrame({ label, detail, open, wide, onClick, children, as: Tag = "div" }: Props) {
+export function PieceFrame({ label, detail, wide, children, as: Tag = "div" }: Props) {
   const [dismissed, setDismissed] = useState(false);
   return (
     <Tag
       className="piece"
       data-tip-dismissed={dismissed || undefined}
-      data-tip-open={open || undefined}
       data-wide={wide || undefined}
-      onClick={onClick}
       onKeyDown={(e) => e.key === "Escape" && setDismissed(true)}
       onMouseLeave={() => setDismissed(false)}
       onBlur={() => setDismissed(false)}

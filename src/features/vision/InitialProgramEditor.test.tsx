@@ -33,21 +33,24 @@ function sample(name: string, start: number, duration = 800) {
 function release(start: number) {
   act(() => { for (let t = start; t <= start + 400; t += 100) session.onSample?.({ name: "", score: 0, hands: 0 }, t); });
 }
+const activate = () => fireEvent.click(screen.getByRole("button", { name: "Activar cámara" }));
+const sequence = () => within(screen.getByRole("list", { name: "Tu secuencia" }));
 
-describe("programar Inicial con gestos", () => {
-  it("empieza con botones; la cámara es opcional y no arranca sola", () => {
+describe("programar Inicial: piezas y gestos en el mismo lugar", () => {
+  it("no hay que elegir un modo: las piezas están a la vista y la cámara es opcional y no arranca sola", () => {
     render(<Harness />);
+    expect(screen.queryByRole("button", { name: "Gestos" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Botones" })).toBeNull();
     expect(session.start).not.toHaveBeenCalled();
-    expect(screen.getByRole("button", { name: "Botones" }).getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByRole("button", { name: "Activar cámara" })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Avanzar" }));
     expect(screen.getByRole("button", { name: /Paso 1: Avanzar/ })).toBeTruthy();
   });
 
-  it("muestra los bloques acumulados y confirma solo el programa visible", () => {
+  it("con la cámara encendida, los gestos agregan las mismas piezas y el pulgar ejecuta el programa visible", () => {
     const onExecute = vi.fn();
     render(<Harness onExecute={onExecute} />);
-    fireEvent.click(screen.getByRole("button", { name: "Gestos" }));
-    fireEvent.click(screen.getByRole("button", { name: "Activar cámara" }));
+    activate();
     release(0);
     sample("Pointing_Up", 500);
     expect(screen.getByRole("button", { name: /Paso 1: Avanzar/ })).toBeTruthy();
@@ -66,109 +69,79 @@ describe("programar Inicial con gestos", () => {
     expect(onExecute).toHaveBeenCalledOnce();
   });
 
+  it("se pueden mezclar: una pieza tocada y otra por gesto quedan en la misma secuencia", () => {
+    render(<Harness />);
+    fireEvent.click(screen.getByRole("button", { name: "Girar a la izquierda" }));
+    activate();
+    release(0);
+    sample("Pointing_Up", 500);
+    expect(sequence().getAllByRole("button").map((b) => b.getAttribute("aria-label"))).toEqual([
+      "Paso 1: Girar a la izquierda. Toca para quitar.",
+      "Paso 2: Avanzar. Toca para quitar.",
+    ]);
+  });
+
   it("un pulgar sostenido nunca ejecuta un programa vacío", () => {
     const onExecute = vi.fn();
     render(<Harness onExecute={onExecute} />);
-    fireEvent.click(screen.getByRole("button", { name: "Gestos" }));
-    fireEvent.click(screen.getByRole("button", { name: "Activar cámara" }));
+    activate();
     release(0);
     sample("Thumb_Up", 500, 1200);
     expect(onExecute).not.toHaveBeenCalled();
   });
 
-  it("ignora la cámara durante la ejecución y la libera al cambiar a botones", () => {
+  it("ignora la cámara durante la ejecución y la libera al apagarla", () => {
     const view = render(<Harness />);
-    fireEvent.click(screen.getByRole("button", { name: "Gestos" }));
-    fireEvent.click(screen.getByRole("button", { name: "Activar cámara" }));
+    activate();
     view.rerender(<Harness disabled />);
     release(0);
     sample("Pointing_Up", 500);
-    expect(within(screen.getByRole("list", { name: "Tu secuencia" })).queryAllByRole("listitem")).toHaveLength(0);
+    expect(sequence().queryAllByRole("listitem")).toHaveLength(0);
     view.rerender(<Harness />);
-    fireEvent.click(screen.getByRole("button", { name: "Botones" }));
+    fireEvent.click(screen.getByRole("button", { name: "Apagar cámara" }));
     expect(session.stop).toHaveBeenCalledOnce();
+    expect(screen.getByRole("button", { name: "Activar cámara" })).toBeTruthy();
   });
-});
 
-describe("guía de gestos sin texto: el nombre vive en el botón de información", () => {
-  const openGestures = () => {
+  it("apagar la cámara no pierde el programa", () => {
     render(<Harness />);
-    fireEvent.click(screen.getByRole("button", { name: "Gestos" }));
-    return within(screen.getByRole("list", { name: "Guía de gestos" })).getAllByRole("listitem");
-  };
-
-  it("son cinco fichas; cada una dice por escrito solo al lector de pantalla qué gesto es y qué hace", () => {
-    const items = openGestures();
-    expect(items).toHaveLength(5);
-    const spoken = items.map((item) => item.querySelector(".sr-only")?.textContent);
-    expect(spoken).toEqual([
-      "Apunta arriba: Avanzar",
-      "Apunta abajo: Retroceder",
-      "Apunta a la izquierda: Girar a la izquierda",
-      "Apunta a la derecha: Girar a la derecha",
-      "Mantén el pulgar arriba: Confirmar y ejecutar",
-    ]);
+    fireEvent.click(screen.getByRole("button", { name: "Avanzar" }));
+    activate();
+    fireEvent.click(screen.getByRole("button", { name: "Apagar cámara" }));
+    expect(screen.getByRole("button", { name: /Paso 1: Avanzar/ })).toBeTruthy();
   });
 
-  it("a la vista solo hay el gesto y la pieza que agrega: ningún texto de ayuda fijo", () => {
-    const items = openGestures();
-    expect(document.querySelector(".vision-legend strong")).toBeNull();
-    for (const item of items) {
-      const visible = [...item.querySelectorAll(".gesture-tile *")].filter((n) => n.children.length === 0 && n.textContent?.trim() && !n.classList.contains("sr-only"));
-      // Lo único con texto es el emoji de la mano, escondido para el lector de pantalla.
-      expect(visible.every((n) => n.closest("[aria-hidden='true']"))).toBe(true);
-    }
-    expect(screen.queryByText(/recoge los otros dedos\. Sigue/)).toBeNull();
-  });
+  describe("el gesto de cada pieza va en la bandeja, sin texto", () => {
+    it("cada pieza lleva su gesto como insignia y el ⓘ explica cómo hacerlo", () => {
+      render(<Harness />);
+      const frames = [...screen.getByRole("group", { name: "Piezas" }).querySelectorAll(".piece")];
+      expect(frames.map((f) => f.querySelector(".piece-gesture")?.textContent)).toEqual(["☝️", "👇", "👈", "👉"]);
+      expect(frames[0]!.querySelector(".piece-tip-detail")?.textContent).toBe("Apunta arriba");
+    });
 
-  it("cada ficha lleva su ⓘ con el nombre del gesto y de la acción", () => {
-    const items = openGestures();
-    expect(items.every((item) => item.querySelector(".piece-info"))).toBe(true);
-    const tip = items[3]!.querySelector(".piece-tip")!;
-    expect(tip.textContent).toContain("Apunta a la derecha");
-    expect(tip.querySelector(".piece-tip-detail")?.textContent).toBe("Girar a la derecha");
-    expect(tip.getAttribute("aria-hidden")).toBe("true");
-  });
+    it("la pieza del gesto que la cámara está viendo se resalta", () => {
+      render(<Harness />);
+      activate();
+      release(0);
+      act(() => { for (let t = 500; t <= 700; t += 100) session.onSample?.({ name: "Pointing_Right", score: 0.95, hands: 1 }, t); });
+      const flags = within(screen.getByRole("group", { name: "Piezas" })).getAllByRole("button").map((b) => b.hasAttribute("data-current"));
+      expect(flags).toEqual([false, false, false, true]);
+    });
 
-  it("tocar una ficha abre su información (en tablet no hay mouse), tocar otra cambia, y Escape o tocar fuera la cierra", () => {
-    const items = openGestures();
-    const open = () => items.map((i) => i.hasAttribute("data-tip-open"));
-    fireEvent.click(items[0]!);
-    expect(open()).toEqual([true, false, false, false, false]);
-    fireEvent.click(items[2]!);
-    expect(open()).toEqual([false, false, true, false, false]);
-    fireEvent.click(items[2]!);
-    expect(open()).toEqual([false, false, false, false, false]);
-    fireEvent.click(items[1]!);
-    fireEvent.keyDown(document, { key: "Escape" });
-    expect(open()).toEqual([false, false, false, false, false]);
-    fireEvent.click(items[4]!);
-    fireEvent.pointerDown(document.body);
-    expect(open()).toEqual([false, false, false, false, false]);
-  });
-
-  it("la ficha del gesto que la cámara está viendo se resalta", () => {
-    const items = openGestures();
-    fireEvent.click(screen.getByRole("button", { name: "Activar cámara" }));
-    release(0);
-    act(() => { for (let t = 500; t <= 700; t += 100) session.onSample?.({ name: "Pointing_Right", score: 0.95, hands: 1 }, t); });
-    const current = items.map((i) => i.querySelector(".gesture-tile")?.hasAttribute("data-current"));
-    expect(current).toEqual([false, false, false, true, false]);
-  });
-
-  it("ya no hay un segundo botón «Confirmar y ejecutar»: el pulgar y «Ejecutar» hacen lo mismo", () => {
-    openGestures();
-    expect(screen.queryByRole("button", { name: "Confirmar y ejecutar" })).toBeNull();
+    it("el pulgar (ejecutar) no es una pieza: «Ejecutar» queda fuera y se avisa con una insignia aparte", () => {
+      render(<Harness />);
+      expect(screen.queryByRole("button", { name: "Confirmar y ejecutar" })).toBeNull();
+      expect(screen.getByText("👍")).toBeTruthy();
+    });
   });
 
   it("las explicaciones de la cámara (cómo apuntar, privacidad) van en un solo ⓘ, y el lector de pantalla las oye una vez", () => {
-    openGestures();
+    render(<Harness />);
     const copies = screen.getAllByText(/No se graba ni se envía/);
     expect(copies).toHaveLength(2);
     expect(copies.filter((n) => n.classList.contains("sr-only"))).toHaveLength(1);
     expect(copies.filter((n) => n.closest(".piece-tip"))).toHaveLength(1);
-    const button = screen.getByRole("button", { name: "Activar cámara" });
-    const describedBy = button.getAttribute("aria-describedby")!;
+    const describedBy = screen.getByRole("button", { name: "Activar cámara" }).getAttribute("aria-describedby")!;
     expect(document.getElementById(describedBy)?.textContent).toMatch(/recoge los otros dedos/);
   });
 });

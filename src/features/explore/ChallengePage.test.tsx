@@ -39,7 +39,6 @@ async function solvePaseo() {
     </MemoryRouter>,
   );
   fireEvent.click(screen.getByRole("button", { name: /empezar el reto/i }));
-  fireEvent.click(await screen.findByRole("button", { name: "Botones" }));
   vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "Date"] });
   for (let i = 0; i < 3; i++) fireEvent.click(screen.getByRole("button", { name: /^Avanzar$/ }));
   fireEvent.click(screen.getByRole("button", { name: /ejecutar/i }));

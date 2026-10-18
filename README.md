@@ -82,9 +82,11 @@ aquí como el paquete npm `@robolab/backend`.
 
 ### Programar con gestos en Inicial
 
-En los retos abiertos de Inicial que permiten editar el programa aparece el modo
-**Gestos** (por defecto se programa con **Botones**). Elige **Gestos**, luego
-**Activar cámara**, permite el acceso y muestra una sola mano:
+En los retos abiertos de Inicial que permiten editar el programa, las piezas
+(avanzar, retroceder y los dos giros) están siempre a la vista en la bandeja
+**Piezas**: se tocan, o se piden con el gesto que cada una lleva como insignia.
+No hay que elegir un modo. La cámara es opcional: dentro del espacio de trabajo,
+**Activar cámara** la enciende, permite el acceso y se muestra una sola mano:
 
 | Gesto | Acción |
 | --- | --- |
@@ -95,9 +97,9 @@ En los retos abiertos de Inicial que permiten editar el programa aparece el modo
 | 👍 Pulgar arriba | Confirmar y ejecutar el programa visible |
 
 Mantén el gesto hasta llenar la barra (0,8 segundos para bloques; 1,2 para
-confirmar). Retira la mano durante al menos 0,4 segundos entre gestos, también
+confirmar); la pieza del gesto que la cámara ve se resalta en la bandeja. Retira la mano durante al menos 0,4 segundos entre gestos, también
 para repetir el mismo bloque. Puedes quitar un bloque tocándolo, borrar el
-programa o cambiar a **Botones** sin perder la secuencia. Un programa vacío no
+programa o apagar la cámara sin perder la secuencia. Un programa vacío no
 se ejecuta y la entrada queda en pausa mientras Kusi se mueve.
 
 Usa el índice extendido con los otros dedos recogidos. Las cuatro direcciones
@@ -112,16 +114,16 @@ Retroceder en Inicial requiere el cambio compartido del
 El paquete queda fijado al commit de ese PR para probarlo. Antes de usarlo en
 producción, hay que fusionar y desplegar ese cambio del backend.
 
-La cámara se activa solo al pedirla; se apaga al salir del reto, cambiar a
-Botones, ocultar la pestaña o fallar la captura. No se pide micrófono, no se
+La cámara se activa solo al pedirla; se apaga al salir del reto, al apagarla,
+al ocultar la pestaña o si falla la captura. No se pide micrófono, no se
 graba vídeo y las imágenes se procesan en el equipo con MediaPipe en un worker.
 El modelo y WebAssembly se descargan de Google y jsDelivr al activar la cámara;
 se necesita internet para esa carga. Las versiones están fijadas. HTTPS (o
 localhost) es obligatorio. Si se deniega el permiso o falla el modelo, sigue
-disponible el modo Botones.
+disponible tocar las piezas.
 
 **Para probar:** abre `/reto/inicial-paseo`, empieza el reto y arma una secuencia
-con la cámara. Revisa los bloques y confirma con 👍 o con el botón de confirmación.
+con la cámara. Revisa los bloques y confirma con 👍 o con el botón **Ejecutar**.
 Prueba también `/reto/inicial-gira` para los giros. Los retos de predicción,
 Primaria mantienen su entrada habitual.
 
