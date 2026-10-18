@@ -11,19 +11,18 @@ import { LabResultsPage } from "../lab/LabResultsPage";
 import { TeacherAuth } from "./auth/TeacherAuth";
 import { ClassDetailPage } from "./classes/ClassDetailPage";
 import { ClassesPage } from "./classes/ClassesPage";
-import { ResultsPage } from "./classes/ResultsPage";
-import { EvaluationDetail } from "./evaluations/EvaluationDetail";
-import { EvaluationForm } from "./evaluations/EvaluationForm";
-import { EvaluationsPage } from "./evaluations/EvaluationsPage";
 import { HomePage } from "./home/HomePage";
 import { ProgressPage } from "./progress/ProgressPage";
+import { LegacyResultsRedirect } from "./retos/LegacyRoutes";
 import { NewChallengePage } from "./retos/NewChallengePage";
+import { RetoDetailPage } from "./retos/RetoDetailPage";
+import { RetosPage } from "./retos/RetosPage";
 import "./teacher.css";
 
 const TABS: readonly { to: string; label: string; icon: IconName; end: boolean }[] = [
   { to: "/docente", label: "Inicio", icon: "home", end: true },
   { to: "/docente/clases", label: "Mis clases", icon: "users", end: false },
-  { to: "/docente/evaluaciones", label: "Evaluaciones", icon: "clipboard", end: false },
+  { to: "/docente/retos", label: "Retos", icon: "clipboard", end: false },
   { to: "/docente/progreso", label: "Progreso", icon: "chart", end: false },
 ];
 
@@ -79,11 +78,11 @@ function TeacherShell() {
           <Route path="clases/nueva" element={<ClassesPage creating />} />
           <Route path="clases/:classroomId" element={<ClassDetailPage tab="students" />} />
           <Route path="clases/:classroomId/retos" element={<ClassDetailPage tab="challenges" />} />
-          <Route path="clases/:classroomId/retos/:assignmentId" element={<ResultsPage />} />
+          <Route path="clases/:classroomId/retos/:assignmentId" element={<LegacyResultsRedirect />} />
+          <Route path="retos" element={<RetosPage />} />
           <Route path="retos/nuevo" element={<NewChallengePage />} />
-          <Route path="evaluaciones" element={<EvaluationsPage />} />
-          <Route path="evaluaciones/nueva" element={<EvaluationForm />} />
-          <Route path="evaluaciones/:evaluationId" element={<EvaluationDetail />} />
+          <Route path="retos/:assignmentId" element={<RetoDetailPage />} />
+          <Route path="evaluaciones/*" element={<Navigate to="/docente/retos" replace />} />
           <Route path="progreso" element={<ProgressPage />} />
           <Route path="laboratorio/nueva" element={<LabCreatePage />} />
           <Route path="laboratorio/:missionId/resultados" element={<LabResultsPage />} />

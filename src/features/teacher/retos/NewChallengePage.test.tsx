@@ -96,7 +96,7 @@ describe("creador de retos (T3 → T4 → T6 → T7)", () => {
     fireEvent.change(screen.getByLabelText(/^Clase$/), { target: { value: "c1" } });
     fireEvent.click(button(/^asignar$/i));
     await waitFor(() => expect(assign).toHaveBeenCalledWith({ assignmentId: "asg-1", classroomId: "c1" }));
-    expect((screen.getByRole("link", { name: /ver en primaria/i }) as HTMLAnchorElement).getAttribute("href")).toBe("/docente/clases/c1/retos");
+    expect((screen.getByRole("link", { name: /ver en primaria/i }) as HTMLAnchorElement).getAttribute("href")).toBe("/docente/retos/asg-1");
   });
 
   it("«Solo mi clase» pide la clase antes de publicar y la manda al crear", async () => {

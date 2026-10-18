@@ -10,15 +10,23 @@ import { Icon } from "../../../shared/ui/Icon";
  * toda la aplicación. Quien lo usa pone `key` con el id para que cambiar de
  * clase vuelva a intentar.
  */
-export function NotFoundBoundary({ children }: { children: ReactNode }) {
+export function NotFoundBoundary({
+  children,
+  backTo = "/docente/clases",
+  backLabel = "Volver a mis clases",
+}: {
+  children: ReactNode;
+  backTo?: string;
+  backLabel?: string;
+}) {
   return (
     <ErrorBoundary
       fallback={(message) => (
         <div className="empty">
           <Icon name="alert" size={32} />
           <p role="alert">{message}</p>
-          <Link className="btn" to="/docente/clases">
-            Volver a mis clases
+          <Link className="btn" to={backTo}>
+            {backLabel}
           </Link>
         </div>
       )}

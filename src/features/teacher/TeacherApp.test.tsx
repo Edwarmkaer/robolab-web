@@ -8,8 +8,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const answers: Record<string, unknown> = {
   "users:me": { name: "Ana Pérez", email: "ana@colegio.edu.pe" },
   "classrooms:listMine": [],
-  "evaluations:listForDate": [],
-  "evaluations:listMine": [],
+  "assignments:listMine": [],
 };
 const signOut = vi.fn();
 
@@ -48,8 +47,8 @@ describe("armazón del docente: landmark, título de página y encabezado", () =
   it.each([
     ["/docente", "Inicio · RoboLab", "Hola"],
     ["/docente/clases", "Mis clases · RoboLab", "Mis clases"],
-    ["/docente/evaluaciones", "Evaluaciones · RoboLab", "Evaluaciones"],
-    ["/docente/evaluaciones/nueva", "Nueva evaluación · RoboLab", "Nueva evaluación"],
+    ["/docente/retos", "Retos · RoboLab", "Retos"],
+    ["/docente/evaluaciones", "Retos · RoboLab", "Retos"],
     ["/docente/progreso", "Progreso · RoboLab", "Progreso"],
   ])("%s: un <main>, un <h1> y la pestaña dice dónde estás", (path, tab, heading) => {
     renderAt(path);
@@ -58,6 +57,20 @@ describe("armazón del docente: landmark, título de página y encabezado", () =
     expect(h1).toHaveLength(1);
     expect(h1[0]!.textContent).toBe(heading);
     expect(document.title).toBe(tab);
+  });
+
+  it("la pestaña dice Retos (ya no Evaluaciones) y marca dónde estás", () => {
+    renderAt("/docente/retos");
+    const nav = screen.getByRole("navigation", { name: "Secciones del docente" });
+    expect(Array.from(nav.querySelectorAll("a")).map((a) => a.textContent)).toEqual(["Inicio", "Mis clases", "Retos", "Progreso"]);
+    expect(nav.querySelector('a[aria-current="page"]')?.textContent).toBe("Retos");
+    expect(nav.querySelector('a[href="/docente/evaluaciones"]')).toBeNull();
+  });
+
+  it("la pestaña Retos sigue marcada dentro de «Nuevo reto»", () => {
+    renderAt("/docente/retos/nuevo");
+    const nav = screen.getByRole("navigation", { name: "Secciones del docente" });
+    expect(nav.querySelector('a[aria-current="page"]')?.textContent).toBe("Retos");
   });
 
   it("el menú de secciones queda fuera del <main> (es navegación, no contenido)", () => {
