@@ -1,10 +1,12 @@
-import type { Dispatch } from "react";
+import { type Dispatch, useId } from "react";
 import type { EditorAction, EditorState } from "@robolab/backend/domain/game/editor";
 import { COMMANDS, type BlockPath, MAX_REPEAT, MIN_REPEAT } from "@robolab/backend/domain/game/program";
 import type { LevelPolicy } from "@robolab/backend/domain/game/levels";
 import { Icon } from "../../shared/ui/Icon";
+import { IconButton } from "../../shared/ui/IconButton";
 import { speak } from "../student/speech";
-import { BLOCK_LOOK, REPEAT_LOOK } from "./blocks";
+import { BLOCK_LOOK, MIN_SLOTS, REPEAT_LOOK } from "./blocks";
+import "./palette.css";
 
 type Props = {
   readonly policy: LevelPolicy;
@@ -15,11 +17,18 @@ type Props = {
   readonly active?: { path: BlockPath; tone: "active" | "error" } | null;
   /** Solo muestra el programa (retos de predecir): sin paleta y sin quitar bloques. */
   readonly readOnly?: boolean;
+  /** Qué hacer al tocar la papelera además de vaciar la secuencia (por ejemplo, devolver al robot al inicio). */
+  readonly onClear?: () => void;
 };
 
 const samePath = (a: BlockPath, b: BlockPath) => a.length === b.length && a.every((v, i) => v === b[i]);
 
-export function BlockEditor({ policy, state, dispatch, disabled: busy, active, readOnly = false }: Props) {
+/**
+ * Paleta de piezas ("Pasos") y la secuencia que arma el alumno. La secuencia
+ * es una lista real (`<ul>/<li>`) con un botón dentro de cada paso: el lector
+ * de pantalla cuenta los pasos y sabe que cada uno se puede quitar.
+ */
+export function BlockEditor({ policy, state, dispatch, disabled: busy, active, readOnly = false, onClear }: Props) {
   const disabled = busy || readOnly;
   const commands = COMMANDS.filter((c) => policy.palette.has(c));
   const toneOf = (path: BlockPath) => (active && samePath(active.path, path) ? active.tone : undefined);
@@ -29,110 +38,145 @@ export function BlockEditor({ policy, state, dispatch, disabled: busy, active, r
     acc.push(block.kind === "move" ? last + 1 : last);
     return acc;
   }, []);
+  const emptySlots = readOnly ? 0 : Math.max(1, MIN_SLOTS - state.blocks.length);
+  const id = useId();
+  const paletteLabel = `${id}-pasos`;
+  const sequenceLabel = `${id}-secuencia`;
+
+  const clear = () => {
+    dispatch({ type: "clear" });
+    onClear?.();
+  };
 
   return (
-    <div className="stack">
-      <div className="palette" role="group" aria-label="Bloques disponibles" hidden={readOnly}>
-        {commands.map((command) => (
-          <button
-            key={command}
-            type="button"
-            className="block-btn"
-            disabled={disabled}
-            onClick={() => {
-              dispatch({ type: "add", command });
-              speak(BLOCK_LOOK[command].label);
-            }}
-          >
-            <img src={BLOCK_LOOK[command].icon} alt="" />
-            {BLOCK_LOOK[command].label}
-          </button>
-        ))}
-        {policy.palette.has("repeat") && (
-          <button
-            type="button"
-            className="block-btn"
-            disabled={disabled || state.openRepeat !== null}
-            onClick={() => dispatch({ type: "addRepeat" })}
-          >
-            <img src={REPEAT_LOOK.icon} alt="" />
-            {REPEAT_LOOK.label}
-          </button>
-        )}
-      </div>
-
-      <div className="program" role="list" aria-label={readOnly ? "Programa de Kusi" : "Tu programa"} data-readonly={readOnly || undefined}>
-        {state.blocks.length === 0 && <span className="muted">Toca los bloques para armar tu programa.</span>}
-        {state.blocks.map((block, i) => {
-          if (block.kind === "move") {
-            const stepNumber = stepNumbers[i];
-            return (
+    <div className="stack editor">
+      {!readOnly && (
+        <div className="stack-sm">
+          <span className="editor-label" id={paletteLabel}>
+            Pasos
+          </span>
+          <div className="palette" role="group" aria-labelledby={paletteLabel}>
+            {commands.map((command) => (
               <button
-                key={i}
+                key={command}
                 type="button"
-                role="listitem"
-                className="program-block"
-                data-state={toneOf([i])}
+                className="block-btn"
+                data-piece={command}
                 disabled={disabled}
-                aria-label={`Paso ${stepNumber}: ${BLOCK_LOOK[block.command].label}.${readOnly ? "" : " Toca para quitar."}`}
-                onClick={() => dispatch({ type: "remove", path: [i] })}
+                onClick={() => {
+                  dispatch({ type: "add", command });
+                  speak(BLOCK_LOOK[command].label);
+                }}
               >
-                <span className="step-n">{stepNumber}</span>
-                <img src={BLOCK_LOOK[block.command].icon} alt="" />
+                <img src={BLOCK_LOOK[command].icon} alt="" />
+                <span className="block-label">{BLOCK_LOOK[command].label}</span>
               </button>
-            );
-          }
-          const open = state.openRepeat === i;
-          return (
-            <div key={i} role="listitem" className="repeat-block">
-              <strong className="small">Repetir</strong>
-              <select
-                className="select"
-                style={{ width: 70, minHeight: 36, padding: "4px 8px" }}
-                value={block.times}
-                disabled={disabled}
-                aria-label="Veces"
-                onChange={(e) => dispatch({ type: "setTimes", index: i, times: Number(e.target.value) })}
+            ))}
+            {policy.palette.has("repeat") && (
+              <button
+                type="button"
+                className="block-btn"
+                data-piece="repeat"
+                disabled={disabled || state.openRepeat !== null}
+                onClick={() => dispatch({ type: "addRepeat" })}
               >
-                {Array.from({ length: MAX_REPEAT - MIN_REPEAT + 1 }, (_, k) => k + MIN_REPEAT).map((n) => (
-                  <option key={n} value={n}>
-                    {n}
-                  </option>
-                ))}
-              </select>
-              {block.body.map((child, j) =>
-                child.kind === "move" ? (
+                <img src={REPEAT_LOOK.icon} alt="" />
+                <span className="block-label">{REPEAT_LOOK.label}</span>
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      <div className="stack-sm">
+        <div className="row spread editor-head">
+          <span className="editor-label" id={sequenceLabel}>
+            {readOnly ? "Programa de Kusi" : "Tu secuencia"}
+          </span>
+          {!readOnly && <IconButton icon="trash" label="Borrar la secuencia" disabled={disabled || state.blocks.length === 0} onClick={clear} />}
+        </div>
+        <ul className="program" aria-labelledby={sequenceLabel} data-readonly={readOnly || undefined}>
+          {state.blocks.map((block, i) => {
+            if (block.kind === "move") {
+              const stepNumber = stepNumbers[i];
+              return (
+                <li key={i}>
                   <button
-                    key={j}
                     type="button"
                     className="program-block"
-                    data-state={toneOf([i, j])}
+                    data-piece={block.command}
+                    data-state={toneOf([i])}
                     disabled={disabled}
-                    aria-label={`${BLOCK_LOOK[child.command].label} dentro de repetir.${readOnly ? "" : " Toca para quitar."}`}
-                    onClick={() => dispatch({ type: "remove", path: [i, j] })}
+                    aria-label={`Paso ${stepNumber}: ${BLOCK_LOOK[block.command].label}.${readOnly ? "" : " Toca para quitar."}`}
+                    onClick={() => dispatch({ type: "remove", path: [i] })}
                   >
-                    <img src={BLOCK_LOOK[child.command].icon} alt="" />
+                    <span className="step-n" aria-hidden="true">
+                      {stepNumber}
+                    </span>
+                    <img src={BLOCK_LOOK[block.command].icon} alt="" />
                   </button>
-                ) : null,
-              )}
-              {readOnly ? null : open ? (
-                <button className="btn" type="button" disabled={disabled} onClick={() => dispatch({ type: "closeRepeat" })}>
-                  Cerrar
-                </button>
-              ) : (
-                <button
-                  className="btn btn-ghost"
-                  type="button"
+                </li>
+              );
+            }
+            const open = state.openRepeat === i;
+            return (
+              <li key={i} className="repeat-block" data-piece="repeat">
+                <strong className="small">Repetir</strong>
+                <select
+                  className="select repeat-times"
+                  value={block.times}
                   disabled={disabled}
-                  aria-label="Quitar repetir"
-                  onClick={() => dispatch({ type: "remove", path: [i] })}
+                  aria-label="Veces"
+                  onChange={(e) => dispatch({ type: "setTimes", index: i, times: Number(e.target.value) })}
                 >
-                  <Icon name="x" />
-                </button>
-              )}
-            </div>
-          );
-        })}
+                  {Array.from({ length: MAX_REPEAT - MIN_REPEAT + 1 }, (_, k) => k + MIN_REPEAT).map((n) => (
+                    <option key={n} value={n}>
+                      {n}
+                    </option>
+                  ))}
+                </select>
+                <ul className="repeat-body" aria-label="Dentro de repetir">
+                  {block.body.map((child, j) =>
+                    child.kind === "move" ? (
+                      <li key={j}>
+                        <button
+                          type="button"
+                          className="program-block"
+                          data-piece={child.command}
+                          data-state={toneOf([i, j])}
+                          disabled={disabled}
+                          aria-label={`${BLOCK_LOOK[child.command].label} dentro de repetir.${readOnly ? "" : " Toca para quitar."}`}
+                          onClick={() => dispatch({ type: "remove", path: [i, j] })}
+                        >
+                          <img src={BLOCK_LOOK[child.command].icon} alt="" />
+                        </button>
+                      </li>
+                    ) : null,
+                  )}
+                </ul>
+                {readOnly ? null : open ? (
+                  <button className="btn btn-sm" type="button" disabled={disabled} onClick={() => dispatch({ type: "closeRepeat" })}>
+                    Cerrar
+                  </button>
+                ) : (
+                  <button
+                    className="btn btn-ghost btn-sm"
+                    type="button"
+                    disabled={disabled}
+                    aria-label="Quitar repetir"
+                    onClick={() => dispatch({ type: "remove", path: [i] })}
+                  >
+                    <Icon name="x" />
+                  </button>
+                )}
+              </li>
+            );
+          })}
+          {Array.from({ length: emptySlots }, (_, k) => (
+            <li key={`empty-${k}`} className="slot-empty" aria-hidden="true" />
+          ))}
+        </ul>
+        {!readOnly && state.blocks.length === 0 && <span className="small muted">Toca las piezas para armar tu secuencia.</span>}
       </div>
     </div>
   );

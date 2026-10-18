@@ -204,7 +204,17 @@ function Play({ challenge, onSolved }: { challenge: Challenge; onSolved: (stats:
           </>
         ) : (
           <>
-            <BlockEditor policy={policy} state={editor} dispatch={dispatch} disabled={busy} active={highlight} />
+            <BlockEditor
+              policy={policy}
+              state={editor}
+              dispatch={dispatch}
+              disabled={busy}
+              active={highlight}
+              onClear={() => {
+                setBoardMood("idle");
+                reset();
+              }}
+            />
             {challenge.kind === "efficient" && (
               <p className="small" data-over={used > challenge.maxBlocks || undefined}>
                 Bloques: <strong>{used}</strong> de {challenge.maxBlocks} como máximo
@@ -213,18 +223,6 @@ function Play({ challenge, onSolved }: { challenge: Challenge; onSolved: (stats:
             <div className="row">
               <button className="btn btn-primary" type="button" style={{ flex: 1 }} disabled={busy || editor.blocks.length === 0} onClick={execute}>
                 <Icon name="play" /> Ejecutar
-              </button>
-              <button
-                className="btn"
-                type="button"
-                disabled={busy}
-                onClick={() => {
-                  dispatch({ type: "clear" });
-                  setBoardMood("idle");
-                  reset();
-                }}
-              >
-                <Icon name="rotate" /> Borrar
               </button>
             </div>
             <RobotSend program={editor.blocks} disabled={busy} />

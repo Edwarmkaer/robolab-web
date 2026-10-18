@@ -104,7 +104,17 @@ function StageView({
         )}
       </div>
       <div className="stack">
-        <BlockEditor policy={policy} state={editor} dispatch={dispatch} disabled={runner.running || question !== null} active={highlight} />
+        <BlockEditor
+          policy={policy}
+          state={editor}
+          dispatch={dispatch}
+          disabled={runner.running || question !== null}
+          active={highlight}
+          onClear={() => {
+            setFeedback(null);
+            reset();
+          }}
+        />
         <div className="row">
           <button
             className="btn btn-primary"
@@ -114,18 +124,6 @@ function StageView({
             onClick={onRun}
           >
             <Icon name="play" /> Ejecutar
-          </button>
-          <button
-            className="btn"
-            type="button"
-            disabled={runner.running}
-            onClick={() => {
-              dispatch({ type: "clear" });
-              setFeedback(null);
-              reset();
-            }}
-          >
-            <Icon name="rotate" /> Borrar
           </button>
         </div>
         <RobotSend program={editor.blocks} disabled={runner.running} />

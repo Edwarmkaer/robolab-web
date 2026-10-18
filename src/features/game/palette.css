@@ -1,0 +1,132 @@
+/* Paleta de piezas y secuencia (M4 del Figma): tiles de color, casillas punteadas y barra inferior en el celular. */
+
+.editor-label {
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: var(--c-muted);
+}
+
+.editor-head {
+  min-height: 40px;
+}
+
+.block-btn[data-piece] {
+  color: var(--c-ink);
+}
+
+/* La secuencia es una lista: sin viñetas ni sangría. */
+ul.program,
+ul.repeat-body {
+  list-style: none;
+  margin: 0;
+}
+
+ul.program {
+  align-items: center;
+}
+
+ul.repeat-body {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0;
+}
+
+.repeat-times {
+  width: 70px;
+  min-height: 40px;
+  padding: 4px 8px;
+  font-weight: 800;
+}
+
+.repeat-block[data-piece="repeat"] {
+  border-color: #f0c23a;
+  background: #fff8dc;
+}
+
+.program-block .step-n {
+  z-index: 1;
+}
+
+/* Casillas vacías: el lugar donde van las próximas piezas. */
+.slot-empty {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  border: 2px dashed var(--c-line-strong);
+}
+
+/* Barra de acciones: Robot y Ejecutar. En pantalla ancha es una fila normal. */
+.action-bar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.action-bar > .btn-primary {
+  flex: 1;
+}
+
+@media (max-width: 640px) {
+  .palette {
+    grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+    gap: 8px;
+  }
+
+  .block-btn {
+    min-height: 68px;
+    padding: 6px;
+  }
+
+  .block-btn img {
+    width: 52px;
+    height: 46px;
+  }
+
+  /* En el celular la pieza habla por sí sola; el nombre queda para el lector de pantalla y la voz. */
+  .block-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .program-block,
+  .slot-empty {
+    width: 56px;
+    height: 56px;
+  }
+
+  .program-block img {
+    width: 42px;
+    height: 36px;
+  }
+
+  /* Robot y Ejecutar siempre a mano, al pie de la pantalla. */
+  .action-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 20;
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+    background: var(--c-surface);
+    border-top: 1px solid var(--c-line);
+    box-shadow: 0 -4px 16px rgb(31 36 48 / 8%);
+  }
+
+  .action-bar .btn {
+    min-height: 52px;
+  }
+
+  .game.has-action-bar {
+    padding-bottom: 88px;
+  }
+
+  /* Los avisos no tapan la barra. */
+  body:has(.action-bar) .toasts {
+    bottom: calc(88px + env(safe-area-inset-bottom));
+  }
+}
