@@ -64,6 +64,12 @@ describe("mis clases (T10)", () => {
     expect((screen.getByRole("link", { name: "Ir a la clase" }) as HTMLAnchorElement).getAttribute("href")).toBe("/docente/clases/c1");
   });
 
+  it("el selector de nivel ofrece solo Inicial y Primaria", () => {
+    renderClasses(true);
+    const options = within(screen.getByLabelText("Nivel")).getAllByRole("option").map((o) => o.textContent);
+    expect(options).toEqual(["Inicial", "Primaria"]);
+  });
+
   it("una clase anterior a los códigos pide uno al servidor una sola vez y mientras tanto avisa", () => {
     classes = [{ ...A, joinCode: null }];
     renderClasses();

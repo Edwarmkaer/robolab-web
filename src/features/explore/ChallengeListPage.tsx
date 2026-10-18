@@ -1,6 +1,6 @@
 import { Link, Navigate, useParams } from "react-router-dom";
 import { KIND_LABEL, challengesFor, topicInfo } from "@robolab/backend/domain/explore/challenges";
-import { EDUCATION_LEVELS, type EducationLevel } from "@robolab/backend/domain/game/levels";
+import { ACTIVE_LEVELS, type EducationLevel } from "@robolab/backend/domain/game/levels";
 import { missionsFor } from "@robolab/backend/domain/lab/mission";
 import { Icon } from "../../shared/ui/Icon";
 import { MissionThumb } from "../lab/MissionThumb";
@@ -8,7 +8,7 @@ import { countLabel, openCountFor } from "./catalog";
 import { Breadcrumbs, ExploreLayout, LEVEL_INFO } from "./ExploreLayout";
 import { useExploreProgress } from "./storage";
 
-const isLevel = (value: string): value is EducationLevel => (EDUCATION_LEVELS as readonly string[]).includes(value);
+const isLevel = (value: string): value is EducationLevel => (ACTIVE_LEVELS as readonly string[]).includes(value);
 
 /** Los retos de un tópico y nivel: en Primaria son misiones (tablero con energía); en los demás, retos de bloques. */
 export function ChallengeListPage() {
@@ -30,7 +30,7 @@ export function ChallengeListPage() {
           {isMissions ? "Misiones" : "Retos"} de {topic.name} · {LEVEL_INFO[level].name}
         </h1>
         <div className="segmented" role="group" aria-label="Nivel">
-          {EDUCATION_LEVELS.map((l) =>
+          {ACTIVE_LEVELS.map((l) =>
             openCountFor(topic.id, l) > 0 ? (
               <Link key={l} to={`/explorar/${topic.id}/${l}`} aria-current={l === level ? "page" : undefined} className="segmented-link">
                 {LEVEL_INFO[l].name}

@@ -25,6 +25,12 @@ describe("lista de retos: contadores", () => {
     expect(screen.queryByRole("link", { name: "Secundaria" })).toBeNull();
   });
 
+  it("un enlace a Secundaria ya no muestra una lista: vuelve a la portada", () => {
+    at("/explorar/ingenieria/secundaria");
+    expect(screen.queryByRole("heading", { level: 1 })).toBeNull();
+    expect(screen.queryByText(/en preparación/)).toBeNull();
+  });
+
   it("el contador de Primaria cuenta las misiones", () => {
     at("/explorar/artes/primaria");
     expect(screen.getByText("4 misiones")).toBeTruthy();

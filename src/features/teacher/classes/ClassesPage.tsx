@@ -3,7 +3,7 @@ import { type FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "@robolab/backend/convex/_generated/api";
 import { LIMITS } from "@robolab/backend/domain/evaluation/rules";
-import { EDUCATION_LEVELS, type EducationLevel, LEVEL_LABEL } from "@robolab/backend/domain/game/levels";
+import { ACTIVE_LEVELS, type EducationLevel, LEVEL_LABEL } from "@robolab/backend/domain/game/levels";
 import { userMessage } from "../../../shared/errors";
 import { Icon } from "../../../shared/ui/Icon";
 import { IconButton } from "../../../shared/ui/IconButton";
@@ -51,7 +51,7 @@ function CreateClassForm({ onCreated, onCancel }: { onCreated: (classroomId: str
       <div className="field">
         <label htmlFor="level">Nivel</label>
         <select id="level" className="select" value={level} onChange={(e) => setLevel(e.target.value as EducationLevel)}>
-          {EDUCATION_LEVELS.map((l) => (
+          {ACTIVE_LEVELS.map((l) => (
             <option key={l} value={l}>
               {LEVEL_LABEL[l]}
             </option>
