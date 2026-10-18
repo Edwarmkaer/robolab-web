@@ -82,11 +82,15 @@ aquí como el paquete npm `@robolab/backend`.
 
 ### Programar con gestos en Inicial
 
-En los retos abiertos de Inicial que permiten editar el programa, las piezas
-(avanzar, retroceder y los dos giros) están siempre a la vista en la bandeja
-**Piezas**: se tocan, o se piden con el gesto que cada una lleva como insignia.
-No hay que elegir un modo. La cámara es opcional: dentro del espacio de trabajo,
-**Activar cámara** la enciende, permite el acceso y se muestra una sola mano:
+En los retos abiertos de Inicial que permiten editar el programa, arriba a la
+derecha de **Tu programa** están **Gestos** (elegido al entrar) y **Botones**. Con
+Gestos, la bandeja **Piezas** muestra solo manos (dedo arriba, abajo, izquierda,
+derecha y el pulgar para ejecutar) y la cámara se enciende sola debajo del
+jardín; permite el acceso y muestra una sola mano. Con Botones, las piezas son
+flechas y la cámara se apaga. Si la cámara no se puede encender, vuelve a
+Botones y lo avisa. Los dos modos arman el mismo programa. La papelera y
+**Ejecutar** van dentro del cuadro del programa, y Wayra (con las pistas) junto
+al reto:
 
 | Gesto | Acción |
 | --- | --- |
@@ -99,7 +103,7 @@ No hay que elegir un modo. La cámara es opcional: dentro del espacio de trabajo
 Mantén el gesto hasta llenar la barra (0,8 segundos para bloques; 1,2 para
 confirmar); la pieza del gesto que la cámara ve se resalta en la bandeja. Retira la mano durante al menos 0,4 segundos entre gestos, también
 para repetir el mismo bloque. Puedes quitar un bloque tocándolo, borrar el
-programa o apagar la cámara sin perder la secuencia. Un programa vacío no
+programa o cambiar a Botones sin perder la secuencia. Un programa vacío no
 se ejecuta y la entrada queda en pausa mientras Kusi se mueve.
 
 Usa el índice extendido con los otros dedos recogidos. Las cuatro direcciones

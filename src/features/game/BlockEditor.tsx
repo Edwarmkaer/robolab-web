@@ -1,4 +1,4 @@
-import { type Dispatch, useId } from "react";
+import { type Dispatch, type ReactNode, useId } from "react";
 import type { EditorAction, EditorState } from "@robolab/backend/domain/game/editor";
 import { COMMANDS, type BlockPath, type Command, MAX_REPEAT, MIN_REPEAT } from "@robolab/backend/domain/game/program";
 import type { LevelPolicy } from "@robolab/backend/domain/game/levels";
@@ -23,17 +23,20 @@ type Props = EditorProps & {
   readonly readOnly?: boolean;
   /** Qué hacer al tocar la papelera además de vaciar la secuencia (por ejemplo, devolver al robot al inicio). */
   readonly onClear?: () => void;
+  /** Lo que va abajo a la derecha del cuadro del programa, junto a la papelera («Ejecutar»). */
+  readonly actions?: ReactNode;
 };
 
-/** El gesto con el que se agrega cada pieza: solo el emoji se ve; el nombre del gesto va en el ⓘ. */
+/** El gesto con el que se agrega cada pieza: en su lugar se ve solo la mano; el nombre del gesto sale al pasar el mouse o enfocarla. */
 export type GestureHints = Partial<Record<Command, { readonly emoji: string; readonly prompt: string }>>;
 
 const samePath = (a: BlockPath, b: BlockPath) => a.length === b.length && a.every((v, i) => v === b[i]);
 
 /**
  * La bandeja de piezas ("Piezas"): cada una se muestra solo con su ícono. En
- * Inicial, `gestures` pone además el gesto que la agrega como insignia y
- * `currentCommand` resalta la pieza del gesto que la cámara está viendo.
+ * Inicial con gestos, `gestures` cambia el ícono de cada pieza por la mano que
+ * la agrega y `currentCommand` resalta la pieza del gesto que la cámara está
+ * viendo. `trailing` va al final, tras un separador (por ejemplo, el pulgar).
  */
 export function PieceTray({
   policy,
@@ -42,11 +45,12 @@ export function PieceTray({
   disabled,
   gestures,
   currentCommand = null,
-}: EditorProps & { readonly gestures?: GestureHints; readonly currentCommand?: Command | null }) {
+  trailing,
+}: EditorProps & { readonly gestures?: GestureHints; readonly currentCommand?: Command | null; readonly trailing?: ReactNode }) {
   const commands = COMMANDS.filter((c) => policy.palette.has(c));
   const label = `${useId()}-piezas`;
   return (
-    <div className="stack-sm">
+    <div className="stack-sm piece-tray">
       <span className="editor-label" id={label}>
         Piezas
       </span>
@@ -67,13 +71,14 @@ export function PieceTray({
                   speak(BLOCK_LOOK[command].label);
                 }}
               >
-                <img src={BLOCK_LOOK[command].icon} alt="" />
+                {gesture ? (
+                  <span className="piece-hand" aria-hidden="true">
+                    {gesture.emoji}
+                  </span>
+                ) : (
+                  <img src={BLOCK_LOOK[command].icon} alt="" />
+                )}
               </button>
-              {gesture && (
-                <span className="piece-gesture" aria-hidden="true">
-                  {gesture.emoji}
-                </span>
-              )}
             </PieceFrame>
           );
         })}
@@ -91,7 +96,23 @@ export function PieceTray({
             </button>
           </PieceFrame>
         )}
+        {trailing && (
+          <>
+            <span className="palette-sep" aria-hidden="true" />
+            {trailing}
+          </>
+        )}
       </div>
+    </div>
+  );
+}
+
+/** Encabezado del espacio de trabajo: «Tu programa» y, a la derecha, lo que la pantalla ponga (Robot, Gestos / Botones). */
+export function ProgramHead({ children }: { readonly children?: ReactNode }) {
+  return (
+    <div className="program-head">
+      <h2 className="program-title">Tu programa</h2>
+      {children && <div className="program-head-actions">{children}</div>}
     </div>
   );
 }
@@ -108,7 +129,8 @@ export function Sequence({
   active,
   readOnly = false,
   onClear,
-}: Pick<EditorProps, "state" | "dispatch" | "disabled"> & Pick<Props, "active" | "readOnly" | "onClear">) {
+  actions,
+}: Pick<EditorProps, "state" | "dispatch" | "disabled"> & Pick<Props, "active" | "readOnly" | "onClear" | "actions">) {
   const disabled = busy || readOnly;
   const toneOf = (path: BlockPath) => (active && samePath(active.path, path) ? active.tone : undefined);
   // Número de paso visible de cada bloque raíz (los bucles no cuentan como paso).
@@ -126,13 +148,11 @@ export function Sequence({
   };
 
   return (
-    <div className="stack-sm">
-      <div className="row spread editor-head">
-        <span className="editor-label" id={sequenceLabel}>
-          {readOnly ? "Programa de Kusi" : "Tu secuencia"}
-        </span>
-        {!readOnly && <IconButton icon="trash" label="Borrar la secuencia" disabled={disabled || state.blocks.length === 0} onClick={clear} />}
-      </div>
+    <div className="stack-sm sequence" data-editable={readOnly ? undefined : true}>
+      {/* El título visible de lo que se arma es «Tu programa» (ProgramHead); aquí solo nombra la lista. */}
+      <span className={readOnly ? "editor-label" : "sr-only"} id={sequenceLabel}>
+        {readOnly ? "Programa de Kusi" : "Tu secuencia"}
+      </span>
       <ul className="program" aria-labelledby={sequenceLabel} data-readonly={readOnly || undefined}>
         {state.blocks.map((block, i) => {
           if (block.kind === "move") {
@@ -218,16 +238,28 @@ export function Sequence({
         ))}
       </ul>
       {!readOnly && state.blocks.length === 0 && <span className="small muted">Toca las piezas para armar tu secuencia.</span>}
+      {!readOnly && (
+        <div className="program-actions">
+          <IconButton icon="trash" label="Borrar la secuencia" disabled={disabled || state.blocks.length === 0} onClick={clear} />
+          {actions}
+        </div>
+      )}
     </div>
   );
 }
 
-/** Paleta y secuencia juntas (Primaria y retos que no usan cámara). */
-export function BlockEditor({ policy, state, dispatch, disabled, active, readOnly = false, onClear }: Props) {
+/**
+ * Secuencia y paleta juntas (Primaria y retos que no usan cámara): «Tu programa»
+ * con `headerActions` a la derecha, el cuadro de la secuencia con su papelera y
+ * `actions`, y debajo las piezas. Solo lectura (retos de predecir): solo el programa.
+ */
+export function BlockEditor({ policy, state, dispatch, disabled, active, readOnly = false, onClear, actions, headerActions }: Props & { readonly headerActions?: ReactNode }) {
+  if (readOnly) return <Sequence state={state} dispatch={dispatch} disabled={disabled} active={active} readOnly onClear={onClear} />;
   return (
     <div className="stack editor">
-      {!readOnly && <PieceTray policy={policy} state={state} dispatch={dispatch} disabled={disabled} />}
-      <Sequence state={state} dispatch={dispatch} disabled={disabled} active={active} readOnly={readOnly} onClear={onClear} />
+      <ProgramHead>{headerActions}</ProgramHead>
+      <Sequence state={state} dispatch={dispatch} disabled={disabled} active={active} onClear={onClear} actions={actions} />
+      <PieceTray policy={policy} state={state} dispatch={dispatch} disabled={disabled} />
     </div>
   );
 }

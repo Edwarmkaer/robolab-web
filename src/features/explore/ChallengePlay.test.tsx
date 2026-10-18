@@ -63,15 +63,28 @@ describe("pantalla del reto: Robot y Ejecutar", () => {
     expect(scrollTo).toHaveBeenCalledWith(0, 0);
   });
 
-  it("Robot y Ejecutar van juntos en la barra de acciones (fija al pie en el celular)", () => {
+  it("Robot va arriba a la derecha de «Tu programa»; Ejecutar y la papelera, dentro del cuadro del programa", () => {
     renderChallenge();
     fireEvent.click(screen.getByRole("button", { name: /Empezar el reto/ }));
-    const bar = document.querySelector<HTMLElement>(".action-bar");
-    expect(bar).not.toBeNull();
-    expect(within(bar!).getByRole("button", { name: /^Robot/ })).toBeTruthy();
-    expect(within(bar!).getByRole("button", { name: /Ejecutar/ })).toBeTruthy();
-    // La pantalla reserva el espacio de la barra para que no tape el final del contenido.
-    expect(document.querySelector(".game.has-action-bar")).not.toBeNull();
+    const head = screen.getByRole("heading", { name: "Tu programa" }).closest(".program-head") as HTMLElement;
+    expect(within(head).getByRole("button", { name: /^Robot/ })).toBeTruthy();
+    const box = screen.getByRole("list", { name: "Tu secuencia" }).closest(".sequence") as HTMLElement;
+    expect(within(box).getByRole("button", { name: /Ejecutar/ })).toBeTruthy();
+    expect(within(box).getByRole("button", { name: "Borrar la secuencia" })).toBeTruthy();
+    // Ya no hay barra fija al pie: Ejecutar vive en el cuadro. (Solo la usa «Comprobar», en predecir.)
+    expect(document.querySelector(".game.has-action-bar")).toBeNull();
+  });
+
+  it("Wayra queda arriba a la derecha, junto al reto, con su botón de pista; el jardín es la tarjeta del tablero", () => {
+    renderChallenge();
+    fireEvent.click(screen.getByRole("button", { name: /Empezar el reto/ }));
+    const row = document.querySelector(".goal-row") as HTMLElement;
+    expect(within(row).getByRole("heading", { level: 1 })).toBeTruthy();
+    const wayra = within(within(row).getByRole("complementary", { name: /Wayra/ }));
+    expect(wayra.getByRole("button", { name: "Pista 0/3: pedir una pista" }).textContent).toBe(" Pista 0/3");
+    fireEvent.click(wayra.getByRole("button", { name: /pedir una pista/ }));
+    expect(wayra.getByRole("button", { name: /Pista 1\/3/ })).toBeTruthy();
+    expect(within(screen.getByRole("complementary", { name: "Tablero" })).getByRole("heading", { level: 2 })).toBeTruthy();
   });
 
   it("con un robot conectado, Ejecutar también manda la secuencia al robot", async () => {

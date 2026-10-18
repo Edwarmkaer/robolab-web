@@ -6,14 +6,12 @@
   color: var(--c-muted);
 }
 
-.editor-head {
-  min-height: 40px;
-}
-
 /* Las piezas muestran solo su ícono: el nombre va en el aria-label y en la etiqueta del ícono de información. */
 .palette {
-  grid-template-columns: repeat(auto-fill, 76px);
-  gap: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
 }
 
 .block-btn {
@@ -174,7 +172,6 @@ ul.repeat-body {
 
 @media (max-width: 640px) {
   .palette {
-    grid-template-columns: repeat(auto-fill, 64px);
     gap: 8px;
   }
 
@@ -207,13 +204,13 @@ ul.repeat-body {
 }
 
 /* La papelera queda en el borde derecho: su etiqueta se abre hacia la izquierda para no ensanchar la página. */
-.editor-head [data-tooltip]::after {
+.program-actions [data-tooltip]::after {
   left: auto;
   right: 0;
   transform: translateY(4px);
 }
 
-.editor-head [data-tooltip]:hover:not(:disabled)::after,
-.editor-head [data-tooltip]:focus-visible::after {
+.program-actions [data-tooltip]:hover:not(:disabled)::after,
+.program-actions [data-tooltip]:focus-visible::after {
   transform: translateY(0);
 }
